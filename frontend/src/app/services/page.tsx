@@ -70,7 +70,7 @@ const Services = () => {
       <main className="flex-grow">
         {/* Hero Section */}
         <div className="bg-gradient-hero py-16 sm:py-20">
-          <div className="container mx-auto px-4 sm:px-6 text-center">
+          <div className="responsive-container text-center">
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800 mb-4">
               Our Citizen Services
             </h1>
@@ -81,14 +81,14 @@ const Services = () => {
         </div>
 
         {/* Services Grid */}
-        <div className="container mx-auto px-4 sm:px-6 py-12 sm:py-16">
+        <div className="responsive-container py-12 sm:py-16">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {serviceCategories.map((service) => (
               <div 
                 key={service.id}
-                className="bg-white shadow-md rounded-2xl p-6 hover:shadow-xl hover:scale-105 transition-all duration-300 border border-gray-100"
+                className="bg-white shadow-md rounded-2xl p-6 hover:shadow-xl hover:scale-105 transition-all duration-300 border border-gray-100 focus-within:ring-2 focus-within:ring-emerald-500"
               >
-                <div className="text-5xl text-center mb-4">{service.icon}</div>
+                <div className="text-5xl text-center mb-4" aria-hidden="true">{service.icon}</div>
                 <h3 className="text-xl font-semibold text-gray-800 mb-2 text-center">
                   {service.title}
                 </h3>
@@ -99,7 +99,7 @@ const Services = () => {
                 <ul className="mb-6 space-y-2">
                   {service.subServices.map((subService, index) => (
                     <li key={index} className="flex items-start">
-                      <span className="text-emerald-green mr-2">•</span>
+                      <span className="text-emerald-green mr-2" aria-hidden="true">•</span>
                       <span className="text-gray-700">{subService}</span>
                     </li>
                   ))}
@@ -108,12 +108,12 @@ const Services = () => {
                 {service.link ? (
                   <Link 
                     href={service.link}
-                    className="block w-full bg-gradient-to-r from-emerald-green to-deep-blue text-white py-3 rounded-xl shadow-soft hover:shadow-md transition-all text-center font-medium"
+                    className="block w-full bg-gradient-to-r from-emerald-green to-deep-blue text-white py-3 rounded-xl shadow-soft hover:shadow-md transition-all text-center font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   >
                     {service.buttonText}
                   </Link>
                 ) : (
-                  <button className="w-full bg-gradient-to-r from-emerald-green to-deep-blue text-white py-3 rounded-xl shadow-soft hover:shadow-md transition-all font-medium">
+                  <button className="w-full bg-gradient-to-r from-emerald-green to-deep-blue text-white py-3 rounded-xl shadow-soft hover:shadow-md transition-all font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500">
                     {service.buttonText}
                   </button>
                 )}
@@ -123,12 +123,12 @@ const Services = () => {
         </div>
 
         {/* Quick Stats Section */}
-        <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <div className="responsive-container py-8 sm:py-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {quickStats.map((stat) => (
               <div 
                 key={stat.id}
-                className="bg-white rounded-2xl p-4 sm:p-6 text-center shadow-md hover:shadow-lg transition-shadow"
+                className="bg-white rounded-2xl p-4 sm:p-6 text-center shadow-md hover:shadow-lg transition-shadow focus-within:ring-2 focus-within:ring-emerald-500"
               >
                 <div className="text-2xl sm:text-3xl font-bold text-emerald-green mb-1">
                   {stat.value}
@@ -142,7 +142,7 @@ const Services = () => {
         </div>
 
         {/* Help Section */}
-        <div className="container mx-auto px-4 sm:px-6 py-12 sm:py-16">
+        <div className="responsive-container py-12 sm:py-16">
           <div className="bg-gradient-diagonal rounded-2xl p-8 sm:p-10 text-center max-w-4xl mx-auto">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4">
               Need help using services?
@@ -150,7 +150,7 @@ const Services = () => {
             <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
               Visit our FAQ or contact support for assistance with any of our services.
             </p>
-            <button className="bg-gradient-to-r from-emerald-green to-deep-blue text-white px-6 py-3 rounded-xl shadow-soft hover:shadow-md transition-all font-medium">
+            <button className="bg-gradient-to-r from-emerald-green to-deep-blue text-white px-6 py-3 rounded-xl shadow-soft hover:shadow-md transition-all font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500">
               Go to Help Desk
             </button>
           </div>

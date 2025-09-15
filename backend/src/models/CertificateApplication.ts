@@ -2,7 +2,9 @@ import mongoose, { Document, Schema } from 'mongoose';
 
 export interface ICertificateApplication extends Document {
   applicantName: string;
-  certificateType: 'Birth' | 'Death' | 'Marriage' | 'Income' | 'Caste' | 'Residence';
+  fatherName?: string;
+  motherName?: string;
+  certificateType: 'Birth' | 'Death';
   date: Date;
   place: string;
   supportingFiles: string[]; // Store file paths
@@ -12,10 +14,12 @@ export interface ICertificateApplication extends Document {
 
 const CertificateApplicationSchema: Schema = new Schema({
   applicantName: { type: String, required: true },
+  fatherName: { type: String },
+  motherName: { type: String },
   certificateType: { 
     type: String, 
     required: true,
-    enum: ['Birth', 'Death', 'Marriage', 'Income', 'Caste', 'Residence']
+    enum: ['Birth', 'Death']
   },
   date: { type: Date, required: true },
   place: { type: String, required: true },

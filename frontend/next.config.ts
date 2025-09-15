@@ -1,7 +1,28 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Enable image optimization
+  images: {
+    // Add domains for external images if needed
+    domains: [],
+    // Optimize image loading
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+  },
+  // Enable experimental features for better performance
+  experimental: {
+    optimizeCss: true,
+  },
+  // Enable compression
+  compress: true,
+  // Enable react strict mode
+  reactStrictMode: true,
+  // Enable webpack optimizations
+  webpack: (config) => {
+    // Enable tree shaking
+    config.optimization.usedExports = true;
+    return config;
+  },
 };
 
 export default nextConfig;

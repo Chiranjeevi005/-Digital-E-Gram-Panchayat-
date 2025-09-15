@@ -59,7 +59,8 @@ export const register = async (req: Request, res: Response) => {
       } 
     });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    console.error('Registration error:', error);
+    res.status(500).json({ message: 'Server error during registration' });
   }
 };
 
@@ -142,7 +143,8 @@ export const login = async (req: Request, res: Response) => {
       } 
     });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    console.error('Login error:', error);
+    res.status(500).json({ message: 'Server error during login' });
   }
 };
 
@@ -165,6 +167,10 @@ export const getCurrentUser = async (req: Request, res: Response) => {
     
     res.json(user);
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    console.error('Get current user error:', error);
+    if (error instanceof jwt.JsonWebTokenError) {
+      return res.status(401).json({ message: 'Invalid token' });
+    }
+    res.status(500).json({ message: 'Server error while fetching user data' });
   }
 };

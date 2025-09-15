@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import OptimizedIcon from './OptimizedIcon';
 
 const HeroSection = () => {
   const [currentStat, setCurrentStat] = useState(0);
@@ -49,7 +50,7 @@ const HeroSection = () => {
         <div className="absolute top-1/3 left-1/4 w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full bg-yellow-200/30 blur-xl animate-float animation-delay-4000 hidden md:block"></div>
       </div>
       
-      <div className="container mx-auto px-4 sm:px-6 py-16 sm:py-20 relative z-10">
+      <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12 relative z-10">
         <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
           <div className="lg:w-1/2 w-full">
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-800 mb-4 sm:mb-6 animate-fade-in-up">
@@ -77,9 +78,13 @@ const HeroSection = () => {
             <div className="mt-8 sm:mt-12 p-4 sm:p-6 bg-white/80 backdrop-blur-sm rounded-2xl shadow-soft max-w-md animate-fade-in-up animation-delay-600">
               <div className="flex items-center">
                 <div className="mr-3 sm:mr-4 p-2 sm:p-3 bg-emerald-100 rounded-full">
-                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+                  <OptimizedIcon 
+                    src="/globe.svg" 
+                    alt="Checkmark" 
+                    width={24} 
+                    height={24} 
+                    className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600" 
+                  />
                 </div>
                 <div>
                   <p className="text-xl sm:text-2xl font-bold text-gray-800">{stats[currentStat].value}</p>
@@ -116,19 +121,7 @@ const HeroSection = () => {
                   </div>
                 </div>
                 
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white text-[8px] sm:text-xs mr-1 sm:mr-2">RK</div>
-                      <span className="text-xs sm:text-sm font-medium text-gray-700">Ramesh Kumar</span>
-                    </div>
-                    <div className="flex">
-                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-sky-500 flex items-center justify-center text-white text-[8px] sm:text-xs -ml-1">SD</div>
-                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-yellow-500 flex items-center justify-center text-white text-[8px] sm:text-xs -ml-1">AS</div>
-                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-purple-500 flex items-center justify-center text-white text-[8px] sm:text-xs -ml-1">+5</div>
-                    </div>
-                  </div>
-                </div>
+
               </div>
               
               {/* Floating elements - made responsive and hidden on small screens */}

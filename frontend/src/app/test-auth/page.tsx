@@ -3,17 +3,35 @@
 import { useState } from 'react';
 import { apiClient } from '../../lib/api';
 
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  userType: string;
+}
+
+interface LoginResponse {
+  token: string;
+  user: User;
+}
+
+interface RegisterResponse {
+  token: string;
+  user: User;
+}
+
 export default function TestAuthPage() {
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<Record<string, unknown> | RegisterResponse | LoginResponse | User | null>(null);
   const [loading, setLoading] = useState(false);
 
   const testRegister = async () => {
     setLoading(true);
     try {
-      const res = await apiClient.register('Test User', 'test@example.com', 'password123');
+      const res: RegisterResponse = await apiClient.register('Test User', 'test@example.com', 'password123');
       setResult(res);
-    } catch (error) {
-      setResult(error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      setResult({ error: errorMessage });
     } finally {
       setLoading(false);
     }
@@ -22,10 +40,11 @@ export default function TestAuthPage() {
   const testLogin = async () => {
     setLoading(true);
     try {
-      const res = await apiClient.login('test@example.com', 'password123', 'Citizen');
+      const res: LoginResponse = await apiClient.login('test@example.com', 'password123', 'Citizen');
       setResult(res);
-    } catch (error) {
-      setResult(error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      setResult({ error: errorMessage });
     } finally {
       setLoading(false);
     }
@@ -34,10 +53,11 @@ export default function TestAuthPage() {
   const testGetCurrentUser = async () => {
     setLoading(true);
     try {
-      const res = await apiClient.getCurrentUser();
+      const res: User = await apiClient.getCurrentUser();
       setResult(res);
-    } catch (error) {
-      setResult(error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      setResult({ error: errorMessage });
     } finally {
       setLoading(false);
     }

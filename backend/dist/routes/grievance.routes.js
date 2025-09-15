@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const grievance_controller_1 = require("../controllers/grievance.controller");
+const router = (0, express_1.Router)();
+router.post('/', grievance_controller_1.createGrievance);
+router.get('/', grievance_controller_1.getGrievances);
+router.get('/:id', grievance_controller_1.getGrievanceById);
+router.put('/:id', grievance_controller_1.updateGrievance);
+exports.default = router;

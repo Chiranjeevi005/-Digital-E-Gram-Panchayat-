@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import OptimizedIcon from './OptimizedIcon';
 
 const CitizenStories = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -82,9 +83,13 @@ const CitizenStories = () => {
                       </div>
                     </div>
                     <div className="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 bg-emerald-500 text-white rounded-full w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center">
-                      <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
+                      <OptimizedIcon 
+                        src="/globe.svg" 
+                        alt="Checkmark" 
+                        width={20} 
+                        height={20} 
+                        className="w-4 h-4 sm:w-5 sm:h-5" 
+                      />
                     </div>
                   </div>
                 </div>
@@ -110,9 +115,13 @@ const CitizenStories = () => {
                   className="flex items-center text-emerald-600 font-medium hover:text-emerald-800 transition-colors text-sm sm:text-base py-2 px-4 rounded-lg hover:bg-emerald-50 active:bg-emerald-100"
                   type="button"
                 >
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
+                  <OptimizedIcon 
+                    src="/globe.svg" 
+                    alt="Previous" 
+                    width={20} 
+                    height={20} 
+                    className="w-4 h-4 sm:w-5 sm:h-5 mr-2" 
+                  />
                   Previous Story
                 </button>
                 
@@ -136,9 +145,13 @@ const CitizenStories = () => {
                   type="button"
                 >
                   Next Story
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
+                  <OptimizedIcon 
+                    src="/globe.svg" 
+                    alt="Next" 
+                    width={20} 
+                    height={20} 
+                    className="w-4 h-4 sm:w-5 sm:h-5 ml-2" 
+                  />
                 </button>
               </div>
             </div>
