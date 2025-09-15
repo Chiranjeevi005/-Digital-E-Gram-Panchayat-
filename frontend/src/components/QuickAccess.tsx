@@ -2,9 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 const QuickAccess = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const router = useRouter();
   
   const actions = [
     { name: "Services", icon: "📋", href: "/services", color: "text-emerald-600" },
@@ -12,6 +15,12 @@ const QuickAccess = () => {
     { name: "Grievances", icon: "📬", href: "/grievances", color: "text-rose-600" },
     { name: "Dashboard", icon: "📊", href: "/dashboard", color: "text-amber-600" }
   ];
+
+  // Check authentication status
+  useEffect(() => {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    setIsAuthenticated(!!token);
+  }, []);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -44,6 +53,20 @@ const QuickAccess = () => {
     };
   }, []);
 
+  // Handle action clicks
+  const handleActionClick = (href: string) => {
+    if (!isAuthenticated) {
+      // If not authenticated, redirect to login
+      router.push('/login');
+      setIsOpen(false);
+      return;
+    }
+    
+    // If authenticated, navigate to the destination
+    router.push(href);
+    setIsOpen(false);
+  };
+
   return (
     <div className="md:hidden quick-access-container">
       {/* Floating action button */}
@@ -74,16 +97,16 @@ const QuickAccess = () => {
         >
           <div className="py-2">
             {actions.map((action, index) => (
-              <Link 
+              <button
                 key={index} 
-                href={action.href}
-                className="flex items-center px-4 py-3 hover:bg-gray-50 transition-colors focus:outline-none focus:bg-gray-100 active:bg-gray-100"
-                onClick={() => setIsOpen(false)}
+                onClick={() => handleActionClick(action.href)}
+                className="w-full flex items-center px-4 py-3 hover:bg-gray-50 transition-colors focus:outline-none focus:bg-gray-100 active:bg-gray-100 text-left"
                 role="menuitem"
+                type="button"
               >
                 <span className={`text-xl sm:text-2xl mr-3 ${action.color}`} aria-hidden="true">{action.icon}</span>
                 <span className="text-gray-800 font-medium text-sm sm:text-base">{action.name}</span>
-              </Link>
+              </button>
             ))}
           </div>
         </div>

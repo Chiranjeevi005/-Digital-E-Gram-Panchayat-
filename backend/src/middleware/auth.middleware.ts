@@ -1,36 +1,41 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-interface JwtPayload {
-  userId: string;
-  role: string;
+interface AuthRequest extends Request {
+  user?: {
+    userId: string;
+    userType: string;
+  };
 }
 
-export const authenticate = (req: Request, res: Response, next: NextFunction) => {
+export const authenticate = (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
     
     if (!token) {
       return res.status(401).json({ message: 'No token, authorization denied' });
     }
+
+    const decoded: any = jwt.verify(token, process.env.JWT_SECRET as string);
     
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as JwtPayload;
-    (req as any).user = decoded;
+    req.user = {
+      userId: decoded.userId,
+      userType: decoded.userType,
+    };
+    
     next();
   } catch (error) {
     res.status(401).json({ message: 'Token is not valid' });
   }
 };
 
-export const authorize = (...roles: string[]) => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    const user = (req as any).user;
-    
-    if (!user) {
+export const authorize = (...userTypes: string[]) => {
+  return (req: AuthRequest, res: Response, next: NextFunction) => {
+    if (!req.user) {
       return res.status(401).json({ message: 'Authentication required' });
     }
     
-    if (!roles.includes(user.role)) {
+    if (!userTypes.includes(req.user.userType)) {
       return res.status(403).json({ message: 'Access denied' });
     }
     

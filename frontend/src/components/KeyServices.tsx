@@ -1,10 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
-import Link from 'next/link';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 const KeyServices = () => {
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const router = useRouter();
   
   const services = [
     {
@@ -41,6 +43,23 @@ const KeyServices = () => {
     }
   ];
 
+  useEffect(() => {
+    // Check if user is authenticated
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    setIsAuthenticated(!!token);
+  }, []);
+
+  // Function to handle service card clicks
+  const handleServiceClick = (serviceId: number) => {
+    if (isAuthenticated) {
+      // If authenticated, navigate to the service page
+      router.push(`/services/${serviceId}`);
+    } else {
+      // If not authenticated, redirect to login page
+      router.push('/login');
+    }
+  };
+
   return (
     <section className="py-12 sm:py-16 md:py-20 bg-gradient-to-b from-white to-sky-50">
       <div className="container mx-auto px-4 sm:px-6">
@@ -53,14 +72,14 @@ const KeyServices = () => {
         
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6 md:gap-8 max-w-5xl mx-auto">
           {services.map((service) => (
-            <Link 
+            <div 
               key={service.id} 
-              href="#" 
-              className={`bg-gradient-to-br ${service.color} rounded-2xl p-5 sm:p-6 md:p-8 shadow-soft hover:shadow-xl transition-all duration-300 border border-white hover-lift transform ${
+              className={`bg-gradient-to-br ${service.color} rounded-2xl p-5 sm:p-6 md:p-8 shadow-soft hover:shadow-xl transition-all duration-300 border border-white hover-lift transform cursor-pointer ${
                 hoveredCard === service.id ? 'scale-[1.02]' : ''
               }`}
               onMouseEnter={() => setHoveredCard(service.id)}
               onMouseLeave={() => setHoveredCard(null)}
+              onClick={() => handleServiceClick(service.id)}
             >
               <div className={`text-3xl sm:text-4xl md:text-5xl mb-3 sm:mb-4 md:mb-6 ${service.accent} transition-transform duration-300 ${
                 hoveredCard === service.id ? 'scale-110' : ''
@@ -70,12 +89,12 @@ const KeyServices = () => {
               <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-2 sm:mb-3 md:mb-4">{service.title}</h3>
               <p className="text-gray-600 mb-4 sm:mb-5 md:mb-6 text-sm sm:text-base">{service.description}</p>
               <div className="flex items-center text-emerald-600 font-medium text-sm">
-                <span>Learn more</span>
+                <span>{isAuthenticated ? 'Access Service' : 'Login to Access'}</span>
                 <svg className="w-4 h-4 ml-2 transition-transform duration-300 hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </div>
-            </Link>
+            </div>
           ))}
         </div>
       </div>

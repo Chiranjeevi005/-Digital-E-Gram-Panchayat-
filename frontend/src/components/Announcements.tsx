@@ -1,9 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 const Announcements = () => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const router = useRouter();
   
   const notices = [
     {
@@ -31,6 +34,48 @@ const Announcements = () => {
       priority: "high"
     }
   ];
+
+  useEffect(() => {
+    // Check if user is authenticated
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    setIsAuthenticated(!!token);
+  }, []);
+
+  // Function to handle login CTA
+  const handleLoginCta = () => {
+    router.push('/login');
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <section className="py-12 sm:py-16 bg-gradient-radial">
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="text-center mb-8 sm:mb-10 md:mb-12">
+            <h2 className="text-2xl sm:text-4xl font-bold text-gray-800 mb-3 sm:mb-4">Latest Announcements</h2>
+            <p className="text-gray-600 text-sm sm:text-base px-2">Login to stay updated with the latest news and notices</p>
+          </div>
+          
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-white rounded-2xl shadow-soft-lg overflow-hidden">
+              <div className="p-0.5 bg-gradient-to-r from-emerald-500 to-sky-500">
+                <div className="bg-white rounded-xl p-4 sm:p-5 md:p-6">
+                  <div className="text-center py-8">
+                    <p className="text-gray-600 mb-6">You need to be logged in to view announcements.</p>
+                    <button
+                      onClick={handleLoginCta}
+                      className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white font-semibold py-3 px-6 rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition-all shadow-soft hover:shadow-md"
+                    >
+                      Login to Continue
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-12 sm:py-16 bg-gradient-radial">

@@ -6,6 +6,8 @@ import Link from 'next/link';
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userFirstName, setUserFirstName] = useState('');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -13,6 +15,25 @@ const Navbar = () => {
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Check authentication status and get user info
+  useEffect(() => {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    setIsAuthenticated(!!token);
+    
+    if (token) {
+      try {
+        // Decode JWT token to get user info
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const name = payload.name || 'User';
+        // Extract first name
+        const firstName = name.split(' ')[0];
+        setUserFirstName(firstName);
+      } catch (error) {
+        console.error('Error decoding token:', error);
+      }
+    }
   }, []);
 
   // Close mobile menu when resizing to desktop
@@ -26,12 +47,18 @@ const Navbar = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
+    setIsAuthenticated(false);
+    setUserFirstName('');
+    // Redirect to home page
+    window.location.href = '/';
+  };
+
+  // Simplified navigation links
   const navLinks = [
-    { name: 'Home', href: '/' },
     { name: 'Services', href: '/services' },
-    { name: 'Schemes', href: '/schemes' },
-    { name: 'Grievances', href: '/grievances' },
-    { name: 'Dashboard', href: '/dashboard' },
     { name: 'Contact', href: '/contact' }
   ];
 
@@ -44,7 +71,6 @@ const Navbar = () => {
           </div>
           <div className="min-w-0">
             <h1 className="text-lg sm:text-xl font-bold text-emerald-700 truncate">Digital e-Gram Panchayat</h1>
-            <p className="text-[10px] sm:text-xs text-gray-600 hidden md:block">Empowering Villages through Digital Governance</p>
           </div>
         </div>
         
@@ -60,9 +86,23 @@ const Navbar = () => {
             </Link>
           ))}
           
-          <Link href="/login" className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-4 py-2 rounded-full hover:from-emerald-700 hover:to-emerald-800 transition-all shadow-soft hover:shadow-md text-sm lg:text-base whitespace-nowrap">
-            Login / Register
-          </Link>
+          {isAuthenticated ? (
+            <div className="flex items-center space-x-4">
+              <span className="text-emerald-700 font-medium text-sm lg:text-base">
+                Hi, {userFirstName}
+              </span>
+              <button 
+                onClick={handleLogout}
+                className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-4 py-2 rounded-full hover:from-emerald-700 hover:to-emerald-800 transition-all shadow-soft hover:shadow-md text-sm lg:text-base whitespace-nowrap"
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <Link href="/login" className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-4 py-2 rounded-full hover:from-emerald-700 hover:to-emerald-800 transition-all shadow-soft hover:shadow-md text-sm lg:text-base whitespace-nowrap">
+              Login
+            </Link>
+          )}
         </div>
         
         {/* Mobile menu button */}
@@ -102,13 +142,30 @@ const Navbar = () => {
                   {link.name}
                 </Link>
               ))}
-              <Link 
-                href="/login" 
-                className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-5 py-3 rounded-full hover:from-emerald-700 hover:to-emerald-800 transition-all shadow-soft hover:shadow-md text-center mt-2 mx-4"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Login / Register
-              </Link>
+              {isAuthenticated ? (
+                <div className="pt-2 border-t border-gray-200">
+                  <div className="px-4 py-2 text-emerald-700 font-medium">
+                    Hi, {userFirstName}
+                  </div>
+                  <button 
+                    onClick={() => {
+                      handleLogout();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full text-left bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-5 py-3 rounded-full hover:from-emerald-700 hover:to-emerald-800 transition-all shadow-soft hover:shadow-md mt-2"
+                  >
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <Link 
+                  href="/login" 
+                  className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-5 py-3 rounded-full hover:from-emerald-700 hover:to-emerald-800 transition-all shadow-soft hover:shadow-md text-center mt-2"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Login
+                </Link>
+              )}
             </div>
           </div>
         </div>

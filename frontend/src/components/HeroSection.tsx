@@ -2,9 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 const HeroSection = () => {
   const [currentStat, setCurrentStat] = useState(0);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const router = useRouter();
   
   const stats = [
     { label: "Applications Processed", value: "1,248+" },
@@ -19,6 +22,23 @@ const HeroSection = () => {
     }, 3000);
     return () => clearInterval(interval);
   }, [stats.length]);
+
+  useEffect(() => {
+    // Check if user is authenticated
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    setIsAuthenticated(!!token);
+  }, []);
+
+  // Function to handle CTA clicks
+  const handleCtaClick = (destination: string) => {
+    if (isAuthenticated) {
+      // If authenticated, navigate to the destination
+      router.push(destination);
+    } else {
+      // If not authenticated, redirect to login page
+      router.push('/login');
+    }
+  };
 
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden bg-gradient-diagonal">
@@ -39,12 +59,18 @@ const HeroSection = () => {
               One platform for all citizen services – simple, transparent, and efficient. Experience the future of rural governance today.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 animate-fade-in-up animation-delay-400">
-              <Link href="/login" className="btn-primary text-center flex-1">
-                Citizen Login / Register
-              </Link>
-              <Link href="/services" className="btn-secondary text-center flex-1">
+              <button 
+                onClick={() => handleCtaClick('/dashboard')}
+                className="btn-primary text-center flex-1"
+              >
+                {isAuthenticated ? 'Access Services' : 'Citizen Login / Register'}
+              </button>
+              <button 
+                onClick={() => handleCtaClick('/services')}
+                className="btn-secondary text-center flex-1"
+              >
                 Explore Services
-              </Link>
+              </button>
             </div>
             
             {/* Stats counter - made responsive */}

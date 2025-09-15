@@ -1,9 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 const ProgressTracker = () => {
   const [activeStep, setActiveStep] = useState(1);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const router = useRouter();
   
   const steps = [
     { id: 1, title: "Application Submitted", description: "Your application has been received", completed: true },
@@ -13,17 +16,57 @@ const ProgressTracker = () => {
     { id: 5, title: "Document Ready", description: "Approval document is ready", completed: false }
   ];
 
+  useEffect(() => {
+    // Check if user is authenticated
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    setIsAuthenticated(!!token);
+  }, []);
+
   // Simulate progress through all steps smoothly
   useEffect(() => {
     // Auto-progress through all steps
-    if (activeStep < steps.length) {
+    if (activeStep < steps.length && isAuthenticated) {
       const timer = setTimeout(() => {
         setActiveStep(prev => prev + 1);
       }, 3000);
       
       return () => clearTimeout(timer);
     }
-  }, [activeStep, steps.length]);
+  }, [activeStep, steps.length, isAuthenticated]);
+
+  // Function to handle login CTA
+  const handleLoginCta = () => {
+    router.push('/login');
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <section className="py-12 sm:py-16 bg-white">
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-8 sm:mb-10 md:mb-12">
+              <h2 className="text-2xl sm:text-4xl font-bold text-gray-800 mb-3 sm:mb-4">Application Progress Tracker</h2>
+              <p className="text-gray-600 text-sm sm:text-base px-2">
+                Login to track the real-time status of your application
+              </p>
+            </div>
+            
+            <div className="bg-gradient-to-br from-emerald-50 to-sky-50 rounded-2xl p-5 sm:p-6 md:p-8 shadow-soft">
+              <div className="text-center py-8">
+                <p className="text-gray-600 mb-6">You need to be logged in to view your application progress.</p>
+                <button
+                  onClick={handleLoginCta}
+                  className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white font-semibold py-3 px-6 rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition-all shadow-soft hover:shadow-md"
+                >
+                  Login to Continue
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-12 sm:py-16 bg-white">

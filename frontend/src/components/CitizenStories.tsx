@@ -1,9 +1,18 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 const CitizenStories = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const router = useRouter();
+  
+  // Check authentication status
+  useEffect(() => {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    setIsAuthenticated(!!token);
+  }, []);
   
   const stories = [
     {
@@ -32,12 +41,19 @@ const CitizenStories = () => {
     }
   ];
 
-  const nextStory = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % stories.length);
-  };
-
-  const prevStory = () => {
-    setCurrentIndex((prevIndex) => (prevIndex - 1 + stories.length) % stories.length);
+  const handleNavigation = (direction: 'prev' | 'next' | 'index', index?: number) => {
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
+    
+    if (direction === 'prev') {
+      setCurrentIndex((prevIndex) => (prevIndex - 1 + stories.length) % stories.length);
+    } else if (direction === 'next') {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % stories.length);
+    } else if (direction === 'index' && index !== undefined) {
+      setCurrentIndex(index);
+    }
   };
 
   return (
@@ -90,7 +106,7 @@ const CitizenStories = () => {
               
               <div className="flex flex-col sm:flex-row justify-between items-center mt-6 sm:mt-8 md:mt-10 space-y-4 sm:space-y-0">
                 <button 
-                  onClick={prevStory}
+                  onClick={() => handleNavigation('prev')}
                   className="flex items-center text-emerald-600 font-medium hover:text-emerald-800 transition-colors text-sm sm:text-base py-2 px-4 rounded-lg hover:bg-emerald-50 active:bg-emerald-100"
                   type="button"
                 >
@@ -104,7 +120,7 @@ const CitizenStories = () => {
                   {stories.map((_, index) => (
                     <button
                       key={index}
-                      onClick={() => setCurrentIndex(index)}
+                      onClick={() => handleNavigation('index', index)}
                       className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${
                         index === currentIndex ? 'bg-emerald-600' : 'bg-gray-300'
                       }`}
@@ -115,7 +131,7 @@ const CitizenStories = () => {
                 </div>
                 
                 <button 
-                  onClick={nextStory}
+                  onClick={() => handleNavigation('next')}
                   className="flex items-center text-emerald-600 font-medium hover:text-emerald-800 transition-colors text-sm sm:text-base py-2 px-4 rounded-lg hover:bg-emerald-50 active:bg-emerald-100"
                   type="button"
                 >

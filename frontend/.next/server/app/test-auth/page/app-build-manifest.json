@@ -1,0 +1,16 @@
+{
+  "pages": {
+    "/test-auth/page": [
+      "static/chunks/ff1a16fafef87110.js",
+      "static/chunks/7dd66bdf8a7e5707.js",
+      "static/chunks/35f1714faeafa17f.css",
+      "static/chunks/59231f8d81cdac85.js",
+      "static/chunks/409daa79903bdca4.js",
+      "static/chunks/91adb7bdb9870c6a.js",
+      "static/chunks/d04efc723d1783d5.js",
+      "static/chunks/8082ab48faca5ea1.js",
+      "static/chunks/8de370c3cbabf345.js",
+      "static/chunks/turbopack-0fdfed30cb374765.js"
+    ]
+  }
+}

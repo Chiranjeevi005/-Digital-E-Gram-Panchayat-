@@ -40,12 +40,31 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist
 const Navbar = ()=>{
     const [isScrolled, setIsScrolled] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
+    const [isAuthenticated, setIsAuthenticated] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
+    const [userFirstName, setUserFirstName] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])('');
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
         const handleScroll = ()=>{
             setIsScrolled(window.scrollY > 10);
         };
         window.addEventListener('scroll', handleScroll);
         return ()=>window.removeEventListener('scroll', handleScroll);
+    }, []);
+    // Check authentication status and get user info
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        setIsAuthenticated(!!token);
+        if (token) {
+            try {
+                // Decode JWT token to get user info
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const name = payload.name || 'User';
+                // Extract first name
+                const firstName = name.split(' ')[0];
+                setUserFirstName(firstName);
+            } catch (error) {
+                console.error('Error decoding token:', error);
+            }
+        }
     }, []);
     // Close mobile menu when resizing to desktop
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
@@ -57,26 +76,19 @@ const Navbar = ()=>{
         window.addEventListener('resize', handleResize);
         return ()=>window.removeEventListener('resize', handleResize);
     }, []);
+    const handleLogout = ()=>{
+        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
+        setIsAuthenticated(false);
+        setUserFirstName('');
+        // Redirect to home page
+        window.location.href = '/';
+    };
+    // Simplified navigation links
     const navLinks = [
-        {
-            name: 'Home',
-            href: '/'
-        },
         {
             name: 'Services',
             href: '/services'
-        },
-        {
-            name: 'Schemes',
-            href: '/schemes'
-        },
-        {
-            name: 'Grievances',
-            href: '/grievances'
-        },
-        {
-            name: 'Dashboard',
-            href: '/dashboard'
         },
         {
             name: 'Contact',
@@ -99,43 +111,33 @@ const Navbar = ()=>{
                                     children: "DP"
                                 }, void 0, false, {
                                     fileName: "[project]/frontend/src/components/Navbar.tsx",
-                                    lineNumber: 43,
+                                    lineNumber: 70,
                                     columnNumber: 13
                                 }, ("TURBOPACK compile-time value", void 0))
                             }, void 0, false, {
                                 fileName: "[project]/frontend/src/components/Navbar.tsx",
-                                lineNumber: 42,
+                                lineNumber: 69,
                                 columnNumber: 11
                             }, ("TURBOPACK compile-time value", void 0)),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "min-w-0",
-                                children: [
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
-                                        className: "text-lg sm:text-xl font-bold text-emerald-700 truncate",
-                                        children: "Digital e-Gram Panchayat"
-                                    }, void 0, false, {
-                                        fileName: "[project]/frontend/src/components/Navbar.tsx",
-                                        lineNumber: 46,
-                                        columnNumber: 13
-                                    }, ("TURBOPACK compile-time value", void 0)),
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                        className: "text-[10px] sm:text-xs text-gray-600 hidden md:block",
-                                        children: "Empowering Villages through Digital Governance"
-                                    }, void 0, false, {
-                                        fileName: "[project]/frontend/src/components/Navbar.tsx",
-                                        lineNumber: 47,
-                                        columnNumber: 13
-                                    }, ("TURBOPACK compile-time value", void 0))
-                                ]
-                            }, void 0, true, {
+                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
+                                    className: "text-lg sm:text-xl font-bold text-emerald-700 truncate",
+                                    children: "Digital e-Gram Panchayat"
+                                }, void 0, false, {
+                                    fileName: "[project]/frontend/src/components/Navbar.tsx",
+                                    lineNumber: 73,
+                                    columnNumber: 13
+                                }, ("TURBOPACK compile-time value", void 0))
+                            }, void 0, false, {
                                 fileName: "[project]/frontend/src/components/Navbar.tsx",
-                                lineNumber: 45,
+                                lineNumber: 72,
                                 columnNumber: 11
                             }, ("TURBOPACK compile-time value", void 0))
                         ]
                     }, void 0, true, {
                         fileName: "[project]/frontend/src/components/Navbar.tsx",
-                        lineNumber: 41,
+                        lineNumber: 68,
                         columnNumber: 9
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -147,22 +149,50 @@ const Navbar = ()=>{
                                     children: link.name
                                 }, link.name, false, {
                                     fileName: "[project]/frontend/src/components/Navbar.tsx",
-                                    lineNumber: 54,
+                                    lineNumber: 80,
                                     columnNumber: 13
                                 }, ("TURBOPACK compile-time value", void 0))),
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
+                            isAuthenticated ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "flex items-center space-x-4",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                        className: "text-emerald-700 font-medium text-sm lg:text-base",
+                                        children: [
+                                            "Hi, ",
+                                            userFirstName
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "[project]/frontend/src/components/Navbar.tsx",
+                                        lineNumber: 91,
+                                        columnNumber: 15
+                                    }, ("TURBOPACK compile-time value", void 0)),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                        onClick: handleLogout,
+                                        className: "bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-4 py-2 rounded-full hover:from-emerald-700 hover:to-emerald-800 transition-all shadow-soft hover:shadow-md text-sm lg:text-base whitespace-nowrap",
+                                        children: "Logout"
+                                    }, void 0, false, {
+                                        fileName: "[project]/frontend/src/components/Navbar.tsx",
+                                        lineNumber: 94,
+                                        columnNumber: 15
+                                    }, ("TURBOPACK compile-time value", void 0))
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/frontend/src/components/Navbar.tsx",
+                                lineNumber: 90,
+                                columnNumber: 13
+                            }, ("TURBOPACK compile-time value", void 0)) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
                                 href: "/login",
                                 className: "bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-4 py-2 rounded-full hover:from-emerald-700 hover:to-emerald-800 transition-all shadow-soft hover:shadow-md text-sm lg:text-base whitespace-nowrap",
-                                children: "Login / Register"
+                                children: "Login"
                             }, void 0, false, {
                                 fileName: "[project]/frontend/src/components/Navbar.tsx",
-                                lineNumber: 63,
-                                columnNumber: 11
+                                lineNumber: 102,
+                                columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0))
                         ]
                     }, void 0, true, {
                         fileName: "[project]/frontend/src/components/Navbar.tsx",
-                        lineNumber: 52,
+                        lineNumber: 78,
                         columnNumber: 9
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -185,12 +215,12 @@ const Navbar = ()=>{
                                     d: "M6 18L18 6M6 6l12 12"
                                 }, void 0, false, {
                                     fileName: "[project]/frontend/src/components/Navbar.tsx",
-                                    lineNumber: 79,
+                                    lineNumber: 119,
                                     columnNumber: 17
                                 }, ("TURBOPACK compile-time value", void 0))
                             }, void 0, false, {
                                 fileName: "[project]/frontend/src/components/Navbar.tsx",
-                                lineNumber: 78,
+                                lineNumber: 118,
                                 columnNumber: 15
                             }, ("TURBOPACK compile-time value", void 0)) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
                                 className: "w-6 h-6",
@@ -204,28 +234,28 @@ const Navbar = ()=>{
                                     d: "M4 6h16M4 12h16M4 18h16"
                                 }, void 0, false, {
                                     fileName: "[project]/frontend/src/components/Navbar.tsx",
-                                    lineNumber: 83,
+                                    lineNumber: 123,
                                     columnNumber: 17
                                 }, ("TURBOPACK compile-time value", void 0))
                             }, void 0, false, {
                                 fileName: "[project]/frontend/src/components/Navbar.tsx",
-                                lineNumber: 82,
+                                lineNumber: 122,
                                 columnNumber: 15
                             }, ("TURBOPACK compile-time value", void 0))
                         }, void 0, false, {
                             fileName: "[project]/frontend/src/components/Navbar.tsx",
-                            lineNumber: 70,
+                            lineNumber: 110,
                             columnNumber: 11
                         }, ("TURBOPACK compile-time value", void 0))
                     }, void 0, false, {
                         fileName: "[project]/frontend/src/components/Navbar.tsx",
-                        lineNumber: 69,
+                        lineNumber: 109,
                         columnNumber: 9
                     }, ("TURBOPACK compile-time value", void 0))
                 ]
             }, void 0, true, {
                 fileName: "[project]/frontend/src/components/Navbar.tsx",
-                lineNumber: 40,
+                lineNumber: 67,
                 columnNumber: 7
             }, ("TURBOPACK compile-time value", void 0)),
             isMobileMenuOpen && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -242,39 +272,70 @@ const Navbar = ()=>{
                                     children: link.name
                                 }, link.name, false, {
                                     fileName: "[project]/frontend/src/components/Navbar.tsx",
-                                    lineNumber: 96,
+                                    lineNumber: 136,
                                     columnNumber: 17
                                 }, ("TURBOPACK compile-time value", void 0))),
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
+                            isAuthenticated ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "pt-2 border-t border-gray-200",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                        className: "px-4 py-2 text-emerald-700 font-medium",
+                                        children: [
+                                            "Hi, ",
+                                            userFirstName
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "[project]/frontend/src/components/Navbar.tsx",
+                                        lineNumber: 147,
+                                        columnNumber: 19
+                                    }, ("TURBOPACK compile-time value", void 0)),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                        onClick: ()=>{
+                                            handleLogout();
+                                            setIsMobileMenuOpen(false);
+                                        },
+                                        className: "w-full text-left bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-5 py-3 rounded-full hover:from-emerald-700 hover:to-emerald-800 transition-all shadow-soft hover:shadow-md mt-2",
+                                        children: "Logout"
+                                    }, void 0, false, {
+                                        fileName: "[project]/frontend/src/components/Navbar.tsx",
+                                        lineNumber: 150,
+                                        columnNumber: 19
+                                    }, ("TURBOPACK compile-time value", void 0))
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/frontend/src/components/Navbar.tsx",
+                                lineNumber: 146,
+                                columnNumber: 17
+                            }, ("TURBOPACK compile-time value", void 0)) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
                                 href: "/login",
-                                className: "bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-5 py-3 rounded-full hover:from-emerald-700 hover:to-emerald-800 transition-all shadow-soft hover:shadow-md text-center mt-2 mx-4",
+                                className: "bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-5 py-3 rounded-full hover:from-emerald-700 hover:to-emerald-800 transition-all shadow-soft hover:shadow-md text-center mt-2",
                                 onClick: ()=>setIsMobileMenuOpen(false),
-                                children: "Login / Register"
+                                children: "Login"
                             }, void 0, false, {
                                 fileName: "[project]/frontend/src/components/Navbar.tsx",
-                                lineNumber: 105,
-                                columnNumber: 15
+                                lineNumber: 161,
+                                columnNumber: 17
                             }, ("TURBOPACK compile-time value", void 0))
                         ]
                     }, void 0, true, {
                         fileName: "[project]/frontend/src/components/Navbar.tsx",
-                        lineNumber: 94,
+                        lineNumber: 134,
                         columnNumber: 13
                     }, ("TURBOPACK compile-time value", void 0))
                 }, void 0, false, {
                     fileName: "[project]/frontend/src/components/Navbar.tsx",
-                    lineNumber: 93,
+                    lineNumber: 133,
                     columnNumber: 11
                 }, ("TURBOPACK compile-time value", void 0))
             }, void 0, false, {
                 fileName: "[project]/frontend/src/components/Navbar.tsx",
-                lineNumber: 92,
+                lineNumber: 132,
                 columnNumber: 9
             }, ("TURBOPACK compile-time value", void 0))
         ]
     }, void 0, true, {
         fileName: "[project]/frontend/src/components/Navbar.tsx",
-        lineNumber: 39,
+        lineNumber: 66,
         columnNumber: 5
     }, ("TURBOPACK compile-time value", void 0));
 };
@@ -989,23 +1050,37 @@ __turbopack_context__.s([
     ()=>apiClient
 ]);
 const API_BASE_URL = ("TURBOPACK compile-time value", "http://localhost:3000/api") || 'http://localhost:3002/api';
+// Get token from localStorage or sessionStorage
+const getToken = ()=>{
+    if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
+    ;
+    return null;
+};
 const apiClient = {
     // Generic GET request
     get: async (endpoint)=>{
+        const token = getToken();
         const response = await fetch(`${API_BASE_URL}${endpoint}`, {
             method: 'GET',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                ...token && {
+                    'Authorization': `Bearer ${token}`
+                }
             }
         });
         return response.json();
     },
     // Generic POST request
     post: async (endpoint, data)=>{
+        const token = getToken();
         const response = await fetch(`${API_BASE_URL}${endpoint}`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                ...token && {
+                    'Authorization': `Bearer ${token}`
+                }
             },
             body: JSON.stringify(data)
         });
@@ -1013,10 +1088,14 @@ const apiClient = {
     },
     // Generic PUT request
     put: async (endpoint, data)=>{
+        const token = getToken();
         const response = await fetch(`${API_BASE_URL}${endpoint}`, {
             method: 'PUT',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                ...token && {
+                    'Authorization': `Bearer ${token}`
+                }
             },
             body: JSON.stringify(data)
         });
@@ -1024,15 +1103,48 @@ const apiClient = {
     },
     // Generic DELETE request
     delete: async (endpoint)=>{
+        const token = getToken();
         const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: {
+                ...token && {
+                    'Authorization': `Bearer ${token}`
+                }
+            }
         });
         return response.json();
     },
     // File download request
     download: async (endpoint)=>{
-        const response = await fetch(`${API_BASE_URL}${endpoint}`);
+        const token = getToken();
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+            headers: {
+                ...token && {
+                    'Authorization': `Bearer ${token}`
+                }
+            }
+        });
         return response.blob();
+    },
+    // Login method
+    login: async (email, password, userType)=>{
+        return apiClient.post('/auth/login', {
+            email,
+            password,
+            userType
+        });
+    },
+    // Register method
+    register: async (name, email, password)=>{
+        return apiClient.post('/auth/register', {
+            name,
+            email,
+            password
+        });
+    },
+    // Get current user
+    getCurrentUser: async ()=>{
+        return apiClient.get('/auth/user/me');
     }
 };
 }),
