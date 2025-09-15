@@ -1,5 +1,5 @@
 // API client for making requests to the backend
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/api';
 
 // Define a generic type for API responses
 type ApiResponse<T = unknown> = Promise<T>;
@@ -7,7 +7,12 @@ type ApiResponse<T = unknown> = Promise<T>;
 export const apiClient = {
   // Generic GET request
   get: async <T = unknown>(endpoint: string): ApiResponse<T> => {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`);
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
     return response.json();
   },
 
@@ -41,5 +46,11 @@ export const apiClient = {
       method: 'DELETE',
     });
     return response.json();
+  },
+
+  // File download request
+  download: async (endpoint: string): Promise<Blob> => {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`);
+    return response.blob();
   },
 };

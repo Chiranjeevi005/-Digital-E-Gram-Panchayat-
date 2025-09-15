@@ -1801,7 +1801,7 @@ const TrackApplication = ()=>{
                                                     value: trackingId,
                                                     onChange: (e)=>setTrackingId(e.target.value),
                                                     placeholder: "e.g., APP-2025-09-001",
-                                                    className: "block w-full pl-10 pr-3 py-3 sm:py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 shadow-soft text-sm sm:text-base",
+                                                    className: "block w-full pl-10 pr-3 py-3 sm:py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 shadow-soft text-sm sm:text-base text-gray-800",
                                                     required: true
                                                 }, void 0, false, {
                                                     fileName: "[project]/frontend/src/components/TrackApplication.tsx",

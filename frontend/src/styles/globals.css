@@ -12,6 +12,8 @@
   --sunflower: #fbbf24;
   --coral: #f87171;
   --lavender: #c7d2fe;
+  --placeholder-gray: #4b5563; /* darker gray for better visibility */
+  --darker-gray: #374151; /* even darker gray for labels */
 }
 
 @theme inline {
@@ -26,6 +28,8 @@
   --color-sunflower: var(--sunflower);
   --color-coral: var(--coral);
   --color-lavender: var(--lavender);
+  --color-placeholder: var(--placeholder-gray);
+  --color-dark-label: var(--darker-gray);
   --font-sans: 'Inter', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   --font-mono: var(--font-geist-mono);
 }
@@ -67,6 +71,36 @@ body {
 
 .text-deep-blue {
   color: var(--deep-blue);
+}
+
+.text-dark-label {
+  color: var(--darker-gray);
+}
+
+/* Placeholder styles - making them darker gray for better visibility */
+::-webkit-input-placeholder {
+  color: var(--placeholder-gray);
+  opacity: 1;
+}
+
+::-moz-placeholder {
+  color: var(--placeholder-gray);
+  opacity: 1;
+}
+
+:-ms-input-placeholder {
+  color: var(--placeholder-gray);
+  opacity: 1;
+}
+
+:-moz-placeholder {
+  color: var(--placeholder-gray);
+  opacity: 1;
+}
+
+::placeholder {
+  color: var(--placeholder-gray);
+  opacity: 1;
 }
 
 /* Animation classes */
