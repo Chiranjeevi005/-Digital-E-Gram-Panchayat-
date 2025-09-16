@@ -6,6 +6,9 @@ import grievanceRoutes from './routes/grievance.routes';
 import serviceRoutes from './routes/service.routes';
 import schemeRoutes from './routes/scheme.routes';
 import certificateRoutes from './routes/certificate.routes';
+import propertyRoutes from './routes/property.routes';
+import landRecordRoutes from './routes/landrecord.routes';
+import landRecordsRoutes from './routes/landrecords.routes';
 
 // Load environment variables
 dotenv.config();
@@ -25,6 +28,9 @@ app.use('/api/grievances', grievanceRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/schemes', schemeRoutes);
 app.use('/api/certificates', certificateRoutes);
+app.use('/api', propertyRoutes);
+app.use('/api/landrecord', landRecordRoutes);
+app.use('/api/landrecords', landRecordsRoutes);
 
 // Health check endpoint
 app.get('/', (req: Request, res: Response) => {

@@ -11,6 +11,9 @@ const grievance_routes_1 = __importDefault(require("./routes/grievance.routes"))
 const service_routes_1 = __importDefault(require("./routes/service.routes"));
 const scheme_routes_1 = __importDefault(require("./routes/scheme.routes"));
 const certificate_routes_1 = __importDefault(require("./routes/certificate.routes"));
+const property_routes_1 = __importDefault(require("./routes/property.routes"));
+const landrecord_routes_1 = __importDefault(require("./routes/landrecord.routes"));
+const landrecords_routes_1 = __importDefault(require("./routes/landrecords.routes"));
 // Load environment variables
 dotenv_1.default.config();
 const app = (0, express_1.default)();
@@ -26,6 +29,9 @@ app.use('/api/grievances', grievance_routes_1.default);
 app.use('/api/services', service_routes_1.default);
 app.use('/api/schemes', scheme_routes_1.default);
 app.use('/api/certificates', certificate_routes_1.default);
+app.use('/api', property_routes_1.default);
+app.use('/api/landrecord', landrecord_routes_1.default);
+app.use('/api/landrecords', landrecords_routes_1.default);
 // Health check endpoint
 app.get('/', (req, res) => {
     res.json({ message: 'Digital E-Panchayat API' });

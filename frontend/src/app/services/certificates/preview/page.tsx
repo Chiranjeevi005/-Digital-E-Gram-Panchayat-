@@ -111,22 +111,17 @@ const CertificatePreviewContent = () => {
         return;
       }
       
-      // Show download progress for at least 10 seconds with mobile-friendly design
+      // Show download progress for at least 5 seconds with mobile-friendly design
       setIsDownloading(true);
       setDownloadProgress(0);
       setDownloadStatus('Preparing your certificate...');
       
-      // Extended progress simulation for at least 10 seconds
+      // Extended progress simulation for at least 5 seconds
       const progressSteps = [
-        { progress: 10, status: 'Validating certificate details...' },
         { progress: 20, status: 'Generating document...' },
-        { progress: 30, status: 'Adding official seal...' },
-        { progress: 40, status: 'Applying watermark...' },
-        { progress: 50, status: 'Formatting document...' },
-        { progress: 60, status: 'Optimizing file size...' },
-        { progress: 70, status: 'Preparing download...' },
-        { progress: 80, status: 'Almost ready...' },
-        { progress: 90, status: 'Finalizing...' },
+        { progress: 40, status: 'Formatting document...' },
+        { progress: 60, status: 'Preparing download...' },
+        { progress: 80, status: 'Finalizing...' },
         { progress: 100, status: 'Download ready!' }
       ];
       
@@ -135,7 +130,7 @@ const CertificatePreviewContent = () => {
         setDownloadProgress(progress);
         setDownloadStatus(status);
         
-        // Wait for at least 10 seconds total (10000ms / 10 steps = 1000ms per step)
+        // Wait for at least 5 seconds total (5000ms / 5 steps = 1000ms per step)
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
       

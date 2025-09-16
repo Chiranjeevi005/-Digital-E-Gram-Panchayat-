@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import OptimizedIcon from './OptimizedIcon';
 
 const TrackApplication = () => {
   const [trackingId, setTrackingId] = useState('');
@@ -45,13 +44,9 @@ const TrackApplication = () => {
           <div className="bg-white rounded-2xl shadow-soft-lg p-5 sm:p-6 md:p-8 border border-white">
             <div className="text-center mb-6 sm:mb-8">
               <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full bg-emerald-100 text-emerald-600 mb-3 sm:mb-4 mx-auto">
-                <OptimizedIcon 
-                  src="/globe.svg" 
-                  alt="Search" 
-                  width={32} 
-                  height={32} 
-                  className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8" 
-                />
+                <svg className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
               </div>
               <h2 className="text-2xl sm:text-4xl font-bold text-gray-800 mb-2">Track Your Application</h2>
               <p className="text-gray-600 text-sm sm:text-base px-2">
@@ -69,13 +64,9 @@ const TrackApplication = () => {
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <OptimizedIcon 
-                        src="/globe.svg" 
-                        alt="Code" 
-                        width={20} 
-                        height={20} 
-                        className="h-5 w-5 text-gray-400" 
-                      />
+                      <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                      </svg>
                     </div>
                     <input
                       type="text"
@@ -104,13 +95,9 @@ const TrackApplication = () => {
                     </>
                   ) : (
                     <>
-                      <OptimizedIcon 
-                        src="/globe.svg" 
-                        alt="Search" 
-                        width={20} 
-                        height={20} 
-                        className="w-5 h-5 mr-2" 
-                      />
+                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
                       Track Now
                     </>
                   )}

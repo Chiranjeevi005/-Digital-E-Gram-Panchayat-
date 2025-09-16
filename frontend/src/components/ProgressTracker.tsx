@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import OptimizedIcon from './OptimizedIcon';
 
 const ProgressTracker = () => {
   const [activeStep, setActiveStep] = useState(1);
@@ -98,13 +97,9 @@ const ProgressTracker = () => {
                         : 'bg-white border-2 border-gray-300 text-gray-400'
                     }`}>
                       {step.completed || step.id < activeStep ? (
-                        <OptimizedIcon 
-                          src="/globe.svg" 
-                          alt="Checkmark" 
-                          width={24} 
-                          height={24} 
-                          className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" 
-                        />
+                        <svg className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
                       ) : step.id === activeStep ? (
                         <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-white animate-pulse"></div>
                       ) : (
@@ -134,13 +129,9 @@ const ProgressTracker = () => {
               <div className="flex flex-col md:flex-row items-center gap-4 sm:gap-5">
                 <div className="md:w-1/4 mb-4 md:mb-0 flex justify-center">
                   <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full bg-emerald-100 flex items-center justify-center">
-                    <OptimizedIcon 
-                      src="/globe.svg" 
-                      alt="Info" 
-                      width={32} 
-                      height={32} 
-                      className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-emerald-600" 
-                    />
+                    <svg className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                   </div>
                 </div>
                 <div className="md:w-3/4 text-center md:text-left">
@@ -157,23 +148,7 @@ const ProgressTracker = () => {
                     </span>
                   </div>
                   {/* Show completion message when process is finished */}
-                  {activeStep === steps.length && (
-                    <div className="mt-4 sm:mt-5 text-center">
-                      <div className="inline-flex items-center px-3 sm:px-4 py-2 bg-emerald-100 text-emerald-800 rounded-full text-sm sm:text-base">
-                        <OptimizedIcon 
-                          src="/globe.svg" 
-                          alt="Checkmark" 
-                          width={20} 
-                          height={20} 
-                          className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" 
-                        />
-                        Process Completed Successfully
-                      </div>
-                      <p className="text-xs sm:text-sm text-gray-500 mt-2 px-2">
-                        The application process is now complete. This demonstrates the full workflow of our web application.
-                      </p>
-                    </div>
-                  )}
+                  {/* Removed "Process Completed Successfully" message as it's already present in process timeline animation */}
                 </div>
               </div>
             </div>

@@ -1,37 +1,32 @@
 {
-  "[project]/frontend/src/components/TrackApplication.tsx [app-client] (ecmascript, next/dynamic entry)": {
-    "id": "[project]/frontend/src/components/TrackApplication.tsx [app-client] (ecmascript, next/dynamic entry)",
+  "79924": {
+    "id": 79924,
     "files": [
-      "static/chunks/frontend_src_components_TrackApplication_tsx_7ea6ac00._.js",
-      "static/chunks/frontend_src_components_TrackApplication_tsx_74a0084f._.js"
+      "static/chunks/6dd5aee8c7140936.js"
     ]
   },
-  "[project]/frontend/src/components/CitizenStories.tsx [app-client] (ecmascript, next/dynamic entry)": {
-    "id": "[project]/frontend/src/components/CitizenStories.tsx [app-client] (ecmascript, next/dynamic entry)",
+  "75772": {
+    "id": 75772,
     "files": [
-      "static/chunks/frontend_src_components_CitizenStories_tsx_fc61c934._.js",
-      "static/chunks/frontend_src_components_CitizenStories_tsx_74a0084f._.js"
+      "static/chunks/e8b46eb2f00a6f84.js"
     ]
   },
-  "[project]/frontend/src/components/ProgressTracker.tsx [app-client] (ecmascript, next/dynamic entry)": {
-    "id": "[project]/frontend/src/components/ProgressTracker.tsx [app-client] (ecmascript, next/dynamic entry)",
+  "15078": {
+    "id": 15078,
     "files": [
-      "static/chunks/frontend_src_components_ProgressTracker_tsx_9a739615._.js",
-      "static/chunks/frontend_src_components_ProgressTracker_tsx_74a0084f._.js"
+      "static/chunks/f45c2efbf3316fb4.js"
     ]
   },
-  "[project]/frontend/src/components/Announcements.tsx [app-client] (ecmascript, next/dynamic entry)": {
-    "id": "[project]/frontend/src/components/Announcements.tsx [app-client] (ecmascript, next/dynamic entry)",
+  "45883": {
+    "id": 45883,
     "files": [
-      "static/chunks/frontend_src_components_Announcements_tsx_c80603ad._.js",
-      "static/chunks/frontend_src_components_Announcements_tsx_74a0084f._.js"
+      "static/chunks/0394347b3d85883c.js"
     ]
   },
-  "[project]/frontend/src/components/KeyServices.tsx [app-client] (ecmascript, next/dynamic entry)": {
-    "id": "[project]/frontend/src/components/KeyServices.tsx [app-client] (ecmascript, next/dynamic entry)",
+  "27007": {
+    "id": 27007,
     "files": [
-      "static/chunks/frontend_src_components_KeyServices_tsx_51ad3da2._.js",
-      "static/chunks/frontend_src_components_KeyServices_tsx_74a0084f._.js"
+      "static/chunks/12713dd1646f890c.js"
     ]
   }
 }

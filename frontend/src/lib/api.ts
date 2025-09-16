@@ -27,6 +27,36 @@ interface RegisterResponse {
   user: User;
 }
 
+// Property & Land Services interfaces
+interface PropertyTaxData {
+  propertyId: string;
+  ownerName: string;
+  village: string;
+  taxDue: number;
+  status: string;
+  createdAt: string;
+}
+
+interface LandRecordData {
+  surveyNo: string;
+  owner: string;
+  area: string;
+  landType: string;
+  encumbranceStatus: string;
+  createdAt: string;
+}
+
+interface MutationStatusData {
+  applicationId: string;
+  propertyId: string;
+  statusTimeline: {
+    step: string;
+    status: string;
+    date: string;
+  }[];
+  createdAt: string;
+}
+
 // Define a generic type for API responses
 type ApiResponse<T = unknown> = Promise<T>;
 
@@ -189,5 +219,36 @@ export const apiClient = {
   // Get current user
   getCurrentUser: async (): Promise<User> => {
     return apiClient.get<User>('/auth/user/me');
+  },
+
+  // Property & Land Services methods
+  getPropertyTax: async (propertyId: string, ownerName: string, village: string): Promise<PropertyTaxData> => {
+    return apiClient.post<PropertyTaxData>('/property-tax', { propertyId, ownerName, village });
+  },
+
+  downloadPropertyTaxReceipt: async (propertyId: string, format: 'pdf' | 'jpg' = 'pdf'): Promise<Blob> => {
+    return apiClient.download(`/property-tax/${propertyId}/download?format=${format}`);
+  },
+
+  // Updated land record methods to use the new on-demand endpoints
+  createLandRecord: async (data: { owner: string; surveyNo: string; area: string; landType: string; encumbranceStatus: string }): Promise<{ landRecordId: string }> => {
+    return apiClient.post<{ landRecordId: string }>('/landrecords', data);
+  },
+
+  getLandRecord: async (id: string): Promise<{ landRecord: LandRecordData }> => {
+    return apiClient.get<{ landRecord: LandRecordData }>(`/landrecords/${id}`);
+  },
+
+  downloadLandRecord: async (id: string, format: 'pdf' | 'jpg' = 'pdf'): Promise<Blob> => {
+    const endpoint = format === 'pdf' ? `/landrecords/${id}/certificate/pdf` : `/landrecords/${id}/certificate/jpg`;
+    return apiClient.download(endpoint);
+  },
+
+  getMutationStatus: async (applicationId: string): Promise<MutationStatusData> => {
+    return apiClient.post<MutationStatusData>('/mutation-status', { applicationId });
+  },
+
+  downloadMutationAcknowledgement: async (applicationId: string, format: 'pdf' | 'jpg' = 'pdf'): Promise<Blob> => {
+    return apiClient.download(`/mutation-status/${applicationId}/download?format=${format}`);
   }
 };

@@ -29,7 +29,8 @@ const Services = () => {
         'Pay property tax online',
         'View land records & mutation status'
       ],
-      buttonText: 'View Records'
+      buttonText: 'View Records',
+      link: '/services/property'
     },
     {
       id: 3,

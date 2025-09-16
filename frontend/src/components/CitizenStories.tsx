@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import OptimizedIcon from './OptimizedIcon';
 
 const CitizenStories = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -21,7 +20,6 @@ const CitizenStories = () => {
       name: "Ramesh Kumar",
       location: "Sector 3, Village",
       quote: "The digital platform helped me get my land mutation done in just 3 days instead of weeks. Highly efficient!",
-      image: "/placeholder-avatar-1.jpg",
       role: "Farmer"
     },
     {
@@ -29,7 +27,6 @@ const CitizenStories = () => {
       name: "Sunita Devi",
       location: "Sector 5, Village",
       quote: "I applied for the PM-KISAN scheme online and received the benefit directly in my account. Such a smooth process!",
-      image: "/placeholder-avatar-2.jpg",
       role: "Housewife"
     },
     {
@@ -37,7 +34,6 @@ const CitizenStories = () => {
       name: "Amit Sharma",
       location: "Sector 2, Village",
       quote: "Filing a grievance about street lighting was so easy. The issue was resolved within 48 hours. Great work!",
-      image: "/placeholder-avatar-3.jpg",
       role: "Shop Owner"
     }
   ];
@@ -68,70 +64,59 @@ const CitizenStories = () => {
         </div>
         
         <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-2xl shadow-soft-lg p-5 sm:p-6 md:p-8 relative overflow-hidden">
-            {/* Decorative elements - optimized for mobile */}
-            <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-emerald-100 rounded-full -translate-y-8 translate-x-8 sm:-translate-y-10 sm:translate-x-10"></div>
-            <div className="absolute bottom-0 left-0 w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 bg-sky-100 rounded-full translate-y-6 -translate-x-6 sm:translate-y-8 sm:-translate-x-8"></div>
+          <div className="bg-white rounded-2xl shadow-soft-lg p-6 sm:p-8 md:p-10 relative overflow-hidden">
+            {/* Decorative elements */}
+            <div className="absolute top-0 right-0 w-20 h-20 sm:w-24 sm:h-24 bg-emerald-100 rounded-full -translate-y-10 translate-x-10"></div>
+            <div className="absolute bottom-0 left-0 w-16 h-16 sm:w-20 sm:h-20 bg-sky-100 rounded-full translate-y-8 -translate-x-8"></div>
             
             <div className="relative z-10">
-              <div className="flex flex-col md:flex-row items-center gap-6 sm:gap-8">
-                <div className="md:w-1/3 w-full flex justify-center">
-                  <div className="relative">
-                    <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-emerald-400 to-sky-500 p-1">
-                      <div className="bg-gray-200 border-2 border-dashed rounded-full w-full h-full flex items-center justify-center">
-                        <span className="text-3xl sm:text-4xl">👤</span>
-                      </div>
+              {/* Testimonial card with improved layout */}
+              <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 sm:p-8 shadow-inner">
+                <div className="flex flex-col items-center text-center">
+                  {/* Quote mark */}
+                  <div className="text-emerald-500 text-5xl sm:text-6xl md:text-7xl mb-2 sm:mb-4 opacity-70">❝</div>
+                  
+                  {/* Testimonial content */}
+                  <div className="max-w-3xl">
+                    <p className="text-lg sm:text-xl md:text-2xl text-gray-700 italic mb-6 sm:mb-8 px-2 sm:px-4">
+                      "{stories[currentIndex].quote}"
+                    </p>
+                    
+                    {/* Author information */}
+                    <div className="bg-white rounded-lg p-4 sm:p-6 shadow-soft max-w-md mx-auto">
+                      <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-1">{stories[currentIndex].name}</h3>
+                      <p className="text-gray-600 mb-2 text-sm sm:text-base">{stories[currentIndex].location}</p>
+                      <span className="inline-block px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs sm:text-sm font-medium">
+                        {stories[currentIndex].role}
+                      </span>
                     </div>
-                    <div className="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 bg-emerald-500 text-white rounded-full w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center">
-                      <OptimizedIcon 
-                        src="/globe.svg" 
-                        alt="Checkmark" 
-                        width={20} 
-                        height={20} 
-                        className="w-4 h-4 sm:w-5 sm:h-5" 
-                      />
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="md:w-2/3 w-full text-center md:text-left">
-                  <div className="text-emerald-500 text-4xl sm:text-5xl md:text-6xl mb-3 sm:mb-4">❝</div>
-                  <p className="text-base sm:text-lg md:text-xl text-gray-700 italic mb-5 sm:mb-6 px-2">
-                    {stories[currentIndex].quote}
-                  </p>
-                  <div>
-                    <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">{stories[currentIndex].name}</h3>
-                    <p className="text-gray-600 mb-2 text-sm sm:text-base">{stories[currentIndex].location}</p>
-                    <span className="inline-block px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs sm:text-sm font-medium">
-                      {stories[currentIndex].role}
-                    </span>
                   </div>
                 </div>
               </div>
               
-              <div className="flex flex-col sm:flex-row justify-between items-center mt-6 sm:mt-8 md:mt-10 space-y-4 sm:space-y-0">
+              {/* Navigation controls */}
+              <div className="flex flex-col sm:flex-row justify-between items-center mt-8 sm:mt-10 space-y-4 sm:space-y-0">
                 <button 
                   onClick={() => handleNavigation('prev')}
-                  className="flex items-center text-emerald-600 font-medium hover:text-emerald-800 transition-colors text-sm sm:text-base py-2 px-4 rounded-lg hover:bg-emerald-50 active:bg-emerald-100"
+                  className="flex items-center text-emerald-600 font-medium hover:text-emerald-800 transition-colors text-sm sm:text-base py-2 px-5 rounded-lg hover:bg-emerald-50 active:bg-emerald-100 shadow-soft"
                   type="button"
                 >
-                  <OptimizedIcon 
-                    src="/globe.svg" 
-                    alt="Previous" 
-                    width={20} 
-                    height={20} 
-                    className="w-4 h-4 sm:w-5 sm:h-5 mr-2" 
-                  />
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
                   Previous Story
                 </button>
                 
+                {/* Pagination dots */}
                 <div className="flex space-x-2">
                   {stories.map((_, index) => (
                     <button
                       key={index}
                       onClick={() => handleNavigation('index', index)}
-                      className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${
-                        index === currentIndex ? 'bg-emerald-600' : 'bg-gray-300'
+                      className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                        index === currentIndex 
+                          ? 'bg-emerald-600 w-6' 
+                          : 'bg-gray-300 hover:bg-gray-400'
                       }`}
                       aria-label={`Go to story ${index + 1}`}
                       type="button"
@@ -141,17 +126,13 @@ const CitizenStories = () => {
                 
                 <button 
                   onClick={() => handleNavigation('next')}
-                  className="flex items-center text-emerald-600 font-medium hover:text-emerald-800 transition-colors text-sm sm:text-base py-2 px-4 rounded-lg hover:bg-emerald-50 active:bg-emerald-100"
+                  className="flex items-center text-emerald-600 font-medium hover:text-emerald-800 transition-colors text-sm sm:text-base py-2 px-5 rounded-lg hover:bg-emerald-50 active:bg-emerald-100 shadow-soft"
                   type="button"
                 >
                   Next Story
-                  <OptimizedIcon 
-                    src="/globe.svg" 
-                    alt="Next" 
-                    width={20} 
-                    height={20} 
-                    className="w-4 h-4 sm:w-5 sm:h-5 ml-2" 
-                  />
+                  <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
                 </button>
               </div>
             </div>

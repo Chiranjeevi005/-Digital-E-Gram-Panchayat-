@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import OptimizedIcon from './OptimizedIcon';
 
 const HeroSection = () => {
   const [currentStat, setCurrentStat] = useState(0);
@@ -78,13 +77,9 @@ const HeroSection = () => {
             <div className="mt-8 sm:mt-12 p-4 sm:p-6 bg-white/80 backdrop-blur-sm rounded-2xl shadow-soft max-w-md animate-fade-in-up animation-delay-600">
               <div className="flex items-center">
                 <div className="mr-3 sm:mr-4 p-2 sm:p-3 bg-emerald-100 rounded-full">
-                  <OptimizedIcon 
-                    src="/globe.svg" 
-                    alt="Checkmark" 
-                    width={24} 
-                    height={24} 
-                    className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600" 
-                  />
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                 </div>
                 <div>
                   <p className="text-xl sm:text-2xl font-bold text-gray-800">{stats[currentStat].value}</p>

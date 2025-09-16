@@ -192,17 +192,12 @@ const CertificateApplication = () => {
     setSubmissionStatus('Validating your details...');
     
     try {
-      // Extended progress simulation for at least 10 seconds with mobile-friendly messages
+      // Extended progress simulation for at least 5 seconds with mobile-friendly messages
       const progressSteps = [
-        { progress: 10, status: 'Validating your details...' },
-        { progress: 20, status: 'Preparing your application...' },
-        { progress: 30, status: 'Checking document requirements...' },
-        { progress: 40, status: 'Sending to server...' },
-        { progress: 50, status: 'Processing your request...' },
-        { progress: 60, status: 'Verifying information...' },
-        { progress: 70, status: 'Generating certificate...' },
-        { progress: 80, status: 'Applying official seal...' },
-        { progress: 90, status: 'Finalizing document...' },
+        { progress: 20, status: 'Validating your details...' },
+        { progress: 40, status: 'Processing your request...' },
+        { progress: 60, status: 'Generating certificate...' },
+        { progress: 80, status: 'Finalizing document...' },
         { progress: 100, status: 'Ready for preview!' }
       ];
       
@@ -211,7 +206,7 @@ const CertificateApplication = () => {
         setSubmissionProgress(progress);
         setSubmissionStatus(status);
         
-        // Wait for at least 10 seconds total (10000ms / 10 steps = 1000ms per step)
+        // Wait for at least 5 seconds total (5000ms / 5 steps = 1000ms per step)
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
       
