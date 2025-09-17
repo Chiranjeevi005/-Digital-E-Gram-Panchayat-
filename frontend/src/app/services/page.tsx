@@ -14,7 +14,8 @@ const Services = () => {
       title: 'Certificates & Records',
       description: 'Access and apply for essential certificates and records with ease.',
       subServices: [
-        'Apply for Birth/Death Certificates'
+        'Apply for Birth/Death Certificates',
+        'Download Income/Caste/Residence Certificates'
       ],
       buttonText: 'View Certificates',
       link: '/services/certificates'

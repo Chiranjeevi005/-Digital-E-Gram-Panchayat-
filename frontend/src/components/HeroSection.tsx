@@ -60,17 +60,14 @@ const HeroSection = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 animate-fade-in-up animation-delay-400">
               <button 
-                onClick={() => handleCtaClick('/dashboard')}
-                className="btn-primary text-center flex-1"
-              >
-                {isAuthenticated ? 'Access Services' : 'Citizen Login / Register'}
-              </button>
-              <button 
                 onClick={() => handleCtaClick('/services')}
-                className="btn-secondary text-center flex-1"
+                className="btn-primary text-center flex-1"
               >
                 Explore Services
               </button>
+              <Link href="/contact" className="btn-secondary text-center flex-1">
+                Contact Us
+              </Link>
             </div>
             
             {/* Stats counter - made responsive */}

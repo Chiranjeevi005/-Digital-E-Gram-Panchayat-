@@ -1,11 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 const KeyServices = () => {
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const router = useRouter();
   
   const services = [
@@ -43,21 +42,12 @@ const KeyServices = () => {
     }
   ];
 
-  useEffect(() => {
-    // Check if user is authenticated
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-    setIsAuthenticated(!!token);
-  }, []);
+
 
   // Function to handle service card clicks
   const handleServiceClick = (serviceId: number) => {
-    if (isAuthenticated) {
-      // If authenticated, navigate to the service page
-      router.push(`/services/${serviceId}`);
-    } else {
-      // If not authenticated, redirect to login page
-      router.push('/login');
-    }
+    // Navigate to the main services page regardless of authentication status
+    router.push('/services');
   };
 
   return (
@@ -89,7 +79,7 @@ const KeyServices = () => {
               <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-2 sm:mb-3 md:mb-4">{service.title}</h3>
               <p className="text-gray-600 mb-4 sm:mb-5 md:mb-6 text-sm sm:text-base">{service.description}</p>
               <div className="flex items-center text-emerald-600 font-medium text-sm">
-                <span>{isAuthenticated ? 'Access Service' : 'Login to Access'}</span>
+                <span>Access Service</span>
                 <svg className="w-4 h-4 ml-2 transition-transform duration-300 hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                 </svg>
