@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Navbar from '../../../../components/Navbar';
 import Footer from '../../../../components/Footer';
 import { apiClient } from '../../../../lib/api';
@@ -24,14 +24,30 @@ interface User {
 
 const CertificateApplication = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const certificateTypeParam = searchParams.get('type');
   const { showToast } = useToast();
+  
   const [formData, setFormData] = useState({
-    certificateType: '',
+    certificateType: certificateTypeParam || '',
     applicantName: '',
     fatherName: '',
     motherName: '',
     date: '',
     place: '',
+    brideName: '',
+    groomName: '',
+    witnessNames: '',
+    registrationNo: '',
+    address: '',
+    income: '',
+    caste: '',
+    subCaste: '',
+    ward: '',
+    village: '',
+    district: '',
+    issueDate: '',
+    validity: '',
     supportingFiles: [] as File[],
     declaration: false
   });
@@ -61,10 +77,6 @@ const CertificateApplication = () => {
           userType: userData.userType || 'Citizen'
         };
         setUser(user);
-        setFormData(prev => ({
-          ...prev,
-          applicantName: user.name || ''
-        }));
       } catch (error: unknown) {
         console.error('Error fetching user data:', error);
         const errorMessage = error instanceof Error ? error.message : 'Failed to authenticate user. Please login again.';
@@ -81,7 +93,7 @@ const CertificateApplication = () => {
     fetchUser();
   }, [router]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
     
     if (type === 'checkbox') {
@@ -158,17 +170,75 @@ const CertificateApplication = () => {
       newErrors.applicantName = 'Applicant name is required';
     }
     
-    if (!formData.date) {
-      newErrors.date = 'Date is required';
-    }
-    
-    if (!formData.place.trim()) {
-      newErrors.place = 'Place is required';
-    }
-    
-    // Validate that place is a string
-    if (formData.place && typeof formData.place !== 'string') {
-      newErrors.place = 'Place must be a valid text';
+    // Certificate-specific validations
+    if (formData.certificateType === 'Marriage') {
+      if (!formData.brideName.trim()) {
+        newErrors.brideName = 'Bride\'s name is required';
+      }
+      
+      if (!formData.groomName.trim()) {
+        newErrors.groomName = 'Groom\'s name is required';
+      }
+      
+      if (!formData.date) {
+        newErrors.date = 'Date of marriage is required';
+      }
+      
+      if (!formData.place.trim()) {
+        newErrors.place = 'Place of marriage is required';
+      }
+      
+      if (!formData.witnessNames.trim()) {
+        newErrors.witnessNames = 'Witness names are required';
+      }
+      
+      if (!formData.registrationNo.trim()) {
+        newErrors.registrationNo = 'Registration number is required';
+      }
+    } 
+    else if (formData.certificateType === 'Income' || 
+             formData.certificateType === 'Caste' || 
+             formData.certificateType === 'Residence') {
+      if (!formData.fatherName.trim()) {
+        newErrors.fatherName = 'Father\'s/Husband\'s name is required';
+      }
+      
+      if (!formData.address.trim()) {
+        newErrors.address = 'Address is required';
+      }
+      
+      if (formData.certificateType === 'Income' && !formData.income.trim()) {
+        newErrors.income = 'Declared annual income is required';
+      }
+      
+      if (formData.certificateType === 'Caste' && !formData.caste.trim()) {
+        newErrors.caste = 'Caste is required';
+      }
+      
+      if (formData.certificateType === 'Residence') {
+        if (!formData.ward.trim()) {
+          newErrors.ward = 'Ward is required';
+        }
+        if (!formData.village.trim()) {
+          newErrors.village = 'Village is required';
+        }
+        if (!formData.district.trim()) {
+          newErrors.district = 'District is required';
+        }
+      }
+      
+      // For Income, Caste, and Residence certificates, date and place are optional
+      // So we don't validate them here
+    } 
+    else {
+      // Birth and Death certificates
+      if (!formData.date) {
+        newErrors.date = 'Date is required';
+      }
+      
+      if (!formData.place.trim()) {
+        newErrors.place = 'Place is required';
+      }
     }
     
     if (!formData.declaration) {
@@ -211,16 +281,42 @@ const CertificateApplication = () => {
       }
       
       // Prepare form data for submission
-      const submissionData = {
+      const submissionData: Record<string, any> = {
         applicantName: formData.applicantName,
         fatherName: formData.fatherName,
         motherName: formData.motherName,
         certificateType: formData.certificateType,
-        date: formData.date,
-        place: formData.place,
+        brideName: formData.brideName,
+        groomName: formData.groomName,
+        witnessNames: formData.witnessNames,
+        registrationNo: formData.registrationNo,
+        address: formData.address,
+        income: formData.income,
+        caste: formData.caste,
+        subCaste: formData.subCaste,
+        ward: formData.ward,
+        village: formData.village,
+        district: formData.district,
+        issueDate: formData.issueDate,
+        validity: formData.validity,
         supportingFiles: formData.supportingFiles.map(file => file.name),
         declaration: formData.declaration
       };
+      
+      // For Marriage, Birth, and Death certificates, include date and place
+      // For Income, Caste, and Residence certificates, only include date and place if they have values
+      const isDateAndPlaceRequired = ['Marriage', 'Birth', 'Death'].includes(formData.certificateType);
+      
+      if (isDateAndPlaceRequired || (formData.date && formData.date.trim() !== '')) {
+        submissionData.date = formData.date;
+      }
+      
+      if (isDateAndPlaceRequired || (formData.place && formData.place.trim() !== '')) {
+        submissionData.place = formData.place;
+      }
+      
+      // Log the submission data for debugging
+      console.log('Submitting certificate application data:', submissionData);
       
       // Send the form data to the backend
       const response: ApplyResponse = await apiClient.post<ApplyResponse>('/certificates/apply', submissionData);
@@ -284,6 +380,54 @@ const CertificateApplication = () => {
       const errorMessage = error instanceof Error ? error.message : `Failed to download certificate in ${format.toUpperCase()} format. Please try again.`;
       showToast(errorMessage, 'error');
     }
+  };
+
+  const renderInputField = (
+    name: string,
+    label: string,
+    type: string = 'text',
+    placeholder: string = '',
+    required: boolean = false,
+    isTextArea: boolean = false
+  ) => {
+    const error = errors[name];
+    const value = formData[name as keyof typeof formData];
+    
+    return (
+      <div>
+        <label className="block text-sm font-medium text-dark-label mb-1">
+          {label} {required && <span className="text-red-500">*</span>}
+        </label>
+        {isTextArea ? (
+          <textarea
+            name={name}
+            value={value as string || ''}
+            onChange={handleInputChange}
+            rows={3}
+            className={`w-full px-4 py-2.5 sm:py-3 rounded-xl border text-gray-800 transition-all duration-300 ${
+              error ? 'border-red-500 shake' : 'border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500'
+            }`}
+            placeholder={placeholder}
+            aria-required={required}
+          />
+        ) : (
+          <input
+            type={type}
+            name={name}
+            value={value as string || ''}
+            onChange={handleInputChange}
+            className={`w-full px-4 py-2.5 sm:py-3 rounded-xl border text-gray-800 transition-all duration-300 ${
+              error ? 'border-red-500 shake' : 'border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500'
+            }`}
+            placeholder={placeholder}
+            aria-required={required}
+          />
+        )}
+        {error && (
+          <p className="mt-1 text-sm text-red-600 animate-shake" role="alert">{error}</p>
+        )}
+      </div>
+    );
   };
 
   // Show loading state while fetching user data
@@ -388,11 +532,24 @@ const CertificateApplication = () => {
                   setApplicationResult(null);
                   setFormData({
                     certificateType: '',
-                    applicantName: user.name || '',
+                    applicantName: '',
                     fatherName: '',
                     motherName: '',
                     date: '',
                     place: '',
+                    brideName: '',
+                    groomName: '',
+                    witnessNames: '',
+                    registrationNo: '',
+                    address: '',
+                    income: '',
+                    caste: '',
+                    subCaste: '',
+                    ward: '',
+                    village: '',
+                    district: '',
+                    issueDate: '',
+                    validity: '',
                     supportingFiles: [],
                     declaration: false
                   });
@@ -470,32 +627,19 @@ const CertificateApplication = () => {
         <div className="max-w-2xl mx-auto">
           <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 animate-fade-in form-container">
             <div className="text-center mb-6">
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Apply for Certificate</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
+                Apply for {formData.certificateType} Certificate
+              </h1>
               <p className="text-gray-600 mt-2">Fill in the details below to apply for your certificate</p>
             </div>
             
             <form onSubmit={handleSubmit} className="space-y-5">
-              <div>
-                <label className="block text-sm font-medium text-dark-label mb-1">
-                  Certificate Type *
-                </label>
-                <select
-                  name="certificateType"
-                  value={formData.certificateType}
-                  onChange={handleInputChange}
-                  className={`w-full px-4 py-2.5 sm:py-3 rounded-xl border text-gray-800 transition-all duration-300 ${
-                    errors.certificateType ? 'border-red-500 shake' : 'border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500'
-                  }`}
-                  aria-required="true"
-                >
-                  <option value="" className="text-gray-800">Select Certificate Type</option>
-                  <option value="Birth" className="text-gray-800">Birth Certificate</option>
-                  <option value="Death" className="text-gray-800">Death Certificate</option>
-                </select>
-                {errors.certificateType && (
-                  <p className="mt-1 text-sm text-red-600 animate-shake" role="alert">{errors.certificateType}</p>
-                )}
-              </div>
+              {/* Remove the certificate type dropdown and display the certificate type as a heading */}
+              <input
+                type="hidden"
+                name="certificateType"
+                value={formData.certificateType}
+              />
               
               <div>
                 <label className="block text-sm font-medium text-dark-label mb-1">
@@ -506,84 +650,181 @@ const CertificateApplication = () => {
                   name="applicantName"
                   value={formData.applicantName}
                   onChange={handleInputChange}
-                  readOnly
-                  className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-gray-300 bg-gray-100 cursor-not-allowed text-gray-800"
-                  placeholder="Your name"
+                  className={`w-full px-4 py-2.5 sm:py-3 rounded-xl border text-gray-800 transition-all duration-300 ${
+                    errors.applicantName ? 'border-red-500 shake' : 'border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500'
+                  }`}
+                  placeholder="Enter your name"
                   aria-required="true"
                 />
-                <p className="mt-1 text-xs text-gray-500">Auto-filled from your profile</p>
+                {errors.applicantName && (
+                  <p className="mt-1 text-sm text-red-600 animate-shake" role="alert">{errors.applicantName}</p>
+                )}
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-dark-label mb-1">
-                    Father&apos;s Name
-                  </label>
-                  <input
-                    type="text"
-                    name="fatherName"
-                    value={formData.fatherName}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-gray-300 text-gray-800 transition-all duration-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                    placeholder="Enter father&apos;s name"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-dark-label mb-1">
-                    Mother&apos;s Name
-                  </label>
-                  <input
-                    type="text"
-                    name="motherName"
-                    value={formData.motherName}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-gray-300 text-gray-800 transition-all duration-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                    placeholder="Enter mother&apos;s name"
-                  />
-                </div>
-              </div>
+              {/* Marriage Certificate Fields */}
+              {formData.certificateType === 'Marriage' && (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      {renderInputField('brideName', "Bride's Name", 'text', "Enter bride's name", true)}
+                    </div>
+                    
+                    <div>
+                      {renderInputField('groomName', "Groom's Name", 'text', "Enter groom's name", true)}
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-dark-label mb-1">
+                        Date of Marriage <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="date"
+                        name="date"
+                        value={formData.date}
+                        onChange={handleInputChange}
+                        className={`w-full px-4 py-2.5 sm:py-3 rounded-xl border text-gray-800 transition-all duration-300 ${
+                          errors.date ? 'border-red-500 shake' : 'border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500'
+                        }`}
+                        aria-required="true"
+                      />
+                      {errors.date && (
+                        <p className="mt-1 text-sm text-red-600 animate-shake" role="alert">{errors.date}</p>
+                      )}
+                    </div>
+                    
+                    <div>
+                      {renderInputField('place', "Place of Marriage", 'text', "Enter place of marriage", true)}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    {renderInputField('witnessNames', "Witness Names (2-3 lines)", 'text', "Enter witness names (one per line)", true, true)}
+                  </div>
+                  
+                  <div>
+                    {renderInputField('registrationNo', "Registration Number", 'text', "Enter registration number", true)}
+                  </div>
+                </>
+              )}
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-dark-label mb-1">
-                    Date *
-                  </label>
-                  <input
-                    type="date"
-                    name="date"
-                    value={formData.date}
-                    onChange={handleInputChange}
-                    className={`w-full px-4 py-2.5 sm:py-3 rounded-xl border text-gray-800 transition-all duration-300 ${
-                      errors.date ? 'border-red-500 shake' : 'border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500'
-                    }`}
-                    aria-required="true"
-                  />
-                  {errors.date && (
-                    <p className="mt-1 text-sm text-red-600 animate-shake" role="alert">{errors.date}</p>
+              {/* Income/Caste/Residence Certificate Fields */}
+              {(formData.certificateType === 'Income' || 
+                formData.certificateType === 'Caste' || 
+                formData.certificateType === 'Residence') && (
+                <>
+                  <div>
+                    {renderInputField('fatherName', "Father's/Husband's Name", 'text', "Enter father's or husband's name", true)}
+                  </div>
+                  
+                  <div>
+                    {renderInputField('address', "Address", 'text', "Enter full address", true, true)}
+                  </div>
+                  
+                  {/* Income Certificate Specific Fields */}
+                  {formData.certificateType === 'Income' && (
+                    <div>
+                      {renderInputField('income', "Declared Annual Income", 'text', "Enter annual income (e.g., ₹50,000)", true)}
+                    </div>
                   )}
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-dark-label mb-1">
-                    Place *
-                  </label>
-                  <input
-                    type="text"
-                    name="place"
-                    value={formData.place}
-                    onChange={handleInputChange}
-                    className={`w-full px-4 py-2.5 sm:py-3 rounded-xl border text-gray-800 transition-all duration-300 ${
-                      errors.place ? 'border-red-500 shake' : 'border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500'
-                    }`}
-                    placeholder="Enter place"
-                    aria-required="true"
-                  />
-                  {errors.place && (
-                    <p className="mt-1 text-sm text-red-600 animate-shake" role="alert">{errors.place}</p>
+                  
+                  {/* Caste Certificate Specific Fields */}
+                  {formData.certificateType === 'Caste' && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        {renderInputField('caste', "Caste", 'text', "Enter caste", true)}
+                      </div>
+                      
+                      <div>
+                        {renderInputField('subCaste', "Sub-caste", 'text', "Enter sub-caste (if applicable)")}
+                      </div>
+                    </div>
                   )}
-                </div>
-              </div>
+                  
+                  {/* Residence Certificate Specific Fields */}
+                  {formData.certificateType === 'Residence' && (
+                    <>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          {renderInputField('ward', "Ward", 'text', "Enter ward", true)}
+                        </div>
+                        
+                        <div>
+                          {renderInputField('village', "Village", 'text', "Enter village", true)}
+                        </div>
+                        
+                        <div>
+                          {renderInputField('district', "District", 'text', "Enter district", true)}
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-dark-label mb-1">
+                            Issue Date
+                          </label>
+                          <input
+                            type="date"
+                            name="issueDate"
+                            value={formData.issueDate}
+                            onChange={handleInputChange}
+                            className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-gray-300 text-gray-800 transition-all duration-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                          />
+                        </div>
+                        
+                        <div>
+                          {renderInputField('validity', "Validity (Years)", 'number', "Enter validity period")}
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </>
+              )}
+              
+              {/* Birth and Death Certificate Fields */}
+              {(formData.certificateType === 'Birth' || formData.certificateType === 'Death') && (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      {renderInputField('fatherName', formData.certificateType === 'Birth' ? "Father's Name" : "Father's/Husband's Name", 'text', formData.certificateType === 'Birth' ? 'Enter father\'s name' : 'Enter father\'s or husband\'s name')}
+                    </div>
+                    
+                    <div>
+                      {formData.certificateType === 'Birth' ? (
+                        renderInputField('motherName', "Mother's Name", 'text', "Enter mother's name")
+                      ) : (
+                        <div></div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-dark-label mb-1">
+                        Date <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="date"
+                        name="date"
+                        value={formData.date}
+                        onChange={handleInputChange}
+                        className={`w-full px-4 py-2.5 sm:py-3 rounded-xl border text-gray-800 transition-all duration-300 ${
+                          errors.date ? 'border-red-500 shake' : 'border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500'
+                        }`}
+                        aria-required="true"
+                      />
+                      {errors.date && (
+                        <p className="mt-1 text-sm text-red-600 animate-shake" role="alert">{errors.date}</p>
+                      )}
+                    </div>
+                    
+                    <div>
+                      {renderInputField('place', "Place", 'text', "Enter place", true)}
+                    </div>
+                  </div>
+                </>
+              )}
               
               <div>
                 <label className="block text-sm font-medium text-dark-label mb-1">

@@ -80,45 +80,112 @@ const generateCertificatePDF = async (application: any): Promise<string> => {
       // Certificate body with clean, well-aligned fields
       const contentStartY = 130;
       
-      // "This is to certify that" section
-      doc.fontSize(11);
-      doc.text('This is to certify that', 0, contentStartY, { width: doc.page.width, align: 'center' });
-      
-      // Applicant name - larger and bold
-      doc.fontSize(16);
-      doc.font('Helvetica-Bold');
-      doc.text(application.applicantName, 0, contentStartY + 20, { width: doc.page.width, align: 'center' });
-      
-      // Parents' names if available
-      if (application.fatherName || application.motherName) {
-        let parentText = '';
-        if (application.fatherName && application.motherName) {
-          parentText = `Son/Daughter of ${application.fatherName} and ${application.motherName}`;
-        } else if (application.fatherName) {
-          parentText = `Son/Daughter of ${application.fatherName}`;
-        } else if (application.motherName) {
-          parentText = `Son/Daughter of ${application.motherName}`;
-        }
+      // Certificate-specific content
+      if (application.certificateType === 'Marriage') {
+        // "This is to certify that" section
+        doc.fontSize(11);
+        doc.text('This is to certify that', 0, contentStartY, { width: doc.page.width, align: 'center' });
         
+        // Bride and Groom names - larger and bold
+        doc.fontSize(16);
+        doc.font('Helvetica-Bold');
+        doc.text(`${application.brideName} and ${application.groomName}`, 0, contentStartY + 20, { width: doc.page.width, align: 'center' });
+        
+        // Marriage event description
         doc.fontSize(11);
         doc.font('Helvetica');
-        doc.text(parentText, 0, contentStartY + 38, { width: doc.page.width, align: 'center' });
+        doc.text('were married on', 0, contentStartY + 40, { width: doc.page.width, align: 'center' });
+        
+        // Date and place information
+        doc.text(`${new Date(application.date).toDateString()}`, 0, contentStartY + 58, { width: doc.page.width, align: 'center' });
+        doc.text(`at ${application.place}`, 0, contentStartY + 76, { width: doc.page.width, align: 'center' });
+        
+        // Witnesses
+        doc.text('Witnesses:', 0, contentStartY + 96, { width: doc.page.width, align: 'center' });
+        doc.text(application.witnessNames, 0, contentStartY + 114, { width: doc.page.width, align: 'center' });
+        
+        // Registration number
+        doc.text(`Registration No: ${application.registrationNo}`, 0, contentStartY + 134, { width: doc.page.width, align: 'center' });
+      } 
+      else if (application.certificateType === 'Income' || 
+               application.certificateType === 'Caste' || 
+               application.certificateType === 'Residence') {
+        // "This is to certify that" section
+        doc.fontSize(11);
+        doc.text('This is to certify that', 0, contentStartY, { width: doc.page.width, align: 'center' });
+        
+        // Applicant name - larger and bold
+        doc.fontSize(16);
+        doc.font('Helvetica-Bold');
+        doc.text(application.applicantName, 0, contentStartY + 20, { width: doc.page.width, align: 'center' });
+        
+        // Father/Husband name
+        if (application.fatherName) {
+          doc.fontSize(11);
+          doc.font('Helvetica');
+          doc.text(`Father/Husband: ${application.fatherName}`, 0, contentStartY + 40, { width: doc.page.width, align: 'center' });
+        }
+        
+        // Address
+        if (application.address) {
+          doc.text(`Address: ${application.address}`, 0, contentStartY + 58, { width: doc.page.width, align: 'center' });
+        }
+        
+        // Certificate-specific details
+        if (application.certificateType === 'Income') {
+          doc.text(`has declared an annual income of ${application.income}`, 0, contentStartY + 76, { width: doc.page.width, align: 'center' });
+        } else if (application.certificateType === 'Caste') {
+          doc.text(`belongs to ${application.caste}${application.subCaste ? ` (${application.subCaste})` : ''} caste`, 0, contentStartY + 76, { width: doc.page.width, align: 'center' });
+        } else if (application.certificateType === 'Residence') {
+          doc.text(`is a permanent resident of Ward ${application.ward}, Village ${application.village}, District ${application.district}`, 0, contentStartY + 76, { width: doc.page.width, align: 'center' });
+        }
+      } 
+      else {
+        // Birth and Death certificates (existing logic)
+        // "This is to certify that" section
+        doc.fontSize(11);
+        doc.text('This is to certify that', 0, contentStartY, { width: doc.page.width, align: 'center' });
+        
+        // Applicant name - larger and bold
+        doc.fontSize(16);
+        doc.font('Helvetica-Bold');
+        doc.text(application.applicantName, 0, contentStartY + 20, { width: doc.page.width, align: 'center' });
+        
+        // Parents' names if available
+        if (application.fatherName || application.motherName) {
+          let parentText = '';
+          if (application.fatherName && application.motherName) {
+            parentText = `Son/Daughter of ${application.fatherName} and ${application.motherName}`;
+          } else if (application.fatherName) {
+            parentText = `Son/Daughter of ${application.fatherName}`;
+          } else if (application.motherName) {
+            parentText = `Son/Daughter of ${application.motherName}`;
+          }
+          
+          doc.fontSize(11);
+          doc.font('Helvetica');
+          doc.text(parentText, 0, contentStartY + 38, { width: doc.page.width, align: 'center' });
+        }
+        
+        // Certificate event description
+        const parentOffset = application.fatherName || application.motherName ? 18 : 0;
+        doc.fontSize(11);
+        doc.text(`was involved in a ${application.certificateType.toLowerCase()} event`, 0, contentStartY + 38 + parentOffset, { width: doc.page.width, align: 'center' });
+        
+        // Date and place information
+        doc.fontSize(11);
+        doc.text(`on ${new Date(application.date).toDateString()}`, 0, contentStartY + 56 + parentOffset, { width: doc.page.width, align: 'center' });
+        doc.text(`at ${application.place}`, 0, contentStartY + 74 + parentOffset, { width: doc.page.width, align: 'center' });
       }
       
-      // Certificate event description
-      const parentOffset = application.fatherName || application.motherName ? 18 : 0;
-      doc.fontSize(11);
-      doc.text(`was involved in a ${application.certificateType.toLowerCase()} event`, 0, contentStartY + 38 + parentOffset, { width: doc.page.width, align: 'center' });
-      
-      // Date and place information
-      doc.fontSize(11);
-      doc.text(`on ${new Date(application.date).toDateString()}`, 0, contentStartY + 56 + parentOffset, { width: doc.page.width, align: 'center' });
-      doc.text(`at ${application.place}`, 0, contentStartY + 74 + parentOffset, { width: doc.page.width, align: 'center' });
-      
       // Application ID and status
+      const startY = application.certificateType === 'Marriage' ? contentStartY + 160 : 
+                    (application.certificateType === 'Income' || application.certificateType === 'Caste' || application.certificateType === 'Residence') ? contentStartY + 100 : 
+                    contentStartY + 120;
+      
       doc.fontSize(9);
-      doc.text(`Application ID: ${application._id}`, 0, contentStartY + 100 + parentOffset, { width: doc.page.width, align: 'center' });
-      doc.text(`Status: ${application.status}`, 0, contentStartY + 115 + parentOffset, { width: doc.page.width, align: 'center' });
+      doc.text(`Application ID: ${application._id}`, 0, startY, { width: doc.page.width, align: 'center' });
+      doc.text(`Status: ${application.status}`, 0, startY + 15, { width: doc.page.width, align: 'center' });
       
       // Add seal in bottom-right corner to match frontend
       const sealX = doc.page.width - 65;
@@ -214,6 +281,39 @@ const generateCertificateJPG = async (application: any): Promise<string> => {
       .jpeg({ quality: 90 })
       .toBuffer();
       
+      // Certificate-specific content for placeholder
+      let certificateContent = '';
+      if (application.certificateType === 'Marriage') {
+        certificateContent = `
+          <text x="400" y="250" font-family="Arial" font-size="20" fill="#374151" text-anchor="middle">${application.brideName} and ${application.groomName}</text>
+          <text x="400" y="300" font-family="Arial" font-size="14" fill="#374151" text-anchor="middle">were married on</text>
+          <text x="400" y="320" font-family="Arial" font-size="14" fill="#374151" text-anchor="middle">${new Date(application.date).toDateString()} at ${application.place}</text>
+        `;
+      } else if (application.certificateType === 'Income' || 
+                 application.certificateType === 'Caste' || 
+                 application.certificateType === 'Residence') {
+        certificateContent = `
+          <text x="400" y="250" font-family="Arial" font-size="20" fill="#374151" text-anchor="middle">${application.applicantName}</text>
+          <text x="400" y="280" font-family="Arial" font-size="14" fill="#374151" text-anchor="middle">Father/Husband: ${application.fatherName || ''}</text>
+        `;
+        
+        if (application.certificateType === 'Income') {
+          certificateContent += `<text x="400" y="310" font-family="Arial" font-size="14" fill="#374151" text-anchor="middle">has declared an annual income of ${application.income}</text>`;
+        } else if (application.certificateType === 'Caste') {
+          certificateContent += `<text x="400" y="310" font-family="Arial" font-size="14" fill="#374151" text-anchor="middle">belongs to ${application.caste}${application.subCaste ? ` (${application.subCaste})` : ''} caste</text>`;
+        } else if (application.certificateType === 'Residence') {
+          certificateContent += `<text x="400" y="310" font-family="Arial" font-size="14" fill="#374151" text-anchor="middle">is a permanent resident of Ward ${application.ward}, Village ${application.village}, District ${application.district}</text>`;
+        }
+      } else {
+        // Birth and Death certificates
+        certificateContent = `
+          <text x="400" y="250" font-family="Arial" font-size="20" fill="#374151" text-anchor="middle">${application.applicantName}</text>
+          <text x="400" y="300" font-family="Arial" font-size="14" fill="#374151" text-anchor="middle">This is to certify that</text>
+          <text x="400" y="320" font-family="Arial" font-size="14" fill="#374151" text-anchor="middle">was involved in a ${application.certificateType.toLowerCase()} event</text>
+          <text x="400" y="340" font-family="Arial" font-size="14" fill="#374151" text-anchor="middle">on ${new Date(application.date).toDateString()} at ${application.place}</text>
+        `;
+      }
+      
       await sharp(placeholderBuffer)
         .composite([
           // Add text to the placeholder
@@ -223,10 +323,7 @@ const generateCertificateJPG = async (application: any): Promise<string> => {
                 <rect x="20" y="20" width="760" height="560" fill="none" stroke="#1e40af" stroke-width="2"/>
                 <text x="400" y="100" font-family="Arial" font-size="36" fill="#1e40af" text-anchor="middle">CERTIFICATE</text>
                 <text x="400" y="150" font-family="Arial" font-size="24" fill="#1e40af" text-anchor="middle">OF ${application.certificateType.toUpperCase()}</text>
-                <text x="400" y="250" font-family="Arial" font-size="20" fill="#374151" text-anchor="middle">${application.applicantName}</text>
-                <text x="400" y="300" font-family="Arial" font-size="14" fill="#374151" text-anchor="middle">This is to certify that</text>
-                <text x="400" y="350" font-family="Arial" font-size="14" fill="#374151" text-anchor="middle">was involved in a ${application.certificateType.toLowerCase()} event</text>
-                <text x="400" y="400" font-family="Arial" font-size="14" fill="#374151" text-anchor="middle">on ${new Date(application.date).toDateString()} at ${application.place}</text>
+                ${certificateContent}
                 <text x="400" y="500" font-family="Arial" font-size="10" fill="#374151" text-anchor="middle">Generated by Digital e-Gram Panchayat</text>
                 <text x="400" y="550" font-family="Arial" font-size="8" fill="#374151" text-anchor="middle">Official Document</text>
               </svg>`
@@ -253,22 +350,70 @@ const generateMockId = () => {
 
 export const applyForCertificate = async (req: Request, res: Response) => {
   try {
-    const { applicantName, fatherName, motherName, certificateType, date, place, supportingFiles, declaration } = req.body;
+    // Log the incoming request body for debugging
+    console.log('=== Certificate Application Debug Info ===');
+    console.log('Request Body:', JSON.stringify(req.body, null, 2));
+    const { 
+      applicantName, 
+      fatherName, 
+      motherName, 
+      certificateType, 
+      date, 
+      place,
+      // Marriage certificate fields
+      brideName,
+      groomName,
+      witnessNames,
+      registrationNo,
+      // Income/Caste/Residence certificate fields
+      address,
+      income,
+      caste,
+      subCaste,
+      ward,
+      village,
+      district,
+      issueDate,
+      validity,
+      supportingFiles, 
+      declaration 
+    } = req.body;
     
     // Validate required fields
-    if (!applicantName || !certificateType || !date || !place) {
+    
+    // For Marriage, Birth, and Death certificates, date and place are required
+    // For Income, Caste, and Residence certificates, date and place are not required in the form
+    const isDateAndPlaceRequired = ['Marriage', 'Birth', 'Death'].includes(certificateType);
+    
+    console.log('Validation check - applicantName:', applicantName, 'certificateType:', certificateType, 'place:', place, 'isDateAndPlaceRequired:', isDateAndPlaceRequired, 'date:', date);
+    
+    // Validate basic required fields
+    // For Marriage, Birth, and Death certificates, both applicantName, certificateType, date, and place are required
+    // For Income, Caste, and Residence certificates, only applicantName and certificateType are required at this stage
+    // Additional validations for specific certificate types are done later
+    if (!applicantName || !applicantName.trim() || !certificateType) {
+      console.log('Basic validation failed - missing applicantName or certificateType');
       return res.status(400).json({ 
         success: false, 
         message: 'All required fields must be provided' 
       });
     }
     
-    // Validate certificate type (only allow Birth and Death)
-    const validCertificateTypes = ['Birth', 'Death'];
+    // For Marriage, Birth, and Death certificates, date and place are also required at this stage
+    if (isDateAndPlaceRequired && (!date || date.trim() === '' || !place || place.trim() === '')) {
+      console.log('Basic validation failed - missing date or place for certificate type that requires them');
+      return res.status(400).json({ 
+        success: false, 
+        message: 'All required fields must be provided' 
+      });
+    }
+    
+    // Validate certificate type (allow all new certificate types)
+    const validCertificateTypes = ['Birth', 'Death', 'Marriage', 'Income', 'Caste', 'Residence'];
     if (!validCertificateTypes.includes(certificateType)) {
       return res.status(400).json({ 
         success: false, 
-        message: 'Invalid certificate type. Only Birth and Death certificates are available.' 
+        message: 'Invalid certificate type.' 
       });
     }
     
@@ -280,16 +425,56 @@ export const applyForCertificate = async (req: Request, res: Response) => {
       });
     }
     
-    // Validate that place is a string
-    if (typeof place !== 'string') {
+    // Validate that place is a string when provided
+    if (place && typeof place !== 'string') {
       return res.status(400).json({ 
         success: false, 
         message: 'Place must be a valid text' 
       });
     }
     
+    // Certificate-specific validations
+    if (certificateType === 'Marriage') {
+      if (!brideName || !brideName.trim() || !groomName || !groomName.trim() || !witnessNames || !witnessNames.trim() || !registrationNo || !registrationNo.trim()) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'All required fields for Marriage certificate must be provided' 
+        });
+      }
+    } else if (certificateType === 'Income') {
+      if (!fatherName || !fatherName.trim() || !address || !address.trim() || !income || !income.trim()) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'All required fields for Income certificate must be provided' 
+        });
+      }
+    } else if (certificateType === 'Caste') {
+      if (!fatherName || !fatherName.trim() || !address || !address.trim() || !caste || !caste.trim()) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'All required fields for Caste certificate must be provided' 
+        });
+      }
+    } else if (certificateType === 'Residence') {
+      if (!fatherName || !fatherName.trim() || !address || !address.trim() || !ward || !ward.trim() || !village || !village.trim() || !district || !district.trim()) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'All required fields for Residence certificate must be provided' 
+        });
+      }
+    } else if (certificateType === 'Birth' || certificateType === 'Death') {
+      // For Birth and Death certificates, date and place are required
+      if (!date || !date.trim() || !place || !place.trim()) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'All required fields for Birth/Death certificate must be provided' 
+        });
+      }
+    }
+    
     // Validate declaration
-    if (!declaration) {
+    console.log('Declaration value:', declaration, 'Type:', typeof declaration);
+    if (declaration !== true) {
       return res.status(400).json({ 
         success: false, 
         message: 'You must declare that the information is correct' 
@@ -297,14 +482,33 @@ export const applyForCertificate = async (req: Request, res: Response) => {
     }
     
     // Create new certificate application
+    // For Income, Caste, and Residence certificates, use current date if no date is provided
+    const isDateRequiredForApp = ['Marriage', 'Birth', 'Death'].includes(certificateType);
+    const applicationDate = isDateRequiredForApp && date ? new Date(date) : new Date();
+    
     const newApplication = {
       _id: generateMockId(),
       applicantName,
       fatherName,
       motherName,
       certificateType,
-      date: new Date(date),
-      place,
+      date: applicationDate,
+      place: place || '', // Use empty string if place is not provided
+      // Marriage certificate fields
+      brideName,
+      groomName,
+      witnessNames,
+      registrationNo,
+      // Income/Caste/Residence certificate fields
+      address,
+      income,
+      caste,
+      subCaste,
+      ward,
+      village,
+      district,
+      issueDate: issueDate ? new Date(issueDate) : undefined,
+      validity,
       supportingFiles: supportingFiles || [],
       status: 'Submitted',
       createdAt: new Date()

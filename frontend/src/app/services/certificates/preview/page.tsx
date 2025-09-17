@@ -16,6 +16,21 @@ interface CertificateData {
   date: string;
   place: string;
   status: string;
+  // Marriage certificate fields
+  brideName?: string;
+  groomName?: string;
+  witnessNames?: string;
+  registrationNo?: string;
+  // Income/Caste/Residence certificate fields
+  address?: string;
+  income?: string;
+  caste?: string;
+  subCaste?: string;
+  ward?: string;
+  village?: string;
+  district?: string;
+  issueDate?: string;
+  validity?: string;
 }
 
 const CertificatePreviewContent = () => {
@@ -311,10 +326,10 @@ const CertificatePreviewContent = () => {
                   Retry
                 </button>
                 <button
-                  onClick={() => router.push('/services/certificates/apply')}
+                  onClick={() => router.push('/services/certificates')}
                   className="bg-gray-200 text-gray-800 px-6 py-3 rounded-xl hover:bg-gray-300 transition-colors transform hover:scale-105 duration-300 focus:outline-none focus:ring-2 focus:ring-gray-500"
                 >
-                  Apply for New Certificate
+                  Back to Certificates
                 </button>
               </div>
             </div>
@@ -333,12 +348,12 @@ const CertificatePreviewContent = () => {
           <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-lg p-6 sm:p-8">
             <div className="text-center">
               <h1 className="text-2xl font-bold text-gray-800 mb-2">Certificate Not Found</h1>
-              <p className="text-gray-600 mb-6">The certificate you&apos;re looking for could not be found.</p>
+              <p className="text-gray-600 mb-6">The certificate you're looking for could not be found.</p>
               <button
-                onClick={() => router.push('/services/certificates/apply')}
+                onClick={() => router.push('/services/certificates')}
                 className="bg-emerald-600 text-white px-6 py-3 rounded-xl hover:bg-emerald-700 transition-colors transform hover:scale-105 duration-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               >
-                Apply for New Certificate
+                Back to Certificates
               </button>
             </div>
           </div>
@@ -347,6 +362,26 @@ const CertificatePreviewContent = () => {
       </div>
     );
   }
+
+  // Function to generate certificate number based on type
+  const getCertificateNumber = () => {
+    const prefix = certificateData.certificateType === 'Birth' ? 'BC' :
+                  certificateData.certificateType === 'Death' ? 'DC' :
+                  certificateData.certificateType === 'Marriage' ? 'MC' :
+                  certificateData.certificateType === 'Income' ? 'IC' :
+                  certificateData.certificateType === 'Caste' ? 'CC' : 
+                  certificateData.certificateType === 'Residence' ? 'RC' : 'XX';
+    return `${prefix}-2025-${certificateData._id.substring(0, 5).toUpperCase()}`;
+  };
+
+  // Function to format date based on certificate type
+  const formatDate = () => {
+    return new Date(certificateData.date).toLocaleDateString('en-IN', { 
+      day: 'numeric', 
+      month: 'long', 
+      year: 'numeric' 
+    });
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-off-white">
@@ -429,143 +464,508 @@ const CertificatePreviewContent = () => {
             
             {/* Certificate Preview Area - Optimized for better flow and responsiveness */}
             <div className="p-4 sm:p-6">
-              <div className="relative border-2 border-gray-300 rounded-xl p-4 sm:p-6 bg-gradient-to-br from-blue-50 to-indigo-50 shadow-lg max-w-2xl mx-auto">
-                {/* Elegant border/frame around page */}
-                <div className="absolute inset-0 border-2 sm:border-4 border-blue-800 rounded-xl pointer-events-none"></div>
-                
+              <div className="relative border-4 border-double border-blue-800 rounded-xl p-4 sm:p-6 bg-gradient-to-br from-amber-50 to-cream-100 shadow-lg max-w-2xl mx-auto">
                 {/* Watermark */}
-                <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none">
-                  <span className="text-xl sm:text-2xl md:text-3xl font-serif font-bold text-blue-200 transform -rotate-12">
-                    Digital e-Gram Panchayat - Official
+                <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none">
+                  <span className="text-4xl font-serif font-bold text-blue-800 transform -rotate-12">
+                    DIGITAL E-PANCHAYAT
                   </span>
                 </div>
                 
                 {/* Government Seal */}
-                <div className="absolute top-3 sm:top-4 right-3 sm:right-4 w-12 h-12 sm:w-16 sm:h-16 bg-amber-800 rounded-full flex items-center justify-center border-2 sm:border-4 border-amber-900 shadow-lg animate-float">
-                  <div className="text-center text-white text-[0.5rem] sm:text-xs font-semibold">
-                    <div>Digital</div>
-                    <div>e-Gram</div>
-                    <div>Panchayat</div>
-                    <div>Official</div>
-                    <div>Seal</div>
+                <div className="absolute top-4 right-4 w-16 h-16 bg-red-700 rounded-full flex items-center justify-center border-4 border-red-900 shadow-lg animate-float">
+                  <div className="text-center text-white text-xs font-bold">
+                    <div>OFFICIAL</div>
+                    <div>SEAL</div>
                   </div>
                 </div>
                 
                 {/* Certificate Content */}
                 <div className="relative z-10">
+                  {/* Header with Panchayat Logo and Name */}
                   <div className="text-center mb-6 sm:mb-8">
-                    <h2 className="text-2xl sm:text-3xl font-serif font-bold text-blue-800 mb-1">CERTIFICATE</h2>
-                    <p className="text-lg sm:text-xl font-serif text-gray-700">OF {certificateData.certificateType.toUpperCase()}</p>
+                    <div className="flex justify-center mb-2">
+                      <div className="bg-gray-200 border-2 border-dashed rounded-xl w-16 h-16" />
+                    </div>
+                    <h2 className="text-2xl sm:text-3xl font-serif font-bold text-blue-900 mb-1">
+                      {certificateData.certificateType} Certificate
+                    </h2>
+                    <p className="text-lg sm:text-xl font-serif text-gray-700">Digital E-Panchayat</p>
+                    
+                    {/* Certificate Number */}
+                    <div className="mt-3 p-2 bg-blue-50 rounded-lg inline-block">
+                      <p className="text-sm text-gray-600">Certificate No: 
+                        <span className="font-mono font-bold ml-1">
+                          {getCertificateNumber()}
+                        </span>
+                      </p>
+                    </div>
                     
                     {/* Decorative line under title */}
-                    <div className="w-16 sm:w-24 h-0.5 bg-blue-800 mx-auto mt-2 sm:mt-3"></div>
+                    <div className="w-24 h-0.5 bg-blue-800 mx-auto mt-4"></div>
                   </div>
                   
                   <div className="mb-6 sm:mb-8">
-                    <p className="text-center text-gray-700 text-sm sm:text-base mb-4 sm:mb-6">
-                      This is to certify that
-                    </p>
-                    
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        value={editData.applicantName || ''}
-                        onChange={(e) => handleEditChange('applicantName', e.target.value)}
-                        className="text-xl sm:text-2xl font-serif font-bold text-center text-gray-800 border-b-2 border-emerald-500 py-1 w-full mx-auto max-w-md transition-all duration-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                        aria-label="Edit applicant name"
-                      />
-                    ) : (
-                      <h3 className="text-xl sm:text-2xl font-serif font-bold text-center text-gray-800 mb-4 sm:mb-6 animate-fade-in">
-                        {certificateData.applicantName}
-                      </h3>
-                    )}
-                    
-                    {/* Parents' names if available */}
-                    {(certificateData.fatherName || certificateData.motherName) && (
-                      <div className="text-center text-gray-700 mb-4 sm:mb-6">
-                        {isEditing ? (
-                          <div className="flex flex-col sm:flex-row justify-center gap-2 mt-2">
-                            <input
-                              type="text"
-                              value={editData.fatherName || ''}
-                              onChange={(e) => handleEditChange('fatherName', e.target.value)}
-                              placeholder="Father&apos;s Name"
-                              className="border-b-2 border-emerald-500 py-1 text-gray-800 text-center text-sm sm:text-base transition-all duration-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                              aria-label="Edit father&apos;s name"
-                            />
-                            <span className="self-center text-sm sm:text-base">and</span>
-                            <input
-                              type="text"
-                              value={editData.motherName || ''}
-                              onChange={(e) => handleEditChange('motherName', e.target.value)}
-                              placeholder="Mother&apos;s Name"
-                              className="border-b-2 border-emerald-500 py-1 text-gray-800 text-center text-sm sm:text-base transition-all duration-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                              aria-label="Edit mother&apos;s name"
-                            />
-                          </div>
-                        ) : (
-                          <div className="mt-1 animate-fade-in">
-                            {certificateData.fatherName && certificateData.motherName ? (
-                              <p className="text-sm sm:text-base">Son/Daughter of <span className="font-semibold">{certificateData.fatherName}</span> and <span className="font-semibold">{certificateData.motherName}</span></p>
-                            ) : certificateData.fatherName ? (
-                              <p className="text-sm sm:text-base">Son/Daughter of <span className="font-semibold">{certificateData.fatherName}</span></p>
-                            ) : (
-                              <p className="text-sm sm:text-base">Son/Daughter of <span className="font-semibold">{certificateData.motherName}</span></p>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                    
-                    <p className="text-center text-gray-700 text-sm sm:text-base mb-2 sm:mb-3">
-                      was involved in a {certificateData.certificateType.toLowerCase()} event
-                    </p>
-                    
-                    <div className="flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
-                      <div className="flex items-center">
-                        <span className="text-gray-700 text-sm sm:text-base mr-1 sm:mr-2">on</span>
-                        {isEditing ? (
-                          <input
-                            type="date"
-                            value={editData.date ? new Date(editData.date).toISOString().split('T')[0] : ''}
-                            onChange={(e) => handleEditChange('date', e.target.value)}
-                            className="border-b-2 border-emerald-500 py-1 text-gray-800 text-sm sm:text-base transition-all duration-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                            aria-label="Edit date"
-                          />
-                        ) : (
-                          <span className="font-serif font-semibold text-gray-800 text-sm sm:text-base animate-fade-in">
-                            {new Date(certificateData.date).toDateString()}
-                          </span>
-                        )}
-                      </div>
-                      
-                      <div className="flex items-center">
-                        <span className="text-gray-700 text-sm sm:text-base mr-1 sm:mr-2">at</span>
+                    {/* Certificate specific content */}
+                    {certificateData.certificateType === 'Birth' && (
+                      <div className="text-center">
+                        <p className="text-gray-700 text-base mb-4">
+                          This is to certify that
+                        </p>
+                        
                         {isEditing ? (
                           <input
                             type="text"
-                            value={editData.place || ''}
-                            onChange={(e) => handleEditChange('place', e.target.value)}
-                            className="border-b-2 border-emerald-500 py-1 text-gray-800 text-sm sm:text-base transition-all duration-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                            aria-label="Edit place"
+                            value={editData.applicantName || ''}
+                            onChange={(e) => handleEditChange('applicantName', e.target.value)}
+                            className="text-xl sm:text-2xl font-serif font-bold text-center text-gray-800 border-b-2 border-emerald-500 py-1 w-full mx-auto max-w-md transition-all duration-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                            aria-label="Edit child's name"
                           />
                         ) : (
-                          <span className="font-serif font-semibold text-gray-800 text-sm sm:text-base animate-fade-in">
-                            {certificateData.place}
-                          </span>
+                          <h3 className="text-xl sm:text-2xl font-serif font-bold text-center text-gray-800 mb-4 animate-fade-in">
+                            {certificateData.applicantName}
+                          </h3>
                         )}
+                        
+                        <p className="text-gray-700 text-base mb-2">
+                          was born on
+                        </p>
+                        
+                        <div className="flex flex-col sm:flex-row justify-center items-center gap-3 mb-2">
+                          {isEditing ? (
+                            <input
+                              type="date"
+                              value={editData.date ? new Date(editData.date).toISOString().split('T')[0] : ''}
+                              onChange={(e) => handleEditChange('date', e.target.value)}
+                              className="border-b-2 border-emerald-500 py-1 text-gray-800 text-base transition-all duration-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                              aria-label="Edit date of birth"
+                            />
+                          ) : (
+                            <span className="font-serif font-semibold text-gray-800 text-base animate-fade-in">
+                              {formatDate()}
+                            </span>
+                          )}
+                        </div>
+                        
+                        <p className="text-gray-700 text-base mb-2">
+                          at
+                        </p>
+                        
+                        <div className="flex flex-col sm:flex-row justify-center items-center gap-3 mb-4">
+                          {isEditing ? (
+                            <input
+                              type="text"
+                              value={editData.place || ''}
+                              onChange={(e) => handleEditChange('place', e.target.value)}
+                              className="border-b-2 border-emerald-500 py-1 text-gray-800 text-base transition-all duration-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                              aria-label="Edit place of birth"
+                            />
+                          ) : (
+                            <span className="font-serif font-semibold text-gray-800 text-base animate-fade-in">
+                              {certificateData.place}
+                            </span>
+                          )}
+                        </div>
+                        
+                        <div className="text-gray-700 mb-4">
+                          {isEditing ? (
+                            <div className="flex flex-col sm:flex-row justify-center gap-2 mt-2">
+                              <input
+                                type="text"
+                                value={editData.fatherName || ''}
+                                onChange={(e) => handleEditChange('fatherName', e.target.value)}
+                                placeholder="Father's Name"
+                                className="border-b-2 border-emerald-500 py-1 text-gray-800 text-base transition-all duration-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                                aria-label="Edit father's name"
+                              />
+                              <span className="self-center text-base">and</span>
+                              <input
+                                type="text"
+                                value={editData.motherName || ''}
+                                onChange={(e) => handleEditChange('motherName', e.target.value)}
+                                placeholder="Mother's Name"
+                                className="border-b-2 border-emerald-500 py-1 text-gray-800 text-base transition-all duration-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                                aria-label="Edit mother's name"
+                              />
+                            </div>
+                          ) : (
+                            <div className="mt-1 animate-fade-in">
+                              {certificateData.fatherName && certificateData.motherName ? (
+                                <p className="text-base">to <span className="font-semibold">{certificateData.fatherName}</span> and <span className="font-semibold">{certificateData.motherName}</span></p>
+                              ) : certificateData.fatherName ? (
+                                <p className="text-base">to <span className="font-semibold">{certificateData.fatherName}</span></p>
+                              ) : (
+                                <p className="text-base">to <span className="font-semibold">{certificateData.motherName}</span></p>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mb-6 sm:mb-8 text-gray-700">
-                    <div className="bg-blue-50 p-2 sm:p-3 rounded-lg transition-all duration-300 hover:shadow-md">
-                      <p className="text-xs sm:text-sm text-gray-600">Application ID</p>
-                      <p className="font-mono text-xs sm:text-sm font-semibold truncate">{certificateData._id}</p>
-                    </div>
-                    <div className="bg-blue-50 p-2 sm:p-3 rounded-lg transition-all duration-300 hover:shadow-md">
-                      <p className="text-xs sm:text-sm text-gray-600">Status</p>
-                      <p className="font-semibold text-sm sm:text-base">{certificateData.status}</p>
+                    )}
+                    
+                    {certificateData.certificateType === 'Death' && (
+                      <div className="text-center">
+                        <p className="text-gray-700 text-base mb-4">
+                          This is to certify that
+                        </p>
+                        
+                        {isEditing ? (
+                          <input
+                            type="text"
+                            value={editData.applicantName || ''}
+                            onChange={(e) => handleEditChange('applicantName', e.target.value)}
+                            className="text-xl sm:text-2xl font-serif font-bold text-center text-gray-800 border-b-2 border-emerald-500 py-1 w-full mx-auto max-w-md transition-all duration-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                            aria-label="Edit deceased person's name"
+                          />
+                        ) : (
+                          <h3 className="text-xl sm:text-2xl font-serif font-bold text-center text-gray-800 mb-4 animate-fade-in">
+                            {certificateData.applicantName}
+                          </h3>
+                        )}
+                        
+                        <p className="text-gray-700 text-base mb-2">
+                          died on
+                        </p>
+                        
+                        <div className="flex flex-col sm:flex-row justify-center items-center gap-3 mb-2">
+                          {isEditing ? (
+                            <input
+                              type="date"
+                              value={editData.date ? new Date(editData.date).toISOString().split('T')[0] : ''}
+                              onChange={(e) => handleEditChange('date', e.target.value)}
+                              className="border-b-2 border-emerald-500 py-1 text-gray-800 text-base transition-all duration-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                              aria-label="Edit date of death"
+                            />
+                          ) : (
+                            <span className="font-serif font-semibold text-gray-800 text-base animate-fade-in">
+                              {formatDate()}
+                            </span>
+                          )}
+                        </div>
+                        
+                        <p className="text-gray-700 text-base mb-2">
+                          at
+                        </p>
+                        
+                        <div className="flex flex-col sm:flex-row justify-center items-center gap-3 mb-4">
+                          {isEditing ? (
+                            <input
+                              type="text"
+                              value={editData.place || ''}
+                              onChange={(e) => handleEditChange('place', e.target.value)}
+                              className="border-b-2 border-emerald-500 py-1 text-gray-800 text-base transition-all duration-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                              aria-label="Edit place of death"
+                            />
+                          ) : (
+                            <span className="font-serif font-semibold text-gray-800 text-base animate-fade-in">
+                              {certificateData.place}
+                            </span>
+                          )}
+                        </div>
+                        
+                        <div className="text-gray-700 mb-4">
+                          {isEditing ? (
+                            <div className="flex flex-col sm:flex-row justify-center gap-2 mt-2">
+                              <input
+                                type="text"
+                                value={editData.fatherName || ''}
+                                onChange={(e) => handleEditChange('fatherName', e.target.value)}
+                                placeholder="Father's/Husband's Name"
+                                className="border-b-2 border-emerald-500 py-1 text-gray-800 text-base transition-all duration-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                                aria-label="Edit father's or husband's name"
+                              />
+                            </div>
+                          ) : (
+                            <div className="mt-1 animate-fade-in">
+                              {certificateData.fatherName && (
+                                <p className="text-base">Father/Husband: <span className="font-semibold">{certificateData.fatherName}</span></p>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {certificateData.certificateType === 'Marriage' && (
+                      <div className="text-center">
+                        <p className="text-gray-700 text-base mb-4">
+                          This is to certify that
+                        </p>
+                        
+                        {isEditing ? (
+                          <>
+                            <div className="flex flex-col sm:flex-row justify-center gap-4 mb-4">
+                              <input
+                                type="text"
+                                value={editData.brideName || ''}
+                                onChange={(e) => handleEditChange('brideName', e.target.value)}
+                                placeholder="Bride's Name"
+                                className="border-b-2 border-emerald-500 py-1 text-gray-800 text-base transition-all duration-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                                aria-label="Edit bride's name"
+                              />
+                              <span className="self-center text-base">and</span>
+                              <input
+                                type="text"
+                                value={editData.groomName || ''}
+                                onChange={(e) => handleEditChange('groomName', e.target.value)}
+                                placeholder="Groom's Name"
+                                className="border-b-2 border-emerald-500 py-1 text-gray-800 text-base transition-all duration-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                                aria-label="Edit groom's name"
+                              />
+                            </div>
+                          </>
+                        ) : (
+                          <h3 className="text-xl sm:text-2xl font-serif font-bold text-center text-gray-800 mb-4 animate-fade-in">
+                            {certificateData.brideName} and {certificateData.groomName}
+                          </h3>
+                        )}
+                        
+                        <p className="text-gray-700 text-base mb-2">
+                          were married on
+                        </p>
+                        
+                        <div className="flex flex-col sm:flex-row justify-center items-center gap-3 mb-2">
+                          {isEditing ? (
+                            <input
+                              type="date"
+                              value={editData.date ? new Date(editData.date).toISOString().split('T')[0] : ''}
+                              onChange={(e) => handleEditChange('date', e.target.value)}
+                              className="border-b-2 border-emerald-500 py-1 text-gray-800 text-base transition-all duration-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                              aria-label="Edit date of marriage"
+                            />
+                          ) : (
+                            <span className="font-serif font-semibold text-gray-800 text-base animate-fade-in">
+                              {formatDate()}
+                            </span>
+                          )}
+                        </div>
+                        
+                        <p className="text-gray-700 text-base mb-2">
+                          at
+                        </p>
+                        
+                        <div className="flex flex-col sm:flex-row justify-center items-center gap-3 mb-4">
+                          {isEditing ? (
+                            <input
+                              type="text"
+                              value={editData.place || ''}
+                              onChange={(e) => handleEditChange('place', e.target.value)}
+                              className="border-b-2 border-emerald-500 py-1 text-gray-800 text-base transition-all duration-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                              aria-label="Edit place of marriage"
+                            />
+                          ) : (
+                            <span className="font-serif font-semibold text-gray-800 text-base animate-fade-in">
+                              {certificateData.place}
+                            </span>
+                          )}
+                        </div>
+                        
+                        <div className="text-gray-700 mb-4">
+                          <p className="text-base mb-2">Witnesses:</p>
+                          {isEditing ? (
+                            <textarea
+                              value={editData.witnessNames || ''}
+                              onChange={(e) => handleEditChange('witnessNames', e.target.value)}
+                              placeholder="Enter witness names (one per line)"
+                              className="border-b-2 border-emerald-500 py-1 text-gray-800 text-base transition-all duration-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 w-full max-w-md mx-auto"
+                              aria-label="Edit witness names"
+                              rows={3}
+                            />
+                          ) : (
+                            <div className="font-semibold text-gray-800 text-base animate-fade-in whitespace-pre-line">
+                              {certificateData.witnessNames}
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="text-gray-700">
+                          <p className="text-base">Registration No:</p>
+                          {isEditing ? (
+                            <input
+                              type="text"
+                              value={editData.registrationNo || ''}
+                              onChange={(e) => handleEditChange('registrationNo', e.target.value)}
+                              className="border-b-2 border-emerald-500 py-1 text-gray-800 text-base transition-all duration-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                              aria-label="Edit registration number"
+                            />
+                          ) : (
+                            <p className="font-semibold text-gray-800 text-base animate-fade-in">
+                              {certificateData.registrationNo}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {(certificateData.certificateType === 'Income' || 
+                      certificateData.certificateType === 'Caste' || 
+                      certificateData.certificateType === 'Residence') && (
+                      <div className="text-center">
+                        <p className="text-gray-700 text-base mb-4">
+                          This is to certify that
+                        </p>
+                        
+                        {isEditing ? (
+                          <input
+                            type="text"
+                            value={editData.applicantName || ''}
+                            onChange={(e) => handleEditChange('applicantName', e.target.value)}
+                            className="text-xl sm:text-2xl font-serif font-bold text-center text-gray-800 border-b-2 border-emerald-500 py-1 w-full mx-auto max-w-md transition-all duration-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                            aria-label="Edit applicant name"
+                          />
+                        ) : (
+                          <h3 className="text-xl sm:text-2xl font-serif font-bold text-center text-gray-800 mb-4 animate-fade-in">
+                            {certificateData.applicantName}
+                          </h3>
+                        )}
+                        
+                        <div className="text-gray-700 mb-4">
+                          {isEditing ? (
+                            <div className="flex flex-col sm:flex-row justify-center gap-2 mt-2">
+                              <input
+                                type="text"
+                                value={editData.fatherName || ''}
+                                onChange={(e) => handleEditChange('fatherName', e.target.value)}
+                                placeholder="Father's/Husband's Name"
+                                className="border-b-2 border-emerald-500 py-1 text-gray-800 text-base transition-all duration-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                                aria-label="Edit father's or husband's name"
+                              />
+                            </div>
+                          ) : (
+                            <div className="mt-1 animate-fade-in">
+                              {certificateData.fatherName && (
+                                <p className="text-base mb-2">Father/Husband: <span className="font-semibold">{certificateData.fatherName}</span></p>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="text-gray-700 mb-4">
+                          {isEditing ? (
+                            <textarea
+                              value={editData.address || ''}
+                              onChange={(e) => handleEditChange('address', e.target.value)}
+                              placeholder="Address"
+                              className="border-b-2 border-emerald-500 py-1 text-gray-800 text-base transition-all duration-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 w-full max-w-md mx-auto"
+                              aria-label="Edit address"
+                              rows={3}
+                            />
+                          ) : (
+                            <div className="mt-1 animate-fade-in">
+                              {certificateData.address && (
+                                <p className="text-base mb-2">Address: <span className="font-semibold">{certificateData.address}</span></p>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="text-gray-700 mb-4">
+                          {certificateData.certificateType === 'Income' && (
+                            <>
+                              {isEditing ? (
+                                <input
+                                  type="text"
+                                  value={editData.income || ''}
+                                  onChange={(e) => handleEditChange('income', e.target.value)}
+                                  placeholder="Declared Annual Income"
+                                  className="border-b-2 border-emerald-500 py-1 text-gray-800 text-base transition-all duration-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                                  aria-label="Edit declared annual income"
+                                />
+                              ) : (
+                                <p className="text-base">has declared an annual income of <span className="font-semibold">{certificateData.income}</span></p>
+                              )}
+                            </>
+                          )}
+                          {certificateData.certificateType === 'Caste' && (
+                            <>
+                              {isEditing ? (
+                                <div className="flex flex-col sm:flex-row justify-center gap-2">
+                                  <input
+                                    type="text"
+                                    value={editData.caste || ''}
+                                    onChange={(e) => handleEditChange('caste', e.target.value)}
+                                    placeholder="Caste"
+                                    className="border-b-2 border-emerald-500 py-1 text-gray-800 text-base transition-all duration-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                                    aria-label="Edit caste"
+                                  />
+                                  <input
+                                    type="text"
+                                    value={editData.subCaste || ''}
+                                    onChange={(e) => handleEditChange('subCaste', e.target.value)}
+                                    placeholder="Sub-caste"
+                                    className="border-b-2 border-emerald-500 py-1 text-gray-800 text-base transition-all duration-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                                    aria-label="Edit sub-caste"
+                                  />
+                                </div>
+                              ) : (
+                                <p className="text-base">
+                                  belongs to <span className="font-semibold">{certificateData.caste}</span>
+                                  {certificateData.subCaste && ` (${certificateData.subCaste})`} caste
+                                </p>
+                              )}
+                            </>
+                          )}
+                          {certificateData.certificateType === 'Residence' && (
+                            <>
+                              {isEditing ? (
+                                <div className="flex flex-col sm:flex-row justify-center gap-2">
+                                  <input
+                                    type="text"
+                                    value={editData.ward || ''}
+                                    onChange={(e) => handleEditChange('ward', e.target.value)}
+                                    placeholder="Ward"
+                                    className="border-b-2 border-emerald-500 py-1 text-gray-800 text-base transition-all duration-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                                    aria-label="Edit ward"
+                                  />
+                                  <input
+                                    type="text"
+                                    value={editData.village || ''}
+                                    onChange={(e) => handleEditChange('village', e.target.value)}
+                                    placeholder="Village"
+                                    className="border-b-2 border-emerald-500 py-1 text-gray-800 text-base transition-all duration-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                                    aria-label="Edit village"
+                                  />
+                                  <input
+                                    type="text"
+                                    value={editData.district || ''}
+                                    onChange={(e) => handleEditChange('district', e.target.value)}
+                                    placeholder="District"
+                                    className="border-b-2 border-emerald-500 py-1 text-gray-800 text-base transition-all duration-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                                    aria-label="Edit district"
+                                  />
+                                </div>
+                              ) : (
+                                <p className="text-base">
+                                  is a permanent resident of Ward <span className="font-semibold">{certificateData.ward}</span>, 
+                                  Village <span className="font-semibold">{certificateData.village}</span>, 
+                                  District <span className="font-semibold">{certificateData.district}</span>
+                                </p>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mb-6 sm:mb-8 text-gray-700">
+                      <div className="bg-blue-50 p-2 sm:p-3 rounded-lg transition-all duration-300 hover:shadow-md">
+                        <p className="text-xs sm:text-sm text-gray-600">Application ID</p>
+                        <p className="font-mono text-xs sm:text-sm font-semibold truncate">{certificateData._id}</p>
+                      </div>
+                      <div className="bg-blue-50 p-2 sm:p-3 rounded-lg transition-all duration-300 hover:shadow-md">
+                        <p className="text-xs sm:text-sm text-gray-600">Issue Date</p>
+                        <p className="font-semibold text-sm sm:text-base">{new Date().toLocaleDateString('en-IN', { 
+                          day: 'numeric', 
+                          month: 'long', 
+                          year: 'numeric' 
+                        })}</p>
+                      </div>
+                      {certificateData.certificateType === 'Income' && (
+                        <div className="bg-blue-50 p-2 sm:p-3 rounded-lg transition-all duration-300 hover:shadow-md">
+                          <p className="text-xs sm:text-sm text-gray-600">Validity</p>
+                          <p className="font-semibold text-sm sm:text-base">1 Year</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                   
@@ -573,19 +973,21 @@ const CertificatePreviewContent = () => {
                   <div className="flex flex-col sm:flex-row justify-between items-center pt-4 sm:pt-6 border-t border-gray-300">
                     <div className="mb-3 sm:mb-0">
                       <p className="text-gray-600 text-xs sm:text-sm">Generated by</p>
-                      <p className="font-serif font-semibold text-gray-800 text-sm sm:text-base">Digital e-Gram Panchayat</p>
+                      <p className="font-serif font-semibold text-gray-800 text-sm sm:text-base">Digital E-Panchayat</p>
                     </div>
                     <div className="text-center">
                       <div className="mb-1">
-                        <div className="border-t border-gray-400 w-24 sm:w-32 mx-auto"></div>
+                        <div className="border-t border-gray-400 w-32 mx-auto"></div>
                       </div>
                       <p className="text-gray-600 text-xs italic">Authorized Officer Signature</p>
                     </div>
                   </div>
                   
-                  {/* Official Stamp */}
-                  <div className="text-center mt-3 sm:mt-4">
-                    <p className="text-[0.6rem] sm:text-xs text-gray-500 uppercase tracking-wider">Official Document</p>
+                  {/* Disclaimer */}
+                  <div className="text-center mt-4">
+                    <p className="text-[0.6rem] sm:text-xs text-gray-500">
+                      This is a digitally generated certificate. No physical signature required. Valid for official purposes.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -659,10 +1061,10 @@ const CertificatePreviewContent = () => {
           
           <div className="mt-5 sm:mt-6 text-center">
             <button
-              onClick={() => router.push('/services/certificates/apply')}
+              onClick={() => router.push('/services/certificates')}
               className="text-emerald-600 hover:text-emerald-800 font-medium transform hover:scale-105 duration-300 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-emerald-500 rounded-lg px-2 py-1"
             >
-              ← Apply for another certificate
+              ← Back to Certificates
             </button>
           </div>
         </div>

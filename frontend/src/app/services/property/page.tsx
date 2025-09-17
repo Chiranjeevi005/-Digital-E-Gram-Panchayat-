@@ -294,24 +294,24 @@ const PropertyLandServices = () => {
                   <h4 className="font-semibold text-gray-800 mb-2">Tax Details</h4>
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Property ID:</span>
-                      <span className="font-medium">{propertyTaxData.propertyId}</span>
+                      <span className="text-gray-700">Property ID:</span>
+                      <span className="font-medium text-gray-900">{propertyTaxData.propertyId}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Owner:</span>
-                      <span className="font-medium">{propertyTaxData.ownerName}</span>
+                      <span className="text-gray-700">Owner:</span>
+                      <span className="font-medium text-gray-900">{propertyTaxData.ownerName}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Village:</span>
-                      <span className="font-medium">{propertyTaxData.village}</span>
+                      <span className="text-gray-700">Village:</span>
+                      <span className="font-medium text-gray-900">{propertyTaxData.village}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Tax Due:</span>
-                      <span className="font-medium text-emerald-600">₹0 (Digital E-Panchayat – No Fees)</span>
+                      <span className="text-gray-700">Tax Due:</span>
+                      <span className="font-medium text-emerald-700">₹0 (Digital E-Panchayat – No Fees)</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Status:</span>
-                      <span className="font-medium">{propertyTaxData.status}</span>
+                      <span className="text-gray-700">Status:</span>
+                      <span className="font-medium text-gray-900">{propertyTaxData.status}</span>
                     </div>
                   </div>
                   
