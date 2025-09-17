@@ -74,7 +74,7 @@ const CertificatesHub = () => {
           <div className="responsive-container text-center">
             <div className="flex justify-center mb-4">
               <div className="bg-white rounded-full p-3 shadow-lg">
-                <div className="bg-gray-200 border-2 border-dashed rounded-xl w-16 h-16" />
+                <div className="text-4xl">📑</div>
               </div>
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800 mb-4">

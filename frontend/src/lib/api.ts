@@ -158,26 +158,22 @@ export const apiClient = {
   },
 
   // Generic DELETE request
-  delete: async <T = unknown>(endpoint: string): ApiResponse<T> => {
+  delete: async <T>(endpoint: string): Promise<T> => {
     try {
       const token = getToken();
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: 'DELETE',
         headers: {
+          'Content-Type': 'application/json',
           ...(token && { 'Authorization': `Bearer ${token}` }),
         },
-        // Add timeout and credentials for better error handling
         credentials: 'include',
       });
       
       await handleFetchError(response);
       return response.json();
     } catch (error) {
-      console.error('API DELETE request failed:', error);
-      // Provide more specific error messages
-      if (error instanceof TypeError && error.message === 'Failed to fetch') {
-        throw new Error('Network error: Unable to connect to the server. Please check if the server is running.');
-      }
+      console.error('API delete request failed:', error);
       throw error;
     }
   },
@@ -206,22 +202,49 @@ export const apiClient = {
     }
   },
 
-  // Login method
-  login: async (email: string, password: string, userType: string): Promise<LoginResponse> => {
-    return apiClient.post<LoginResponse>('/auth/login', { email, password, userType });
+  // Schemes & Subsidies methods
+  getSchemes: async (): Promise<any[]> => {
+    return apiClient.get<any[]>('/schemes');
   },
 
-  // Register method
-  register: async (name: string, email: string, password: string): Promise<RegisterResponse> => {
-    return apiClient.post<RegisterResponse>('/auth/register', { name, email, password });
+  applyForScheme: async (data: any): Promise<any> => {
+    return apiClient.post<any>('/schemes/apply', data);
   },
 
-  // Get current user
-  getCurrentUser: async (): Promise<User> => {
-    return apiClient.get<User>('/auth/user/me');
+  getSchemeApplications: async (userId: string): Promise<any[]> => {
+    return apiClient.get<any[]>(`/schemes/tracking/${userId}`);
   },
 
-  // Property & Land Services methods
+  deleteSchemeApplication: async (applicationId: string): Promise<any> => {
+    return apiClient.delete<any>(`/schemes/tracking/${applicationId}`);
+  },
+
+  downloadSchemeAcknowledgment: async (applicationId: string, format: 'pdf' | 'jpg' = 'pdf'): Promise<Blob> => {
+    return apiClient.download(`/schemes/acknowledgment/${applicationId}?format=${format}`);
+  },
+
+  // Grievance Redressal methods
+  getGrievances: async (userId: string): Promise<any[]> => {
+    return apiClient.get<any[]>(`/grievances/user/${userId}`);
+  },
+
+  submitGrievance: async (data: any): Promise<any> => {
+    return apiClient.post<any>('/grievances', data);
+  },
+
+  downloadGrievanceAcknowledgment: async (grievanceId: string, format: 'pdf' | 'jpg' = 'pdf'): Promise<Blob> => {
+    return apiClient.download(`/grievances/acknowledgment/${grievanceId}?format=${format}`);
+  },
+
+  downloadGrievanceResolution: async (grievanceId: string, format: 'pdf' | 'jpg' = 'pdf'): Promise<Blob> => {
+    return apiClient.download(`/grievances/resolution/${grievanceId}?format=${format}`);
+  },
+
+  deleteGrievance: async (grievanceId: string): Promise<any> => {
+    return apiClient.delete<any>(`/grievances/view/${grievanceId}`);
+  },
+
+  // Property Tax methods
   getPropertyTax: async (propertyId: string, ownerName: string, village: string): Promise<PropertyTaxData> => {
     return apiClient.post<PropertyTaxData>('/property-tax', { propertyId, ownerName, village });
   },
@@ -250,5 +273,10 @@ export const apiClient = {
 
   downloadMutationAcknowledgement: async (applicationId: string, format: 'pdf' | 'jpg' = 'pdf'): Promise<Blob> => {
     return apiClient.download(`/mutation-status/${applicationId}/download?format=${format}`);
+  },
+
+  // User authentication methods
+  getCurrentUser: async (): Promise<User> => {
+    return apiClient.get<User>('/auth/user/me');
   }
 };

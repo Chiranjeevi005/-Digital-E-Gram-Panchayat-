@@ -41,7 +41,8 @@ const Services = () => {
         'Apply for pensions & scholarships',
         'Track subsidy application status'
       ],
-      buttonText: 'Explore Schemes'
+      buttonText: 'Explore Schemes',
+      link: '/services/schemes'
     },
     {
       id: 4,
@@ -52,7 +53,8 @@ const Services = () => {
         'Lodge complaints (roads, water, electricity, sanitation)',
         'Track complaint status'
       ],
-      buttonText: 'Submit Grievance'
+      buttonText: 'Submit Grievance',
+      link: '/services/grievances'
     }
   ];
 

@@ -1,0 +1,215 @@
+@import "tailwindcss";
+@import "tailwindcss/preflight";
+
+:root {
+  --emerald-green: #059669;
+  --deep-blue: #1D4ED8;
+  --off-white: #F8FAFC;
+  --dark-label: #334155;
+}
+
+@layer components {
+  .responsive-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
+  .bg-gradient-hero {
+    @apply bg-gradient-to-r from-emerald-500 to-blue-600;
+  }
+  
+  .bg-gradient-diagonal {
+    @apply bg-gradient-to-br from-emerald-500 to-blue-600;
+  }
+  
+  .shadow-soft {
+    @apply shadow-md hover:shadow-lg transition-shadow duration-300;
+  }
+  
+  .shake {
+    animation: shake 0.5s ease-in-out;
+  }
+  
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-5px); }
+    40%, 80% { transform: translateX(5px); }
+  }
+  
+  .animate-blob {
+    animation: blob 7s infinite;
+  }
+  
+  @keyframes blob {
+    0% {
+      transform: translate(0px, 0px) scale(1);
+    }
+    33% {
+      transform: translate(30px, -50px) scale(1.1);
+    }
+    66% {
+      transform: translate(-20px, 20px) scale(0.9);
+    }
+    100% {
+      transform: translate(0px, 0px) scale(1);
+    }
+  }
+  
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+  
+  .animation-delay-4000 {
+    animation-delay: 4s;
+  }
+  
+  .animate-shake {
+    animation: shake 0.5s ease-in-out;
+  }
+  
+  @keyframes progress {
+    0% { width: 0%; }
+    100% { width: 100%; }
+  }
+  
+  .progress-animation {
+    animation: progress 2s ease-in-out;
+  }
+  
+  /* Additional animations for enhanced UI */
+  .fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .slide-in-right {
+    animation: slideInRight 0.3s ease-out;
+  }
+  
+  @keyframes slideInRight {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+  }
+  
+  .pulse-slow {
+    animation: pulseSlow 3s infinite;
+  }
+  
+  @keyframes pulseSlow {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+  
+  /* Status timeline styles */
+  .status-timeline {
+    position: relative;
+    padding: 20px 0;
+  }
+  
+  .status-timeline::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 100%;
+    background: #cbd5e1;
+  }
+  
+  .status-item {
+    position: relative;
+    margin-bottom: 30px;
+  }
+  
+  .status-item:last-child {
+    margin-bottom: 0;
+  }
+  
+  .status-marker {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    border: 2px solid #94a3b8;
+    z-index: 1;
+  }
+  
+  .status-marker.active {
+    background: #059669;
+    border-color: #059669;
+  }
+  
+  .status-content {
+    width: calc(50% - 30px);
+    padding: 15px;
+    background: #f8fafc;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .status-item:nth-child(odd) .status-content {
+    margin-left: calc(50% + 30px);
+  }
+  
+  .status-item:nth-child(even) .status-content {
+    margin-right: calc(50% + 30px);
+  }
+  
+  /* Stamp effect for seal */
+  .stamp-effect {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .stamp-effect::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 2px dashed rgba(220, 38, 38, 0.5);
+    border-radius: 50%;
+    animation: stampPulse 1s infinite;
+  }
+  
+  @keyframes stampPulse {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.05);
+      opacity: 0.7;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}

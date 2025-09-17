@@ -46,8 +46,23 @@ const KeyServices = () => {
 
   // Function to handle service card clicks
   const handleServiceClick = (serviceId: number) => {
-    // Navigate to the main services page regardless of authentication status
-    router.push('/services');
+    // Navigate to the specific service page based on serviceId
+    switch (serviceId) {
+      case 1:
+        router.push('/services/certificates');
+        break;
+      case 2:
+        router.push('/services/property');
+        break;
+      case 3:
+        router.push('/services/schemes');
+        break;
+      case 4:
+        router.push('/services/grievances');
+        break;
+      default:
+        router.push('/services');
+    }
   };
 
   return (
