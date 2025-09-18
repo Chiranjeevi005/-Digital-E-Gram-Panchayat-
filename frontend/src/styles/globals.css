@@ -13,8 +13,11 @@
   --sunflower: #fbbf24;
   --coral: #f87171;
   --lavender: #c7d2fe;
-  --placeholder-gray: #4b5563; /* darker gray for better visibility */
-  --darker-gray: #374151; /* even darker gray for labels */
+  --placeholder-gray: #374151; /* Professional dark gray for placeholders */
+  --darker-gray: #374151; /* Dark gray for labels */
+  --dark-text: #111827; /* Professional dark color for text */
+  --medium-text: #1f2937; /* Medium dark color for secondary text */
+  --light-text: #4b5563; /* Lighter dark color for subtle text */
 }
 
 @theme inline {
@@ -104,9 +107,9 @@ body {
   opacity: 1;
 }
 
-/* Enhanced input styles for better visibility */
+/* Enhanced input styles for better visibility - using darker text colors */
 .input-field {
-  color: var(--darker-gray);
+  color: var(--dark-text); /* Using professional dark color instead of lighter gray */
   background-color: white;
   border: 1px solid #d1d5db;
   border-radius: 0.75rem;
@@ -121,18 +124,19 @@ body {
 }
 
 .input-field::placeholder {
-  color: var(--placeholder-gray);
+  color: var(--light-text); /* Using lighter dark color for placeholders */
 }
 
+/* Enhanced select styles for better visibility - using darker text colors */
 .select-field {
-  color: var(--darker-gray);
+  color: var(--dark-text); /* Using professional dark color instead of lighter gray */
   background-color: white;
   border: 1px solid #d1d5db;
   border-radius: 0.75rem;
   padding: 0.75rem 1rem;
   transition: all 0.2s ease-in-out;
   appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234b5563' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23111827' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
   background-repeat: no-repeat;
   background-position: right 1rem center;
   background-size: 1.5em;
@@ -142,6 +146,127 @@ body {
   outline: none;
   border-color: var(--emerald-green);
   box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+}
+
+/* Dark text colors for form elements */
+.form-label {
+  color: var(--dark-text); /* Using professional dark color for labels */
+  font-weight: 600;
+}
+
+.form-input {
+  color: var(--dark-text); /* Using professional dark color for input text */
+  background-color: white;
+  border: 1px solid #d1d5db;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--emerald-green);
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+}
+
+.form-input::placeholder {
+  color: var(--light-text); /* Using lighter dark color for placeholders */
+}
+
+.form-select {
+  color: var(--dark-text); /* Using professional dark color for select text */
+  background-color: white;
+  border: 1px solid #d1d5db;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  transition: all 0.2s ease-in-out;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23111827' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1.5em;
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: var(--emerald-green);
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+}
+
+/* Dark text for notification filtering features */
+.notification-filter-select {
+  color: var(--dark-text); /* Using professional dark color */
+  background-color: white;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  transition: all 0.2s ease-in-out;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23111827' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  background-size: 1em;
+}
+
+.notification-filter-select:focus {
+  outline: none;
+  border-color: var(--emerald-green);
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+}
+
+.notification-filter-button {
+  color: var(--dark-text); /* Using professional dark color */
+  background-color: white;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  transition: all 0.2s ease-in-out;
+  font-weight: 500;
+}
+
+.notification-filter-button:hover {
+  background-color: #f9fafb;
+}
+
+/* Additional form elements with dark text for better visibility */
+.form-textarea {
+  color: var(--dark-text); /* Using professional dark color */
+  background-color: white;
+  border: 1px solid #d1d5db;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--emerald-green);
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+}
+
+.form-textarea::placeholder {
+  color: var(--light-text); /* Using lighter dark color for placeholders */
+}
+
+.form-checkbox {
+  color: var(--dark-text); /* Using professional dark color */
+  border: 1px solid #d1d5db;
+  border-radius: 0.25rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.form-checkbox:checked {
+  background-color: var(--emerald-green);
+  border-color: var(--emerald-green);
+}
+
+.form-radio {
+  color: var(--dark-text); /* Using professional dark color */
+  border: 1px solid #d1d5db;
+  transition: all 0.2s ease-in-out;
+}
+
+.form-radio:checked {
+  background-color: var(--emerald-green);
+  border-color: var(--emerald-green);
 }
 
 /* Animation classes */
@@ -432,6 +557,7 @@ body {
   .mobile-input {
     padding: 0.75rem;
     font-size: 1rem;
+    color: var(--dark-text); /* Ensuring mobile inputs have dark text */
   }
   
   .mobile-header {
@@ -485,6 +611,38 @@ body {
   
   .mobile-pb-4 {
     padding-bottom: 1rem;
+  }
+  
+  /* Dashboard specific mobile styles */
+  .mobile-dashboard-padding {
+    padding: 0.75rem;
+  }
+  
+  .mobile-dashboard-gap {
+    gap: 0.75rem;
+  }
+  
+  .mobile-dashboard-card {
+    padding: 0.75rem;
+  }
+  
+  .mobile-dashboard-text-sm {
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
+  
+  .mobile-dashboard-text-base {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+  
+  .mobile-dashboard-text-lg {
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+  
+  .mobile-dashboard-mb {
+    margin-bottom: 0.75rem;
   }
 }
 

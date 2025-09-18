@@ -46,7 +46,7 @@ export const register = async (req: Request, res: Response) => {
         name: user.name
       },
       process.env.JWT_SECRET as string,
-      { expiresIn: '1d' }
+      { expiresIn: '7d' }
     );
 
     res.status(201).json({ 
@@ -58,9 +58,16 @@ export const register = async (req: Request, res: Response) => {
         userType: user.userType 
       } 
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Registration error:', error);
-    res.status(500).json({ message: 'Server error during registration' });
+    // More detailed error handling
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ message: 'Invalid user data provided' });
+    }
+    if (error.code === 11000) {
+      return res.status(400).json({ message: 'User with this email already exists' });
+    }
+    res.status(500).json({ message: 'Server error during registration', error: error.message });
   }
 };
 
@@ -130,7 +137,7 @@ export const login = async (req: Request, res: Response) => {
         name: user.name
       },
       process.env.JWT_SECRET as string,
-      { expiresIn: '1d' }
+      { expiresIn: '7d' }
     );
 
     res.json({ 

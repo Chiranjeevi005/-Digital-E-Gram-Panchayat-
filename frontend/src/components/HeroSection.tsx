@@ -112,8 +112,6 @@ const HeroSection = () => {
                     <p className="text-xs sm:text-sm text-gray-600">Access all benefits</p>
                   </div>
                 </div>
-                
-
               </div>
               
               {/* Floating elements - made responsive and hidden on small screens */}
@@ -122,6 +120,66 @@ const HeroSection = () => {
               </div>
               <div className="absolute -bottom-3 -left-3 sm:-bottom-6 sm:-left-6 bg-white p-2 sm:p-3 rounded-full shadow-soft animate-float animation-delay-2000 hidden md:block">
                 <div className="text-sky-600 text-lg sm:text-xl">⚡</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// Skeleton version of HeroSection for loading states
+export const HeroSectionSkeleton = () => {
+  return (
+    <section className="relative min-h-screen flex items-center overflow-hidden bg-gradient-diagonal">
+      <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
+          <div className="lg:w-1/2 w-full">
+            <div className="h-8 w-3/4 bg-gray-200 rounded mb-4 animate-pulse"></div>
+            <div className="h-8 w-full bg-gray-200 rounded mb-4 animate-pulse"></div>
+            <div className="h-4 w-2/3 bg-gray-200 rounded mb-6 animate-pulse"></div>
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
+              <div className="h-12 bg-gray-200 rounded flex-1 animate-pulse"></div>
+              <div className="h-12 bg-gray-200 rounded flex-1 animate-pulse"></div>
+            </div>
+            
+            <div className="mt-8 sm:mt-12 p-6 bg-gray-200/80 rounded-2xl max-w-md animate-pulse">
+              <div className="flex items-center">
+                <div className="mr-4 p-3 bg-gray-300 rounded-full w-12 h-12"></div>
+                <div>
+                  <div className="h-6 w-24 bg-gray-300 rounded mb-2"></div>
+                  <div className="h-4 w-32 bg-gray-300 rounded"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="lg:w-1/2 w-full flex justify-center">
+            <div className="relative w-full max-w-lg">
+              <div className="relative bg-gray-200 rounded-2xl p-6 animate-pulse">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-gray-300 p-4 rounded-xl">
+                    <div className="h-8 w-8 bg-gray-400 rounded mb-2"></div>
+                    <div className="h-4 w-3/4 bg-gray-400 rounded mb-1"></div>
+                    <div className="h-3 w-full bg-gray-400 rounded"></div>
+                  </div>
+                  <div className="bg-gray-300 p-4 rounded-xl">
+                    <div className="h-8 w-8 bg-gray-400 rounded mb-2"></div>
+                    <div className="h-4 w-3/4 bg-gray-400 rounded mb-1"></div>
+                    <div className="h-3 w-full bg-gray-400 rounded"></div>
+                  </div>
+                  <div className="bg-gray-300 p-4 rounded-xl">
+                    <div className="h-8 w-8 bg-gray-400 rounded mb-2"></div>
+                    <div className="h-4 w-3/4 bg-gray-400 rounded mb-1"></div>
+                    <div className="h-3 w-full bg-gray-400 rounded"></div>
+                  </div>
+                  <div className="bg-gray-300 p-4 rounded-xl">
+                    <div className="h-8 w-8 bg-gray-400 rounded mb-2"></div>
+                    <div className="h-4 w-3/4 bg-gray-400 rounded mb-1"></div>
+                    <div className="h-3 w-full bg-gray-400 rounded"></div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

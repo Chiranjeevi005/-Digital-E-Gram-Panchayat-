@@ -17,8 +17,6 @@ const nextConfig: NextConfig = {
   compress: true,
   // Enable react strict mode
   reactStrictMode: true,
-  // Turbopack configuration (remove webpack config when using Turbopack)
-  // Note: Turbopack automatically handles tree shaking and optimization
 };
 
 export default nextConfig;

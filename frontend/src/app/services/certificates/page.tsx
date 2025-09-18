@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import Navbar from '../../../components/Navbar';
 import Footer from '../../../components/Footer';
@@ -64,6 +64,13 @@ const CertificatesHub = () => {
     }
   ];
 
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredCertificates = certificateCategories.filter(certificate => 
+    certificate.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    certificate.description.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="min-h-screen flex flex-col bg-off-white">
       <Navbar />
@@ -86,34 +93,74 @@ const CertificatesHub = () => {
           </div>
         </div>
 
-        {/* Service Cards Section - Grid layout with icon + title + button */}
-        <div className="responsive-container py-12 sm:py-16">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {certificateCategories.map((certificate) => (
-              <div 
-                key={certificate.id}
-                className="bg-white shadow-md rounded-2xl p-6 hover:shadow-xl hover:scale-105 transition-all duration-300 border border-gray-100 focus-within:ring-2 focus-within:ring-emerald-500"
-              >
-                <div className="text-5xl text-center mb-4" aria-hidden="true">{certificate.icon}</div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-2 text-center">
-                  {certificate.title}
-                </h3>
-                <p className="text-gray-600 mb-4 text-center">
-                  {certificate.description}
-                </p>
-                
-                <Link 
-                  href={{
-                    pathname: certificate.link,
-                    query: { type: certificate.certificateType }
-                  }}
-                  className="block w-full bg-gradient-to-r from-emerald-green to-deep-blue text-white py-3 rounded-xl shadow-soft hover:shadow-md transition-all text-center font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                >
-                  {certificate.linkText}
-                </Link>
+        {/* Search Bar */}
+        <div className="responsive-container py-6">
+          <div className="max-w-2xl mx-auto">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search certificates..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 shadow-sm"
+              />
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+                </svg>
               </div>
-            ))}
+            </div>
           </div>
+        </div>
+
+        {/* Service Cards Section - Grid layout with icon + title + button */}
+        <div className="responsive-container py-6 sm:py-8">
+          {filteredCertificates.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredCertificates.map((certificate) => (
+                <div 
+                  key={certificate.id}
+                  className="bg-white shadow-md rounded-2xl p-6 hover:shadow-xl hover:scale-105 transition-all duration-300 border border-gray-100 focus-within:ring-2 focus-within:ring-emerald-500"
+                >
+                  <div className="text-5xl text-center mb-4" aria-hidden="true">{certificate.icon}</div>
+                  <h3 className="text-xl font-semibold text-gray-800 mb-2 text-center">
+                    {certificate.title}
+                  </h3>
+                  <p className="text-gray-600 mb-4 text-center">
+                    {certificate.description}
+                  </p>
+                  
+                  <Link 
+                    href={{
+                      pathname: certificate.link,
+                      query: { type: certificate.certificateType }
+                    }}
+                    className="block w-full bg-gradient-to-r from-emerald-green to-deep-blue text-white py-3 rounded-xl shadow-soft hover:shadow-md transition-all text-center font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  >
+                    {certificate.linkText}
+                  </Link>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <h3 className="mt-2 text-sm font-medium text-gray-900">No certificates found</h3>
+              <p className="mt-1 text-sm text-gray-500">
+                Try adjusting your search term
+              </p>
+              <div className="mt-6">
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg"
+                >
+                  Clear Search
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* How It Works Section - Smooth User Flow */}

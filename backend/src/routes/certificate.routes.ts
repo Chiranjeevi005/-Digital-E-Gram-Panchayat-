@@ -4,10 +4,14 @@ import {
   getCertificateStatus,
   downloadCertificate,
   getCertificatePreview,
-  updateCertificate
+  updateCertificate,
+  getAllCertificates
 } from '../controllers/certificate.controller';
 
 const router = Router();
+
+// Get all certificates
+router.get('/', getAllCertificates);
 
 // Apply for a certificate
 router.post('/apply', applyForCertificate);

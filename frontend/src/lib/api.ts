@@ -202,8 +202,29 @@ export const apiClient = {
     }
   },
 
+  // Certificate methods
+  applyForCertificate: async (data: any): Promise<any> => {
+    return apiClient.post<any>('/certificates/apply', data);
+  },
+
+  getAllCertificates: async (): Promise<any[]> => {
+    return apiClient.get<any[]>('/certificates');
+  },
+
+  getCertificateStatus: async (id: string): Promise<any> => {
+    return apiClient.get<any>(`/certificates/${id}/status`);
+  },
+
+  downloadCertificate: async (id: string, format: 'pdf' | 'jpg' = 'pdf'): Promise<Blob> => {
+    return apiClient.download(`/certificates/${id}/download?format=${format}`);
+  },
+
   // Schemes & Subsidies methods
   getSchemes: async (): Promise<any[]> => {
+    return apiClient.get<any[]>('/schemes');
+  },
+
+  getAllSchemes: async (): Promise<any[]> => {
     return apiClient.get<any[]>('/schemes');
   },
 
@@ -224,12 +245,24 @@ export const apiClient = {
   },
 
   // Grievance Redressal methods
+  getAllGrievances: async (): Promise<any[]> => {
+    return apiClient.get<any[]>('/grievances');
+  },
+
   getGrievances: async (userId: string): Promise<any[]> => {
     return apiClient.get<any[]>(`/grievances/user/${userId}`);
   },
 
   submitGrievance: async (data: any): Promise<any> => {
     return apiClient.post<any>('/grievances', data);
+  },
+
+  updateGrievance: async (grievanceId: string, data: any): Promise<any> => {
+    return apiClient.put<any>(`/grievances/view/${grievanceId}`, data);
+  },
+
+  resolveGrievance: async (grievanceId: string, remarks: string): Promise<any> => {
+    return apiClient.post<any>(`/grievances/resolve/${grievanceId}`, { remarks });
   },
 
   downloadGrievanceAcknowledgment: async (grievanceId: string, format: 'pdf' | 'jpg' = 'pdf'): Promise<Blob> => {
@@ -278,5 +311,9 @@ export const apiClient = {
   // User authentication methods
   getCurrentUser: async (): Promise<User> => {
     return apiClient.get<User>('/auth/user/me');
+  },
+  
+  register: async (userData: { name: string; email: string; password: string }): Promise<RegisterResponse> => {
+    return apiClient.post<RegisterResponse>('/auth/register', userData);
   }
 };

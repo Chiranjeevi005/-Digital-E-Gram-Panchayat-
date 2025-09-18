@@ -8,6 +8,83 @@
   --dark-label: #334155;
 }
 
+/* High Contrast Mode Styles */
+.high-contrast {
+  background-color: #000 !important;
+  color: #fff !important;
+}
+
+.high-contrast a {
+  color: #ffff00 !important;
+}
+
+.high-contrast .bg-white {
+  background-color: #000 !important;
+  color: #fff !important;
+}
+
+.high-contrast .bg-gray-50 {
+  background-color: #111 !important;
+  color: #fff !important;
+}
+
+.high-contrast .bg-emerald-500 {
+  background-color: #ffff00 !important;
+  color: #000 !important;
+}
+
+.high-contrast .text-gray-800 {
+  color: #fff !important;
+}
+
+.high-contrast .text-gray-600 {
+  color: #ccc !important;
+}
+
+.high-contrast .text-gray-700 {
+  color: #ddd !important;
+}
+
+.high-contrast .border-gray-200 {
+  border-color: #fff !important;
+}
+
+.high-contrast .border-gray-300 {
+  border-color: #fff !important;
+}
+
+.high-contrast .bg-emerald-100 {
+  background-color: #ffff00 !important;
+  color: #000 !important;
+}
+
+.high-contrast .text-emerald-800 {
+  color: #000 !important;
+}
+
+.high-contrast .bg-blue-100 {
+  background-color: #ffff00 !important;
+  color: #000 !important;
+}
+
+.high-contrast .text-blue-600 {
+  color: #000 !important;
+}
+
+.high-contrast button {
+  background-color: #ffff00 !important;
+  color: #000 !important;
+  border: 1px solid #fff !important;
+}
+
+.high-contrast .shadow-md {
+  box-shadow: 0 0 0 2px #fff !important;
+}
+
+.high-contrast .shadow-lg {
+  box-shadow: 0 0 0 3px #fff !important;
+}
+
 @layer components {
   .responsive-container {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;

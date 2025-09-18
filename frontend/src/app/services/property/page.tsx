@@ -59,6 +59,9 @@ const PropertyLandServices = () => {
   const [previewType, setPreviewType] = useState<'propertyTax' | 'landRecord' | 'mutationStatus' | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
+  // Search states
+  const [searchTerm, setSearchTerm] = useState('');
+
   // Handle property tax submission
   const handlePropertyTaxSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -201,6 +204,11 @@ const PropertyLandServices = () => {
     'Village E'
   ];
 
+  // Filter villages based on search term
+  const filteredVillages = villages.filter(village => 
+    village.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="min-h-screen flex flex-col bg-off-white">
       <Navbar />
@@ -220,6 +228,26 @@ const PropertyLandServices = () => {
             <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">
               Manage your property and land records efficiently with our digital services.
             </p>
+          </div>
+        </div>
+
+        {/* Search Bar */}
+        <div className="responsive-container py-6">
+          <div className="max-w-2xl mx-auto">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search villages..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 shadow-sm"
+              />
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+                </svg>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -279,7 +307,7 @@ const PropertyLandServices = () => {
                     required
                   >
                     <option value="">Select Village/Ward</option>
-                    {villages.map((village, index) => (
+                    {filteredVillages.map((village, index) => (
                       <option key={index} value={village}>{village}</option>
                     ))}
                   </select>

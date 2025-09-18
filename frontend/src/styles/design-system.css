@@ -13,8 +13,9 @@
   /* Neutral Colors */
   --color-background: #ffffff; /* Main background */
   --color-surface: #f9fafb; /* Card backgrounds */
-  --color-text-primary: #171717; /* Main text */
-  --color-text-secondary: #4b5563; /* Secondary text */
+  --color-text-primary: #111827; /* Professional dark color for primary text */
+  --color-text-secondary: #1f2937; /* Medium dark color for secondary text */
+  --color-text-tertiary: #374151; /* Darker gray for placeholders and tertiary text */
   --color-border: #e5e7eb; /* Borders and dividers */
   
   /* Spacing Scale (8-point grid) */
@@ -167,6 +168,11 @@ body {
 .text-info { color: var(--color-accent-info); }
 .text-primary-dark { color: var(--color-primary-dark); }
 
+/* New dark text utility classes for better visibility */
+.text-dark-primary { color: var(--color-text-primary); }
+.text-dark-secondary { color: var(--color-text-secondary); }
+.text-dark-tertiary { color: var(--color-text-tertiary); }
+
 .bg-primary { background-color: var(--color-primary); }
 .bg-secondary { background-color: var(--color-secondary); }
 .bg-success { background-color: var(--color-accent-success); }
@@ -223,7 +229,7 @@ body {
   width: 100%;
 }
 
-/* Form Elements */
+/* Form Elements - Updated for better visibility */
 .form-input {
   width: 100%;
   padding: var(--spacing-xs) var(--spacing-sm);
@@ -231,6 +237,8 @@ body {
   border-radius: var(--border-radius-sm);
   font-size: var(--font-size-body);
   transition: all var(--transition-fast);
+  color: var(--color-text-primary); /* Using dark text for better visibility */
+  background-color: white;
 }
 
 .form-input:focus {
@@ -239,11 +247,16 @@ body {
   box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.2);
 }
 
+.form-input::placeholder {
+  color: var(--color-text-tertiary); /* Using darker gray for placeholders */
+  opacity: 1;
+}
+
 .form-label {
   display: block;
   margin-bottom: var(--spacing-xxs);
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: var(--color-text-primary); /* Using dark text for better visibility */
   font-size: var(--font-size-body-small);
 }
 
@@ -255,12 +268,71 @@ body {
   font-size: var(--font-size-body);
   background-color: white;
   transition: all var(--transition-fast);
+  color: var(--color-text-primary); /* Using dark text for better visibility */
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23111827' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1.5em;
 }
 
 .form-select:focus {
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.2);
+}
+
+.form-select::placeholder {
+  color: var(--color-text-tertiary); /* Using darker gray for placeholders */
+  opacity: 1;
+}
+
+/* Additional form elements with dark text for better visibility */
+.form-textarea {
+  width: 100%;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-body);
+  transition: all var(--transition-fast);
+  color: var(--color-text-primary); /* Using dark text for better visibility */
+  background-color: white;
+  min-height: 100px;
+}
+
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.2);
+}
+
+.form-textarea::placeholder {
+  color: var(--color-text-tertiary); /* Using darker gray for placeholders */
+  opacity: 1;
+}
+
+.form-checkbox {
+  color: var(--color-text-primary); /* Using dark text for better visibility */
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-sm);
+  transition: all var(--transition-fast);
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-primary);
+}
+
+.form-radio {
+  color: var(--color-text-primary); /* Using dark text for better visibility */
+  border: 1px solid var(--color-border);
+  transition: all var(--transition-fast);
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-primary);
+}
+
+.form-checkbox:focus,
+.form-radio:focus {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
 }
 
 /* Card Styles */
@@ -732,4 +804,30 @@ body {
     box-shadow: none;
     border: 1px solid #000;
   }
+}
+
+/* Placeholder styles for better visibility */
+::-webkit-input-placeholder {
+  color: var(--color-text-tertiary);
+  opacity: 1;
+}
+
+::-moz-placeholder {
+  color: var(--color-text-tertiary);
+  opacity: 1;
+}
+
+:-ms-input-placeholder {
+  color: var(--color-text-tertiary);
+  opacity: 1;
+}
+
+:-moz-placeholder {
+  color: var(--color-text-tertiary);
+  opacity: 1;
+}
+
+::placeholder {
+  color: var(--color-text-tertiary);
+  opacity: 1;
 }

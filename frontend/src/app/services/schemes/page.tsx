@@ -173,10 +173,17 @@ const SchemesPage = () => {
     fetchApplications();
   }, []);
 
-  // Filter schemes based on search term and category
+  // Filter schemes based on search term and category, and remove Housing Subsidy Program
   const filteredSchemes = schemes.filter(scheme => {
+    // Exclude Housing Subsidy Program
+    if (scheme.name === 'Housing Subsidy Program') {
+      return false;
+    }
+    
     const matchesSearch = scheme.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          scheme.description.toLowerCase().includes(searchTerm.toLowerCase());
+                          scheme.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          scheme.eligibility.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          scheme.benefits.toLowerCase().includes(searchTerm.toLowerCase());
     // In a real implementation, you would filter by actual category
     return matchesSearch;
   });

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import InputField from '../../components/InputField';
 import Button from '../../components/Button';
 import Link from 'next/link';
+import { apiClient } from '../../lib/api';
 
 export default function RegisterPage() {
   const [name, setName] = useState('');
@@ -64,38 +65,26 @@ export default function RegisterPage() {
     setSuccess(false);
     
     try {
-      const response = await fetch('http://localhost:3002/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          password,
-        }),
+      const response = await apiClient.register({
+        name,
+        email,
+        password,
       });
       
-      const data = await response.json();
+      setSuccess(true);
+      // Clear form
+      setName('');
+      setEmail('');
+      setPassword('');
+      setConfirmPassword('');
+      setDeclaration(false);
       
-      if (response.ok) {
-        setSuccess(true);
-        // Clear form
-        setName('');
-        setEmail('');
-        setPassword('');
-        setConfirmPassword('');
-        setDeclaration(false);
-        
-        // Redirect to home page after 2 seconds
-        setTimeout(() => {
-          router.push('/');
-        }, 2000);
-      } else {
-        setError(data.message || 'Registration failed');
-      }
-    } catch (err) {
-      setError('An error occurred. Please try again.');
+      // Redirect to login page after 2 seconds with email pre-filled
+      setTimeout(() => {
+        router.push(`/login?email=${encodeURIComponent(email)}&registered=true`);
+      }, 2000);
+    } catch (err: any) {
+      setError(err.message || 'Registration failed');
     } finally {
       setLoading(false);
     }
