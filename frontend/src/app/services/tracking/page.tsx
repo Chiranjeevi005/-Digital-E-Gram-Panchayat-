@@ -6,6 +6,7 @@ import ProtectedRoute from '../../../components/ProtectedRoute';
 import Link from 'next/link';
 import Navbar from '../../../components/Navbar';
 import Footer from '../../../components/Footer';
+import { useToast } from '../../../components/ToastContainer';
 
 interface Application {
   id: string;
@@ -18,6 +19,7 @@ interface Application {
 
 export default function TrackingPage() {
   const { user } = useAuth();
+  const { showToast } = useToast();
   const [applications, setApplications] = useState<Application[]>([]);
   const [filteredApplications, setFilteredApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,54 +31,63 @@ export default function TrackingPage() {
     // Simulate fetching applications
     const fetchApplications = async () => {
       try {
+        setLoading(true);
+        const startTime = Date.now();
+        
         // In a real app, you would fetch this data from your API
-        setTimeout(() => {
-          const mockApplications: Application[] = [
-            {
-              id: 'CERT-001',
-              serviceType: 'Certificates',
-              title: 'Birth Certificate Application',
-              status: 'Approved',
-              date: '2023-05-15',
-              referenceNumber: 'REF-2023-001'
-            },
-            {
-              id: 'GRV-002',
-              serviceType: 'Grievances',
-              title: 'Road Maintenance Complaint',
-              status: 'Resolved',
-              date: '2023-05-10',
-              referenceNumber: 'REF-2023-002'
-            },
-            {
-              id: 'SCH-003',
-              serviceType: 'Schemes',
-              title: 'Housing Subsidy Application',
-              status: 'In Review',
-              date: '2023-05-05',
-              referenceNumber: 'REF-2023-003'
-            },
-            {
-              id: 'PROP-004',
-              serviceType: 'Property',
-              title: 'Property Tax Payment',
-              status: 'Approved',
-              date: '2023-05-01',
-              referenceNumber: 'REF-2023-004'
-            },
-            {
-              id: 'CERT-005',
-              serviceType: 'Certificates',
-              title: 'Caste Certificate Application',
-              status: 'Pending',
-              date: '2023-04-28',
-              referenceNumber: 'REF-2023-005'
-            },
-          ];
-          setApplications(mockApplications);
-          setFilteredApplications(mockApplications);
-          setLoading(false);
-        }, 1000);
+        const mockApplications: Application[] = [
+          {
+            id: 'CERT-001',
+            serviceType: 'Certificates',
+            title: 'Birth Certificate Application',
+            status: 'Approved',
+            date: '2023-05-15',
+            referenceNumber: 'REF-2023-001'
+          },
+          {
+            id: 'GRV-002',
+            serviceType: 'Grievances',
+            title: 'Road Maintenance Complaint',
+            status: 'Resolved',
+            date: '2023-05-10',
+            referenceNumber: 'REF-2023-002'
+          },
+          {
+            id: 'SCH-003',
+            serviceType: 'Schemes',
+            title: 'Housing Subsidy Application',
+            status: 'In Review',
+            date: '2023-05-05',
+            referenceNumber: 'REF-2023-003'
+          },
+          {
+            id: 'PROP-004',
+            serviceType: 'Property',
+            title: 'Property Tax Payment',
+            status: 'Approved',
+            date: '2023-05-01',
+            referenceNumber: 'REF-2023-004'
+          },
+          {
+            id: 'CERT-005',
+            serviceType: 'Certificates',
+            title: 'Caste Certificate Application',
+            status: 'Pending',
+            date: '2023-04-28',
+            referenceNumber: 'REF-2023-005'
+          },
+        ];
+        
+        // Ensure minimum loading time of 1-2 seconds for better UX
+        const elapsedTime = Date.now() - startTime;
+        const minLoadingTime = 1000; // 1 second minimum
+        if (elapsedTime < minLoadingTime) {
+          await new Promise(resolve => setTimeout(resolve, minLoadingTime - elapsedTime));
+        }
+        
+        setApplications(mockApplications);
+        setFilteredApplications(mockApplications);
+        setLoading(false);
       } catch (error) {
         console.error('Error fetching applications:', error);
         setLoading(false);
@@ -133,7 +144,7 @@ export default function TrackingPage() {
 
   const handleDownload = (applicationId: string) => {
     // In a real app, you would download the document
-    alert(`Downloading document for application ${applicationId}`);
+    showToast(`Downloading document for application ${applicationId}`, 'info');
   };
 
   if (!user) {

@@ -45,6 +45,7 @@ export default function CitizenDashboard() {
     const fetchData = async () => {
       try {
         setLoading(true);
+        const startTime = Date.now();
         
         // Fetch grievances for the user
         const grievances: Grievance[] = await apiClient.getGrievances(user?.id || '');
@@ -94,6 +95,13 @@ export default function CitizenDashboard() {
             activity.status === 'Completed'
           ).length
         });
+        
+        // Ensure minimum loading time of 1-2 seconds for better UX
+        const elapsedTime = Date.now() - startTime;
+        const minLoadingTime = 1000; // 1 second minimum
+        if (elapsedTime < minLoadingTime) {
+          await new Promise(resolve => setTimeout(resolve, minLoadingTime - elapsedTime));
+        }
         
         setLoading(false);
       } catch (error) {

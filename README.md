@@ -112,6 +112,24 @@ npm run build
 npm start
 ```
 
+### Default Login Credentials
+
+For testing and development purposes, the system has predefined accounts with default passwords:
+
+#### Officer Account
+- Email: `officer@epanchayat.com`
+- Default Password: `officer123`
+
+#### Staff Accounts
+- Email: `staff1@epanchayat.com` or `staff2@epanchayat.com`
+- Default Password: `staff123`
+
+**Note:** On first login with these default credentials, the system will automatically hash and store the password. Users are encouraged to change their passwords after first login for security.
+
+#### Citizen Accounts
+- Citizens can register for new accounts using the registration page
+- No default credentials for citizens
+
 ### Environment Variables
 
 #### Frontend (.env.local)

@@ -69,6 +69,8 @@ const CertificateApplication = () => {
       try {
         setIsLoading(true);
         setAuthError(null);
+        const startTime = Date.now();
+        
         const userData = await apiClient.getCurrentUser();
         const user: User = {
           id: userData.id || '',
@@ -77,6 +79,13 @@ const CertificateApplication = () => {
           userType: userData.userType || 'Citizen'
         };
         setUser(user);
+        
+        // Ensure minimum loading time of 1-2 seconds for better UX
+        const elapsedTime = Date.now() - startTime;
+        const minLoadingTime = 1000; // 1 second minimum
+        if (elapsedTime < minLoadingTime) {
+          await new Promise(resolve => setTimeout(resolve, minLoadingTime - elapsedTime));
+        }
       } catch (error: unknown) {
         console.error('Error fetching user data:', error);
         const errorMessage = error instanceof Error ? error.message : 'Failed to authenticate user. Please login again.';

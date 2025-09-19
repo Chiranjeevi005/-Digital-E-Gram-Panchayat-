@@ -315,5 +315,22 @@ export const apiClient = {
   
   register: async (userData: { name: string; email: string; password: string }): Promise<RegisterResponse> => {
     return apiClient.post<RegisterResponse>('/auth/register', userData);
+  },
+  
+  // Staff-specific methods
+  updateCertificateStatus: async (certificateId: string, status: string, remarks?: string): Promise<any> => {
+    return apiClient.put<any>(`/certificates/${certificateId}/status`, { status, remarks });
+  },
+  
+  updateGrievanceStatus: async (grievanceId: string, status: string, remarks?: string): Promise<any> => {
+    return apiClient.put<any>(`/grievances/${grievanceId}/status`, { status, remarks });
+  },
+  
+  getCitizenRecords: async (): Promise<any[]> => {
+    return apiClient.get<any[]>('/citizens');
+  },
+  
+  getCitizenRecord: async (citizenId: string): Promise<any> => {
+    return apiClient.get<any>(`/citizens/${citizenId}`);
   }
 };

@@ -49,6 +49,18 @@ export default function LoginPage() {
     }
   };
 
+  // Predefined credentials information
+  const getDefaultCredentials = () => {
+    if (userType === 'Officer') {
+      return { email: 'officer@epanchayat.com', password: 'officer123' };
+    } else if (userType === 'Staff') {
+      return { email: 'staff1@epanchayat.com or staff2@epanchayat.com', password: 'staff123' };
+    }
+    return null;
+  };
+
+  const defaultCredentials = getDefaultCredentials();
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sky-50 to-emerald-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
@@ -65,6 +77,18 @@ export default function LoginPage() {
           <div className="rounded-md bg-green-50 p-4">
             <div className="text-sm text-green-700">
               {success}
+            </div>
+          </div>
+        )}
+        
+        {/* Default credentials information */}
+        {defaultCredentials && (
+          <div className="rounded-md bg-blue-50 p-4">
+            <div className="text-sm text-blue-700">
+              <p className="font-medium">Default credentials for {userType}:</p>
+              <p>Email: {defaultCredentials.email}</p>
+              <p>Password: {defaultCredentials.password}</p>
+              <p className="mt-1 text-xs">Please change your password after first login.</p>
             </div>
           </div>
         )}

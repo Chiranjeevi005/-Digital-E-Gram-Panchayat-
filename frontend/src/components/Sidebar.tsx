@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -9,7 +8,6 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ userType }: SidebarProps) {
-  const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
 
   const getNavItems = () => {
@@ -50,70 +48,40 @@ export default function Sidebar({ userType }: SidebarProps) {
   };
 
   return (
-    <>
-      {/* Mobile sidebar toggle button */}
-      <button
-        className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-md bg-white shadow-md text-gray-600 hover:text-gray-900 focus:outline-none"
-        onClick={() => setIsOpen(!isOpen)}
-        aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
-        </svg>
-      </button>
-
-      {/* Sidebar overlay for mobile */}
-      {isOpen && (
-        <div 
-          className="md:hidden fixed inset-0 z-40 bg-black bg-opacity-40"
-          onClick={() => setIsOpen(false)}
-          aria-hidden="true"
-        ></div>
-      )}
-
-      {/* Sidebar */}
-      <div 
-        className={`fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:shadow-none ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
-      >
-        <div className="flex flex-col h-full pt-16 md:pt-0">
-          {/* Sidebar header */}
-          <div className="flex items-center justify-center h-16 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-800">Navigation</h2>
-          </div>
-
-          {/* Sidebar content */}
-          <div className="flex-1 overflow-y-auto py-4">
-            <nav className="px-3 space-y-1">
-              {navItems.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
-                    isActive(item.href)
-                      ? 'bg-emerald-100 text-emerald-800'
-                      : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                  }`}
-                  onClick={() => setIsOpen(false)}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
-                  </svg>
-                  <span className="truncate">{item.name}</span>
-                </Link>
-              ))}
-            </nav>
-          </div>
-
-          {/* Sidebar footer */}
-          <div className="p-4 border-t border-gray-200">
-            <p className="text-xs text-gray-500 text-center">
-              Digital E-Panchayat v1.0
-            </p>
-          </div>
-        </div>
+    <div className="flex flex-col h-full">
+      {/* Sidebar header */}
+      <div className="flex items-center justify-center h-16 border-b border-gray-200">
+        <h2 className="text-lg font-semibold text-gray-800">Navigation</h2>
       </div>
-    </>
+
+      {/* Sidebar content */}
+      <div className="flex-1 overflow-y-auto py-4">
+        <nav className="px-3 space-y-1">
+          {navItems.map((item) => (
+            <Link
+              key={item.name}
+              href={item.href}
+              className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                isActive(item.href)
+                  ? 'bg-emerald-100 text-emerald-800'
+                  : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+              }`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
+              </svg>
+              <span className="truncate">{item.name}</span>
+            </Link>
+          ))}
+        </nav>
+      </div>
+
+      {/* Sidebar footer */}
+      <div className="p-4 border-t border-gray-200">
+        <p className="text-xs text-gray-500 text-center">
+          Digital E-Panchayat v1.0
+        </p>
+      </div>
+    </div>
   );
 }

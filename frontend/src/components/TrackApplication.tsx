@@ -2,12 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useToast } from './ToastContainer';
 
 const TrackApplication = () => {
   const [trackingId, setTrackingId] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const router = useRouter();
+  const { showToast } = useToast();
 
   useEffect(() => {
     // Check if user is authenticated
@@ -28,7 +30,7 @@ const TrackApplication = () => {
     // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
-      alert(`Tracking application with ID: ${trackingId}`);
+      showToast(`Tracking application with ID: ${trackingId}`, 'info');
     }, 1500);
   };
 

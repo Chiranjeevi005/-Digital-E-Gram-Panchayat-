@@ -19,6 +19,24 @@ The dashboard system provides customized interfaces for three user roles:
 3. **Officer** → Limited to 1 account:
    - officer@epanchayat.com
 
+### Default Credentials
+
+For testing and development purposes, the system has predefined accounts with default passwords:
+
+#### Officer Account
+- Email: `officer@epanchayat.com`
+- Default Password: `officer123`
+
+#### Staff Accounts
+- Email: `staff1@epanchayat.com` or `staff2@epanchayat.com`
+- Default Password: `staff123`
+
+**Note:** On first login with these default credentials, the system will automatically hash and store the password. Users are encouraged to change their passwords after first login for security.
+
+#### Citizen Accounts
+- Citizens can register for new accounts using the registration page
+- No default credentials for citizens
+
 ### Authentication Flow
 1. Users select their role during login
 2. Credentials are validated against predefined accounts for Staff and Officer roles
@@ -198,6 +216,3 @@ The dashboard system is ready for deployment with the existing Digital E-Panchay
 Regular maintenance tasks include:
 - Monitoring authentication logs
 - Updating user account information
-- Reviewing access permissions
-- Performance optimization
-- Security updates

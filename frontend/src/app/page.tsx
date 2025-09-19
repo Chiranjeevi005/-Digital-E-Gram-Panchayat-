@@ -40,11 +40,11 @@ export default function Home() {
   const [showSkeleton, setShowSkeleton] = useState(true);
   const [minTimeElapsed, setMinTimeElapsed] = useState(false);
 
-  // Show skeleton loader for minimum 3.5 seconds
+  // Show skeleton loader for minimum 1 second
   useEffect(() => {
     const timer = setTimeout(() => {
       setMinTimeElapsed(true);
-    }, 3500);
+    }, 1000);
 
     return () => clearTimeout(timer);
   }, []);

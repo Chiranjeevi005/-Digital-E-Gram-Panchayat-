@@ -138,8 +138,17 @@ const SchemesPage = () => {
     const fetchSchemes = async () => {
       try {
         setLoading(true);
+        const startTime = Date.now();
+        
         const data = await apiClient.get<Scheme[]>('/schemes');
         setSchemes(data);
+        
+        // Ensure minimum loading time of 1-2 seconds for better UX
+        const elapsedTime = Date.now() - startTime;
+        const minLoadingTime = 1000; // 1 second minimum
+        if (elapsedTime < minLoadingTime) {
+          await new Promise(resolve => setTimeout(resolve, minLoadingTime - elapsedTime));
+        }
       } catch (err) {
         console.error('Error fetching schemes:', err);
         setError('Failed to load schemes. Please try again later.');
@@ -156,10 +165,19 @@ const SchemesPage = () => {
   const fetchApplications = async () => {
     try {
       setIsTrackingLoading(true);
+      const startTime = Date.now();
+      
       // In a real implementation, this would use the actual user ID
       const userId = 'CIT-001'; // This would come from auth context
       const data = await apiClient.get<SchemeApplication[]>(`/schemes/tracking/${userId}`);
       setApplications(data);
+      
+      // Ensure minimum loading time of 1-2 seconds for better UX
+      const elapsedTime = Date.now() - startTime;
+      const minLoadingTime = 1000; // 1 second minimum
+      if (elapsedTime < minLoadingTime) {
+        await new Promise(resolve => setTimeout(resolve, minLoadingTime - elapsedTime));
+      }
     } catch (err) {
       console.error('Error fetching applications:', err);
       showToast('Failed to load applications', 'error');

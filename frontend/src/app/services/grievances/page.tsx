@@ -117,10 +117,19 @@ const GrievancePage = () => {
   const fetchGrievances = async () => {
     try {
       setLoading(true);
+      const startTime = Date.now();
+      
       // In a real implementation, this would use the actual user ID
       const userId = 'CIT-001'; // This would come from auth context
       const data = await apiClient.get<Grievance[]>(`/grievances/user/${userId}`);
       setGrievances(data);
+      
+      // Ensure minimum loading time of 1-2 seconds for better UX
+      const elapsedTime = Date.now() - startTime;
+      const minLoadingTime = 1000; // 1 second minimum
+      if (elapsedTime < minLoadingTime) {
+        await new Promise(resolve => setTimeout(resolve, minLoadingTime - elapsedTime));
+      }
     } catch (err) {
       console.error('Error fetching grievances:', err);
       setError('Failed to load grievances. Please try again later.');

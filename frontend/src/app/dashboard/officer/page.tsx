@@ -5,7 +5,6 @@ import { useAuth } from '../../../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import ProtectedRoute from '../../../components/ProtectedRoute';
 import Link from 'next/link';
-import Sidebar from '../../../components/Sidebar';
 import { apiClient } from '../../../lib/api';
 
 // Define types for our data
@@ -78,6 +77,7 @@ export default function OfficerDashboard() {
     const fetchData = async () => {
       try {
         setLoading(true);
+        const startTime = Date.now();
         
         // Fetch all grievances to calculate metrics
         const allGrievances: Grievance[] = await apiClient.getAllGrievances();
@@ -120,6 +120,13 @@ export default function OfficerDashboard() {
         setStaffTasks(staffPerformance);
         setApprovals(pendingApprovals);
         
+        // Ensure minimum loading time of 1-2 seconds for better UX
+        const elapsedTime = Date.now() - startTime;
+        const minLoadingTime = 1000; // 1 second minimum
+        if (elapsedTime < minLoadingTime) {
+          await new Promise(resolve => setTimeout(resolve, minLoadingTime - elapsedTime));
+        }
+        
         setLoading(false);
       } catch (error) {
         console.error('Error fetching real-time data:', error);
@@ -152,12 +159,9 @@ export default function OfficerDashboard() {
 
   return (
     <ProtectedRoute allowedRoles={['Officer']}>
-      <div className="min-h-screen bg-gradient-to-br from-sky-50 to-emerald-50 flex">
-        {/* Sidebar */}
-        <Sidebar userType="Officer" />
-        
+      <div className="min-h-screen bg-gradient-to-br from-sky-50 to-emerald-50 flex flex-col">
         {/* Main content */}
-        <div className="flex-1 flex flex-col md:ml-0">
+        <div className="flex-1 flex flex-col">
           {/* Header */}
           <header className="bg-white shadow">
             <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">

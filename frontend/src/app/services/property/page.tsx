@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Navbar from '../../../components/Navbar';
 import Footer from '../../../components/Footer';
 import { apiClient } from '../../../lib/api';
+import { useToast } from '../../../components/ToastContainer';
 
 interface PropertyTaxData {
   propertyId: string;
@@ -36,6 +37,8 @@ interface MutationStatusData {
 }
 
 const PropertyLandServices = () => {
+  const { showToast } = useToast();
+
   // State for property tax
   const [propertyId, setPropertyId] = useState('');
   const [ownerName, setOwnerName] = useState('');
@@ -72,7 +75,7 @@ const PropertyLandServices = () => {
       setPropertyTaxData(response);
     } catch (error) {
       console.error('Error fetching property tax data:', error);
-      alert('Error fetching property tax data. Please try again.');
+      showToast('Error fetching property tax data. Please try again.', 'error');
     } finally {
       setIsPropertyTaxLoading(false);
     }
@@ -99,7 +102,7 @@ const PropertyLandServices = () => {
       setLandRecordId(createResponse.landRecordId);
     } catch (error) {
       console.error('Error fetching land record:', error);
-      alert('Error fetching land record. Please try again.');
+      showToast('Error fetching land record. Please try again.', 'error');
     } finally {
       setIsLandRecordLoading(false);
     }
@@ -115,7 +118,7 @@ const PropertyLandServices = () => {
       setMutationStatusData(response);
     } catch (error) {
       console.error('Error fetching mutation status:', error);
-      alert('Error fetching mutation status. Please try again.');
+      showToast('Error fetching mutation status. Please try again.', 'error');
     } finally {
       setIsMutationStatusLoading(false);
     }
@@ -137,7 +140,7 @@ const PropertyLandServices = () => {
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error(`Error downloading property tax receipt (${format}):`, error);
-      alert(`Error downloading property tax receipt. Please try again.`);
+      showToast(`Error downloading property tax receipt. Please try again.`, 'error');
     }
   };
 
@@ -157,7 +160,7 @@ const PropertyLandServices = () => {
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error(`Error downloading land record (${format}):`, error);
-      alert(`Error downloading land record. Please try again.`);
+      showToast(`Error downloading land record. Please try again.`, 'error');
     }
   };
 
@@ -177,7 +180,7 @@ const PropertyLandServices = () => {
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error(`Error downloading mutation acknowledgement (${format}):`, error);
-      alert(`Error downloading mutation acknowledgement. Please try again.`);
+      showToast(`Error downloading mutation acknowledgement. Please try again.`, 'error');
     }
   };
 

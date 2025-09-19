@@ -1,16 +1,10 @@
 'use client';
 
-import React, { createContext, useContext, useState } from 'react';
-import Toast from './Toast';
+import React, { createContext, useContext } from 'react';
+import { toast, ToastContainer as ReactToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 type ToastType = 'success' | 'error' | 'warning' | 'info';
-
-interface ToastMessage {
-  id: string;
-  message: string;
-  type: ToastType;
-  duration?: number;
-}
 
 interface ToastContextType {
   showToast: (message: string, type: ToastType, duration?: number) => void;
@@ -27,38 +21,50 @@ export const useToast = () => {
 };
 
 export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [toasts, setToasts] = useState<ToastMessage[]>([]);
-
   const showToast = (message: string, type: ToastType, duration?: number) => {
-    const id = Math.random().toString(36).substr(2, 9);
-    const newToast: ToastMessage = {
-      id,
-      message,
-      type,
-      duration
+    const options = {
+      position: "top-right" as const,
+      autoClose: duration || 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
     };
-    
-    setToasts(prev => [...prev, newToast]);
-  };
 
-  const removeToast = (id: string) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
+    switch (type) {
+      case 'success':
+        toast.success(message, options);
+        break;
+      case 'error':
+        toast.error(message, options);
+        break;
+      case 'warning':
+        toast.warn(message, options);
+        break;
+      case 'info':
+        toast.info(message, options);
+        break;
+      default:
+        toast(message, options);
+    }
   };
 
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <div className="toast-container fixed top-4 right-4 z-50 space-y-2">
-        {toasts.map(toast => (
-          <Toast
-            key={toast.id}
-            message={toast.message}
-            type={toast.type}
-            duration={toast.duration}
-            onClose={() => removeToast(toast.id)}
-          />
-        ))}
-      </div>
+      <ReactToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
     </ToastContext.Provider>
   );
 };
