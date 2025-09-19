@@ -139,6 +139,32 @@ export const getLandRecord = async (req: Request, res: Response) => {
   }
 };
 
+// Get all land records
+export const getAllLandRecords = async (req: Request, res: Response) => {
+  try {
+    let landRecords = [];
+    
+    try {
+      // Try to get from MongoDB first
+      landRecords = await LandRecord.find({});
+    } catch (dbError) {
+      // If MongoDB is not available, get from in-memory storage
+      landRecords = Array.from(inMemoryLandRecords.values());
+    }
+    
+    res.status(200).json({
+      success: true,
+      landRecords: landRecords
+    });
+  } catch (error: any) {
+    console.error('Error fetching all land records:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: error.message || 'Internal server error' 
+    });
+  }
+};
+
 // Generate a PDF certificate with professional design (following the same pattern as Birth/Death certificates)
 const generateLandRecordCertificatePDF = async (landRecord: any): Promise<string> => {
   return new Promise((resolve, reject) => {

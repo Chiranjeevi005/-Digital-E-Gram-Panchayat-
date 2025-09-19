@@ -37,7 +37,8 @@ interface PropertyTaxData {
   createdAt: string;
 }
 
-interface LandRecordData {
+export interface LandRecordData {
+  _id: string;
   surveyNo: string;
   owner: string;
   area: string;
@@ -289,6 +290,11 @@ export const apiClient = {
   // Updated land record methods to use the new on-demand endpoints
   createLandRecord: async (data: { owner: string; surveyNo: string; area: string; landType: string; encumbranceStatus: string }): Promise<{ landRecordId: string }> => {
     return apiClient.post<{ landRecordId: string }>('/landrecords', data);
+  },
+
+  getAllLandRecords: async (): Promise<LandRecordData[]> => {
+    const response = await apiClient.get<{ landRecords: LandRecordData[] }>('/landrecords');
+    return response.landRecords;
   },
 
   getLandRecord: async (id: string): Promise<{ landRecord: LandRecordData }> => {

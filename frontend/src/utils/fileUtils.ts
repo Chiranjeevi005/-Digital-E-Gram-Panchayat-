@@ -3,7 +3,7 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
 // Function to generate a professional PDF report
-export const generatePDFReport = (title: string, data: any): void => {
+export const generatePDFReport = (title: string, data: Record<string, Record<string, string> | string>): void => {
   const doc = new jsPDF();
   
   // Set font and title
@@ -27,7 +27,7 @@ export const generatePDFReport = (title: string, data: any): void => {
   // Add content
   let yPosition = 65;
   
-  Object.entries(data).forEach(([section, sectionData], index) => {
+  Object.entries(data).forEach(([section, sectionData]) => {
     // Add section title
     doc.setFontSize(14);
     doc.setTextColor(72, 186, 136);
@@ -38,7 +38,7 @@ export const generatePDFReport = (title: string, data: any): void => {
     doc.setFontSize(12);
     doc.setTextColor(0, 0, 0);
     
-    Object.entries(sectionData as any).forEach(([key, value]) => {
+    Object.entries(sectionData).forEach(([key, value]) => {
       // Check if we need a new page
       if (yPosition > 280) {
         doc.addPage();
@@ -77,7 +77,7 @@ export const generatePDFReport = (title: string, data: any): void => {
 };
 
 // Function to generate a JPG report
-export const generateJPGReport = async (title: string, data: any): Promise<void> => {
+export const generateJPGReport = async (title: string, data: Record<string, Record<string, string> | string>): Promise<void> => {
   // Create a temporary HTML element for rendering
   const tempElement = document.createElement('div');
   tempElement.style.position = 'absolute';
@@ -107,7 +107,7 @@ export const generateJPGReport = async (title: string, data: any): Promise<void>
         <div style="margin-left: 10px;">
     `;
     
-    Object.entries(sectionData as any).forEach(([key, value]) => {
+    Object.entries(sectionData).forEach(([key, value]) => {
       htmlContent += `
         <div style="margin-bottom: 8px; display: flex;">
           <div style="font-weight: bold; width: 200px; color: #374151;">${key}:</div>
@@ -155,7 +155,7 @@ export const generateJPGReport = async (title: string, data: any): Promise<void>
 // Function to generate and download a report
 export const generateAndDownloadReport = async (
   title: string, 
-  data: any, 
+  data: Record<string, Record<string, string> | string>, 
   format: 'pdf' | 'jpg'
 ): Promise<void> => {
   if (format === 'pdf') {

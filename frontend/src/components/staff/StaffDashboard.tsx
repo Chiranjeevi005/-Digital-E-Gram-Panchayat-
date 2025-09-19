@@ -10,8 +10,114 @@ import ProfileAndSettings from './ProfileAndSettings';
 import NotificationsCenter from './NotificationsCenter';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
+// Skeleton Loader Component for Staff Dashboard
+const StaffDashboardSkeleton = () => (
+  <div className="p-2 md:p-6 w-full">
+    {/* Tab Navigation Skeleton */}
+    <div className="mb-6 bg-white rounded-xl shadow-sm p-2 border border-gray-200">
+      <div className="flex flex-wrap gap-1 md:gap-2">
+        {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+          <div key={i} className="flex items-center justify-center py-2.5 px-3 md:px-4 rounded-lg bg-gray-100 animate-pulse">
+            <div className="h-4 w-4 md:h-5 md:w-5 bg-gray-300 rounded-full mr-1.5 md:mr-2"></div>
+            <div className="h-3 bg-gray-300 rounded w-16"></div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/* Dashboard Content Skeleton */}
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
+      {/* Welcome Card Skeleton */}
+      <div className="bg-gradient-to-r from-white to-emerald-50 rounded-xl shadow-lg p-6 lg:col-span-3 border border-emerald-100">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+          <div className="flex-1">
+            <div className="h-6 bg-gray-200 rounded w-1/3 mb-2 animate-pulse"></div>
+            <div className="h-4 bg-gray-200 rounded w-2/3 mb-4 animate-pulse"></div>
+          </div>
+          <div className="bg-gray-200 rounded-lg p-3 w-12 h-12 animate-pulse"></div>
+        </div>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="bg-gray-100 rounded-xl p-5 border border-gray-200 animate-pulse">
+              <div className="flex items-center">
+                <div className="bg-gray-200 p-3 rounded-xl mr-4 w-12 h-12"></div>
+                <div>
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-1"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Summary Statistics Chart Skeleton */}
+      <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+        <div className="flex items-center justify-between mb-4">
+          <div className="h-5 bg-gray-200 rounded w-1/4 animate-pulse"></div>
+          <div className="bg-gray-200 p-2 rounded-lg w-8 h-8 animate-pulse"></div>
+        </div>
+        <div className="h-64 bg-gray-100 rounded animate-pulse"></div>
+        <div className="mt-4">
+          <div className="h-4 bg-gray-200 rounded w-1/3 mb-2 animate-pulse"></div>
+          <div className="flex flex-col md:flex-row items-center justify-center">
+            <div className="w-full md:w-1/2 h-32 bg-gray-100 rounded animate-pulse"></div>
+            <div className="w-full md:w-1/2 mt-4 md:mt-0">
+              <div className="space-y-2">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="flex items-center">
+                    <div className="w-3 h-3 rounded-full mr-2 bg-gray-200 animate-pulse"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/2 animate-pulse"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Access Cards Skeleton */}
+      <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+        <div className="flex items-center justify-between mb-4">
+          <div className="h-5 bg-gray-200 rounded w-1/4 animate-pulse"></div>
+          <div className="bg-gray-200 p-2 rounded-lg w-8 h-8 animate-pulse"></div>
+        </div>
+        <div className="space-y-4">
+          {[1, 2].map((i) => (
+            <div key={i} className="w-full p-4 rounded-xl border border-gray-200 animate-pulse">
+              <div className="flex items-center">
+                <div className="bg-gray-200 p-3 rounded-xl mr-4 w-12 h-12"></div>
+                <div className="flex-1">
+                  <div className="h-4 bg-gray-200 rounded w-1/2 mb-1"></div>
+                  <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+                </div>
+                <div className="w-5 h-5 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Recent Activity Skeleton */}
+      <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+        <div className="flex items-center justify-between mb-4">
+          <div className="h-5 bg-gray-200 rounded w-1/4 animate-pulse"></div>
+          <div className="bg-gray-200 p-2 rounded-lg w-8 h-8 animate-pulse"></div>
+        </div>
+        <div className="space-y-4">
+          <div className="text-center py-8">
+            <div className="h-4 bg-gray-200 rounded w-1/3 mx-auto animate-pulse"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
 export default function StaffDashboard() {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [loading, setLoading] = useState(false); // Set to false by default for now
 
   // Mock data for summary statistics
   const summaryData = [
@@ -33,6 +139,10 @@ export default function StaffDashboard() {
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
   const renderActiveTab = () => {
+    if (loading) {
+      return <StaffDashboardSkeleton />;
+    }
+
     switch (activeTab) {
       case 'certificates':
         return <CertificateManagement />;

@@ -28,6 +28,105 @@ interface Grievance {
   createdAt: string;
 }
 
+// Skeleton Loader Component for Staff Dashboard
+const StaffDashboardSkeleton = () => (
+  <div className="space-y-6">
+    {/* Hero Welcome Section with Quick Stats Skeleton */}
+    <div className="mb-6 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl p-4 md:p-5 text-white shadow-lg">
+      <div className="animate-pulse">
+        <div className="h-6 bg-white bg-opacity-30 rounded w-1/3 mb-2"></div>
+        <div className="h-4 bg-white bg-opacity-30 rounded w-1/2 mb-4"></div>
+        {/* Quick stats cards skeleton */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-3">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="bg-white bg-opacity-30 rounded-lg p-2 md:p-3">
+              <div className="flex items-center">
+                <div className="bg-emerald-600 p-1.5 md:p-2 rounded-full mr-2 md:mr-3">
+                  <div className="h-4 w-4 md:h-5 md:w-5 bg-white rounded-full"></div>
+                </div>
+                <div className="flex-1">
+                  <div className="h-3 bg-white bg-opacity-50 rounded w-3/4 mb-1"></div>
+                  <div className="h-5 bg-white bg-opacity-70 rounded w-1/2"></div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    {/* Staff Dashboard Tabs and Content Skeleton */}
+    <div className="bg-white rounded-xl shadow-sm p-2 border border-gray-200">
+      <div className="flex flex-wrap gap-1 md:gap-2 mb-4">
+        {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+          <div key={i} className="flex items-center justify-center py-2.5 px-3 md:px-4 rounded-lg bg-gray-100 animate-pulse">
+            <div className="h-4 w-4 md:h-5 md:w-5 bg-gray-300 rounded-full mr-1.5 md:mr-2"></div>
+            <div className="h-3 bg-gray-300 rounded w-16"></div>
+          </div>
+        ))}
+      </div>
+      
+      {/* Dashboard Content Skeleton */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Certificate Management Skeleton */}
+        <div className="bg-gray-50 rounded-xl p-5 border border-gray-200 lg:col-span-2">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+            <div>
+              <div className="h-6 bg-gray-200 rounded w-1/3 mb-2 animate-pulse"></div>
+              <div className="h-4 bg-gray-200 rounded w-2/3 animate-pulse"></div>
+            </div>
+            <div className="flex gap-2">
+              <div className="h-10 bg-gray-200 rounded-lg w-24 animate-pulse"></div>
+              <div className="h-10 bg-gray-200 rounded-lg w-24 animate-pulse"></div>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-white p-4 rounded-lg border border-gray-200 text-center animate-pulse">
+                <div className="h-6 bg-gray-200 rounded w-3/4 mx-auto mb-2"></div>
+                <div className="h-8 bg-gray-200 rounded w-1/2 mx-auto"></div>
+              </div>
+            ))}
+          </div>
+          
+          <div className="bg-white rounded-lg border border-gray-200 p-4 animate-pulse">
+            <div className="h-5 bg-gray-200 rounded w-1/4 mb-4"></div>
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex items-center p-3 border border-gray-200 rounded">
+                  <div className="flex-1">
+                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                  </div>
+                  <div className="h-6 bg-gray-200 rounded w-20"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        
+        {/* Recent Activity Skeleton */}
+        <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
+          <div className="h-5 bg-gray-200 rounded w-1/4 mb-4 animate-pulse"></div>
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-white rounded-lg border border-gray-200 p-4 animate-pulse">
+                <div className="flex justify-between mb-2">
+                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-16"></div>
+                </div>
+                <div className="h-3 bg-gray-200 rounded w-3/4 mb-2"></div>
+                <div className="h-3 bg-gray-200 rounded w-1/3"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
 export default function StaffDashboardPage() {
   const { user, logout } = useAuth();
   const router = useRouter();
@@ -125,75 +224,81 @@ export default function StaffDashboardPage() {
           {/* Main content area */}
           <main className="flex-1 py-4 md:py-6">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-              {/* Hero Welcome Section with Quick Stats */}
-              <div className="mb-6 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl p-4 md:p-5 text-white shadow-lg">
-                <h1 className="text-xl md:text-2xl font-bold mb-1 md:mb-2">Welcome, {user?.name}!</h1>
-                <p className="text-emerald-100 text-xs md:text-sm mb-3 md:mb-4">Your administrative dashboard for efficient service delivery.</p>
-                {/* Quick stats cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-3">
-                  <div className="bg-white bg-opacity-30 rounded-lg p-2 md:p-3 backdrop-blur-sm">
-                    <div className="flex items-center">
-                      <div className="bg-emerald-600 p-1.5 md:p-2 rounded-full mr-2 md:mr-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 md:h-4 md:w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
+              {loading ? (
+                <StaffDashboardSkeleton />
+              ) : (
+                <>
+                  {/* Hero Welcome Section with Quick Stats */}
+                  <div className="mb-6 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl p-4 md:p-5 text-white shadow-lg">
+                    <h1 className="text-xl md:text-2xl font-bold mb-1 md:mb-2">Welcome, {user?.name}!</h1>
+                    <p className="text-emerald-100 text-xs md:text-sm mb-3 md:mb-4">Your administrative dashboard for efficient service delivery.</p>
+                    {/* Quick stats cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-3">
+                      <div className="bg-white bg-opacity-30 rounded-lg p-2 md:p-3 backdrop-blur-sm">
+                        <div className="flex items-center">
+                          <div className="bg-emerald-600 p-1.5 md:p-2 rounded-full mr-2 md:mr-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 md:h-4 md:w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                          </div>
+                          <div>
+                            <p className="text-[10px] md:text-xs text-emerald-900 font-medium">Pending Certificates</p>
+                            <p className="text-base md:text-lg font-bold text-gray-800">{stats.pendingCertificates}</p>
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-[10px] md:text-xs text-emerald-900 font-medium">Pending Certificates</p>
-                        <p className="text-base md:text-lg font-bold text-gray-800">{loading ? '...' : stats.pendingCertificates}</p>
+                      <div className="bg-white bg-opacity-30 rounded-lg p-2 md:p-3 backdrop-blur-sm">
+                        <div className="flex items-center">
+                          <div className="bg-emerald-600 p-1.5 md:p-2 rounded-full mr-2 md:mr-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 md:h-4 md:w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                            </svg>
+                          </div>
+                          <div>
+                            <p className="text-[10px] md:text-xs text-emerald-900 font-medium">Assigned Grievances</p>
+                            <p className="text-base md:text-lg font-bold text-gray-800">{stats.assignedGrievances}</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="bg-white bg-opacity-30 rounded-lg p-2 md:p-3 backdrop-blur-sm">
+                        <div className="flex items-center">
+                          <div className="bg-emerald-600 p-1.5 md:p-2 rounded-full mr-2 md:mr-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 md:h-4 md:w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                            </svg>
+                          </div>
+                          <div>
+                            <p className="text-[10px] md:text-xs text-emerald-900 font-medium">Citizen Records</p>
+                            <p className="text-base md:text-lg font-bold text-gray-800">{stats.citizenRecords}</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="bg-white bg-opacity-30 rounded-lg p-2 md:p-3 backdrop-blur-sm">
+                        <div className="flex items-center">
+                          <div className="bg-emerald-600 p-1.5 md:p-2 rounded-full mr-2 md:mr-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 md:h-4 md:w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          </div>
+                          <div>
+                            <p className="text-[10px] md:text-xs text-emerald-900 font-medium">Pending Schemes</p>
+                            <p className="text-base md:text-lg font-bold text-gray-800">{stats.pendingSchemes}</p>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
-                  <div className="bg-white bg-opacity-30 rounded-lg p-2 md:p-3 backdrop-blur-sm">
-                    <div className="flex items-center">
-                      <div className="bg-emerald-600 p-1.5 md:p-2 rounded-full mr-2 md:mr-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 md:h-4 md:w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-[10px] md:text-xs text-emerald-900 font-medium">Assigned Grievances</p>
-                        <p className="text-base md:text-lg font-bold text-gray-800">{loading ? '...' : stats.assignedGrievances}</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-white bg-opacity-30 rounded-lg p-2 md:p-3 backdrop-blur-sm">
-                    <div className="flex items-center">
-                      <div className="bg-emerald-600 p-1.5 md:p-2 rounded-full mr-2 md:mr-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 md:h-4 md:w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-[10px] md:text-xs text-emerald-900 font-medium">Citizen Records</p>
-                        <p className="text-base md:text-lg font-bold text-gray-800">{loading ? '...' : stats.citizenRecords}</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-white bg-opacity-30 rounded-lg p-2 md:p-3 backdrop-blur-sm">
-                    <div className="flex items-center">
-                      <div className="bg-emerald-600 p-1.5 md:p-2 rounded-full mr-2 md:mr-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 md:h-4 md:w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-[10px] md:text-xs text-emerald-900 font-medium">Pending Schemes</p>
-                        <p className="text-base md:text-lg font-bold text-gray-800">{loading ? '...' : stats.pendingSchemes}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
 
-              {/* Dashboard Content */}
-              <StaffDashboard />
+                  {/* Staff Dashboard Components */}
+                  <StaffDashboard />
+                </>
+              )}
             </div>
           </main>
-          
-          {/* Footer */}
-          <Footer />
         </div>
+        
+        {/* Footer */}
+        <Footer />
       </div>
     </ProtectedRoute>
   );

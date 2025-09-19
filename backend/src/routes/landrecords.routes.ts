@@ -2,11 +2,15 @@ import { Router } from 'express';
 import {
   createLandRecord,
   getLandRecord,
+  getAllLandRecords,
   downloadLandRecordCertificatePDF,
   downloadLandRecordCertificateJPG
 } from '../controllers/landrecords.controller';
 
 const router = Router();
+
+// Get all land records
+router.get('/', getAllLandRecords);
 
 // Create a new land record
 router.post('/', createLandRecord);
