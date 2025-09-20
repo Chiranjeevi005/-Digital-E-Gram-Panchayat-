@@ -3,26 +3,9 @@
 import { useState, useEffect } from 'react';
 import { generateAndDownloadReport } from '../../utils/fileUtils';
 import { useToast } from '../../components/ToastContainer';
-import { apiClient } from '../../lib/api';
+import { apiClient, SchemeApplication } from '../../lib/api';
 
-interface SchemeApplication {
-  _id: string;
-  citizenId: string;
-  schemeId: string;
-  schemeName: string;
-  applicantName: string;
-  fatherName: string;
-  address: string;
-  phone: string;
-  email: string;
-  income: string;
-  caste: string;
-  documents: string[];
-  status: string;
-  submittedAt: string;
-  updatedAt: string;
-  remarks?: string;
-}
+
 
 export default function SchemeApplications() {
   const { showToast } = useToast();
@@ -90,7 +73,7 @@ export default function SchemeApplications() {
       
       // Update local state
       const updatedApplications = applications.map(app => 
-        app._id === selectedApplication._id ? { ...app, status, remarks } : app
+        app.id === selectedApplication.id ? { ...app, status, remarks } : app
       );
       setApplications(updatedApplications);
       
@@ -119,15 +102,15 @@ export default function SchemeApplications() {
     // Generate document verification report
     const verificationData = {
       "Verification Report": {
-        "Application ID": application._id,
-        "Applicant Name": application.applicantName,
+        "Application ID": application.id,
+        "Applicant Name": application.applicantName || 'N/A',
         "Scheme Name": application.schemeName,
         "Verification Date": new Date().toLocaleDateString(),
         "Verification Status": "Verified",
         "Verified By": "Staff User"
       },
       "Document Details": {
-        "Total Documents": application.documents.length,
+        "Total Documents": application.documents.length.toString(),
         "Documents Verified": application.documents.join(', '),
         "Verification Notes": "All documents verified successfully",
         "Additional Remarks": "No discrepancies found"
@@ -258,18 +241,18 @@ export default function SchemeApplications() {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {applications.map((application) => (
-                <tr key={application._id} className="hover:bg-gray-50 transition-colors duration-150">
+                <tr key={application.id} className="hover:bg-gray-50 transition-colors duration-150">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">{application.applicantName}</div>
                     <div className="text-sm text-gray-500">
-                      {application.address.split(',')[application.address.split(',').length - 1].trim() || 'N/A'}
+                      {application.address ? application.address.split(',')[application.address.split(',').length - 1].trim() : 'N/A'}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {application.schemeName}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(application.submittedAt).toLocaleDateString()}
+                    {new Date(application.appliedAt).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(application.status)}`}>
@@ -314,7 +297,7 @@ export default function SchemeApplications() {
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">
                     {selectedApplication.schemeName} Application
                   </h3>
-                  <p className="text-gray-600">Application ID: {selectedApplication._id.substring(0, 8)}</p>
+                  <p className="text-gray-600">Application ID: {selectedApplication.id.substring(0, 8)}</p>
                 </div>
                 <button
                   onClick={() => setShowModal(false)}
@@ -340,7 +323,7 @@ export default function SchemeApplications() {
                       <span className="text-gray-900">{selectedApplication.applicantName}</span>
                     </div>
                     <div className="flex">
-                      <span className="font-medium w-36 text-gray-700">Father's Name:</span>
+                      <span className="font-medium w-36 text-gray-700">Father&apos;s Name:</span>
                       <span className="text-gray-900">{selectedApplication.fatherName}</span>
                     </div>
                     <div className="flex">
@@ -388,7 +371,7 @@ export default function SchemeApplications() {
                     </div>
                     <div className="flex">
                       <span className="font-medium w-24 text-gray-700">Submitted:</span>
-                      <span className="text-gray-900">{new Date(selectedApplication.submittedAt).toLocaleString()}</span>
+                      <span className="text-gray-900">{new Date(selectedApplication.appliedAt).toLocaleString()}</span>
                     </div>
                   </div>
                 </div>

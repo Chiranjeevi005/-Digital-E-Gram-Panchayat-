@@ -3,495 +3,272 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.downloadCertificate = exports.getCertificateStatus = exports.updateCertificate = exports.getCertificatePreview = exports.applyForCertificate = void 0;
-const CertificateApplication_1 = __importDefault(require("../models/CertificateApplication"));
-const path_1 = __importDefault(require("path"));
+exports.downloadCertificate = exports.getCertificateStatus = exports.updateCertificate = exports.getCertificatePreview = exports.applyForCertificate = exports.getAllCertificates = void 0;
 const fs_1 = __importDefault(require("fs"));
 const pdfkit_1 = __importDefault(require("pdfkit"));
-const sharp_1 = __importDefault(require("sharp")); // Add sharp for JPG conversion
-// In-memory storage for demo purposes when MongoDB is not available
-const inMemoryApplications = new Map();
-// In-memory storage for demo purposes
-// In production, use a proper file storage solution
-const UPLOAD_DIR = path_1.default.join(__dirname, '../../uploads');
-// Create directories if they don't exist
-if (!fs_1.default.existsSync(UPLOAD_DIR)) {
-    fs_1.default.mkdirSync(UPLOAD_DIR, { recursive: true });
-}
-// Generate a PDF certificate with professional design (optimized for both mobile and desktop)
-const generateCertificatePDF = async (application) => {
-    return new Promise((resolve, reject) => {
-        try {
-            const fileName = `certificate_${application._id}.pdf`;
-            const filePath = path_1.default.join(UPLOAD_DIR, fileName);
-            // Create a document with A4 size
-            const doc = new pdfkit_1.default({
-                size: 'A4',
-                margin: 30
-            });
-            // Pipe its output to a file
-            doc.pipe(fs_1.default.createWriteStream(filePath));
-            // Set background color to match frontend
-            doc.save();
-            doc.rect(0, 0, doc.page.width, doc.page.height).fill('#f0f9ff'); // Light blue background
-            doc.restore();
-            // Add elegant border/frame around page to match frontend
-            doc.rect(10, 10, doc.page.width - 20, doc.page.height - 20).stroke('#1e40af'); // Dark blue border
-            // Add watermark to match frontend
-            doc.save();
-            doc.fontSize(24);
-            doc.fillColor('#dbeafe'); // Very light blue for watermark
-            doc.text('Digital e-Gram Panchayat - Official', 0, doc.page.height / 2 - 10, {
-                width: doc.page.width,
-                align: 'center',
-                oblique: true
-            });
-            doc.restore();
-            // Add header with certificate title to match frontend
-            doc.save();
-            // Certificate title - Bold, Serif font
-            doc.fontSize(28);
-            doc.fillColor('#1e40af'); // Dark blue for headings
-            doc.font('Helvetica-Bold');
-            doc.text('CERTIFICATE', 0, 50, { width: doc.page.width, align: 'center' });
-            doc.fontSize(18);
-            doc.text(`OF ${application.certificateType.toUpperCase()}`, 0, 85, { width: doc.page.width, align: 'center' });
-            // Add decorative line under title to match frontend
-            doc.moveTo(60, 110)
-                .lineTo(doc.page.width - 60, 110)
-                .stroke('#1e40af');
-            doc.restore();
-            // Add content to the PDF with proper spacing (optimized for single page)
-            doc.fontSize(10);
-            doc.fillColor('#374151'); // Dark gray for body text
-            doc.font('Helvetica');
-            // Certificate body with clean, well-aligned fields
-            const contentStartY = 130;
-            // "This is to certify that" section
-            doc.fontSize(11);
-            doc.text('This is to certify that', 0, contentStartY, { width: doc.page.width, align: 'center' });
-            // Applicant name - larger and bold
-            doc.fontSize(16);
-            doc.font('Helvetica-Bold');
-            doc.text(application.applicantName, 0, contentStartY + 20, { width: doc.page.width, align: 'center' });
-            // Parents' names if available
-            if (application.fatherName || application.motherName) {
-                let parentText = '';
-                if (application.fatherName && application.motherName) {
-                    parentText = `Son/Daughter of ${application.fatherName} and ${application.motherName}`;
-                }
-                else if (application.fatherName) {
-                    parentText = `Son/Daughter of ${application.fatherName}`;
-                }
-                else if (application.motherName) {
-                    parentText = `Son/Daughter of ${application.motherName}`;
-                }
-                doc.fontSize(11);
-                doc.font('Helvetica');
-                doc.text(parentText, 0, contentStartY + 38, { width: doc.page.width, align: 'center' });
-            }
-            // Certificate event description
-            const parentOffset = application.fatherName || application.motherName ? 18 : 0;
-            doc.fontSize(11);
-            doc.text(`was involved in a ${application.certificateType.toLowerCase()} event`, 0, contentStartY + 38 + parentOffset, { width: doc.page.width, align: 'center' });
-            // Date and place information
-            doc.fontSize(11);
-            doc.text(`on ${new Date(application.date).toDateString()}`, 0, contentStartY + 56 + parentOffset, { width: doc.page.width, align: 'center' });
-            doc.text(`at ${application.place}`, 0, contentStartY + 74 + parentOffset, { width: doc.page.width, align: 'center' });
-            // Application ID and status
-            doc.fontSize(9);
-            doc.text(`Application ID: ${application._id}`, 0, contentStartY + 100 + parentOffset, { width: doc.page.width, align: 'center' });
-            doc.text(`Status: ${application.status}`, 0, contentStartY + 115 + parentOffset, { width: doc.page.width, align: 'center' });
-            // Add seal in bottom-right corner to match frontend
-            const sealX = doc.page.width - 65;
-            const sealY = doc.page.height - 100;
-            // Draw circular seal
-            doc.circle(sealX, sealY, 25).lineWidth(1.5).stroke('#92400e'); // Gold/brown color for seal
-            doc.circle(sealX, sealY, 20).lineWidth(1).stroke('#92400e');
-            // Seal text
-            doc.fontSize(5);
-            doc.fillColor('#92400e');
-            doc.text('Digital e-Gram', sealX - 20, sealY - 10, { width: 40, align: 'center' });
-            doc.text('Panchayat', sealX - 20, sealY - 6, { width: 40, align: 'center' });
-            doc.text('Official', sealX - 20, sealY - 2, { width: 40, align: 'center' });
-            doc.text('Seal', sealX - 20, sealY + 2, { width: 40, align: 'center' });
-            // Add signature area in bottom-left corner to match frontend
-            const signatureX = 60;
-            const signatureY = doc.page.height - 85;
-            doc.fontSize(7);
-            doc.fillColor('#374151');
-            doc.text('Generated by Digital e-Gram Panchayat', signatureX, signatureY - 25);
-            // Draw signature line
-            doc.moveTo(signatureX, signatureY - 12)
-                .lineTo(signatureX + 100, signatureY - 12)
-                .stroke('#374151');
-            doc.text('Authorized Officer Signature', signatureX, signatureY);
-            // Add official stamp text
-            doc.fontSize(6);
-            doc.text('Official Document', 0, doc.page.height - 25, { width: doc.page.width, align: 'center' });
-            // Finalize PDF file
-            doc.end();
-            // Resolve with the file name when the document is finished
-            doc.on('end', () => {
-                resolve(fileName);
-            });
-            // Handle errors
-            doc.on('error', (err) => {
-                reject(err);
-            });
-        }
-        catch (error) {
-            reject(error);
-        }
-    });
-};
-// Generate a JPG certificate from PDF
-const generateCertificateJPG = async (application) => {
+const documentGenerator_1 = require("../utils/documentGenerator");
+// Mock database
+let certificates = [
+    {
+        _id: '1',
+        id: '1',
+        type: 'Birth Certificate',
+        certificateType: 'Birth',
+        applicantName: 'John Doe',
+        date: '2023-05-15',
+        place: 'Village Hospital',
+        status: 'Approved',
+        certificateNumber: 'BC-2023-001',
+        issuedDate: '2023-05-20',
+        fatherName: 'Robert Doe',
+        motherName: 'Mary Doe'
+    },
+    {
+        _id: '2',
+        id: '2',
+        type: 'Income Certificate',
+        certificateType: 'Income',
+        applicantName: 'Jane Smith',
+        fatherName: 'Michael Smith',
+        address: '123 Main St, Sample Village',
+        income: '₹50,000',
+        status: 'Approved',
+        certificateNumber: 'IC-2023-002',
+        issuedDate: '2023-05-21'
+    }
+];
+// Get all certificates
+const getAllCertificates = async (req, res) => {
     try {
-        // First generate the PDF
-        const pdfFileName = await generateCertificatePDF(application);
-        const pdfPath = path_1.default.join(UPLOAD_DIR, pdfFileName);
-        // Ensure the PDF file exists
-        if (!fs_1.default.existsSync(pdfPath)) {
-            throw new Error('PDF file was not generated successfully');
-        }
-        // Convert PDF to JPG
-        const jpgFileName = `certificate_${application._id}.jpg`;
-        const jpgPath = path_1.default.join(UPLOAD_DIR, jpgFileName);
-        // Try to convert PDF to JPG using sharp
-        try {
-            const pdfBuffer = await fs_1.default.promises.readFile(pdfPath);
-            await (0, sharp_1.default)(pdfBuffer, {
-                density: 300,
-                pages: 1 // Only convert first page
-            })
-                .jpeg({ quality: 90 })
-                .toFile(jpgPath);
-        }
-        catch (pdfConversionError) {
-            // If PDF conversion fails, create a simple placeholder JPG
-            console.warn('PDF to JPG conversion failed, creating placeholder image:', pdfConversionError);
-            // Create a simple placeholder image with the same design as the PDF
-            const placeholderBuffer = await (0, sharp_1.default)({
-                create: {
-                    width: 800,
-                    height: 600,
-                    channels: 3,
-                    background: { r: 240, g: 249, b: 255 } // Light blue background
-                }
-            })
-                .jpeg({ quality: 90 })
-                .toBuffer();
-            await (0, sharp_1.default)(placeholderBuffer)
-                .composite([
-                // Add text to the placeholder
-                {
-                    input: Buffer.from(`<svg width="800" height="600">
-                <rect x="20" y="20" width="760" height="560" fill="none" stroke="#1e40af" stroke-width="2"/>
-                <text x="400" y="100" font-family="Arial" font-size="36" fill="#1e40af" text-anchor="middle">CERTIFICATE</text>
-                <text x="400" y="150" font-family="Arial" font-size="24" fill="#1e40af" text-anchor="middle">OF ${application.certificateType.toUpperCase()}</text>
-                <text x="400" y="250" font-family="Arial" font-size="20" fill="#374151" text-anchor="middle">${application.applicantName}</text>
-                <text x="400" y="300" font-family="Arial" font-size="14" fill="#374151" text-anchor="middle">This is to certify that</text>
-                <text x="400" y="350" font-family="Arial" font-size="14" fill="#374151" text-anchor="middle">was involved in a ${application.certificateType.toLowerCase()} event</text>
-                <text x="400" y="400" font-family="Arial" font-size="14" fill="#374151" text-anchor="middle">on ${new Date(application.date).toDateString()} at ${application.place}</text>
-                <text x="400" y="500" font-family="Arial" font-size="10" fill="#374151" text-anchor="middle">Generated by Digital e-Gram Panchayat</text>
-                <text x="400" y="550" font-family="Arial" font-size="8" fill="#374151" text-anchor="middle">Official Document</text>
-              </svg>`),
-                    top: 0,
-                    left: 0
-                }
-            ])
-                .jpeg({ quality: 90 })
-                .toFile(jpgPath);
-        }
-        return jpgFileName;
+        res.json(certificates);
     }
     catch (error) {
-        console.error('Error generating JPG certificate:', error);
-        throw error;
+        console.error('Error fetching certificates:', error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
-// Helper function to generate a mock ID
-const generateMockId = () => {
-    return 'CRT-' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substr(2, 5).toUpperCase();
-};
+exports.getAllCertificates = getAllCertificates;
+// Apply for a certificate
 const applyForCertificate = async (req, res) => {
     try {
-        const { applicantName, fatherName, motherName, certificateType, date, place, supportingFiles, declaration } = req.body;
-        // Validate required fields
-        if (!applicantName || !certificateType || !date || !place) {
-            return res.status(400).json({
-                success: false,
-                message: 'All required fields must be provided'
-            });
+        // Extract all possible fields from request body
+        const { type, applicantName, fatherName, motherName, date, place, brideName, groomName, witnessNames, registrationNo, address, income, caste, subCaste, ward, village, district } = req.body;
+        if (!type || !applicantName) {
+            return res.status(400).json({ message: 'Type and applicant name are required' });
         }
-        // Validate certificate type (only allow Birth and Death)
-        const validCertificateTypes = ['Birth', 'Death'];
-        if (!validCertificateTypes.includes(certificateType)) {
-            return res.status(400).json({
-                success: false,
-                message: 'Invalid certificate type. Only Birth and Death certificates are available.'
-            });
-        }
-        // Validate that applicantName is a string
-        if (typeof applicantName !== 'string') {
-            return res.status(400).json({
-                success: false,
-                message: 'Applicant name must be a valid text'
-            });
-        }
-        // Validate that place is a string
-        if (typeof place !== 'string') {
-            return res.status(400).json({
-                success: false,
-                message: 'Place must be a valid text'
-            });
-        }
-        // Validate declaration
-        if (!declaration) {
-            return res.status(400).json({
-                success: false,
-                message: 'You must declare that the information is correct'
-            });
-        }
-        // Create new certificate application
-        const newApplication = {
-            _id: generateMockId(),
+        const newCertificate = {
+            _id: (certificates.length + 1).toString(),
+            id: (certificates.length + 1).toString(),
+            type,
+            certificateType: type,
             applicantName,
             fatherName,
             motherName,
-            certificateType,
-            date: new Date(date),
+            date,
             place,
-            supportingFiles: supportingFiles || [],
-            status: 'Submitted',
-            createdAt: new Date()
+            brideName,
+            groomName,
+            witnessNames,
+            registrationNo,
+            address,
+            income,
+            caste,
+            subCaste,
+            ward,
+            village,
+            district,
+            status: 'Approved',
+            certificateNumber: `${type.substring(0, 1).toUpperCase()}C-2025-${(certificates.length + 1).toString().padStart(3, '0')}`,
+            issuedDate: new Date().toISOString().split('T')[0]
         };
-        // Save to in-memory storage
-        inMemoryApplications.set(newApplication._id, newApplication);
-        // Update status to Ready
-        newApplication.status = 'Ready';
-        // Generate certificate file
-        const certificateFile = await generateCertificatePDF(newApplication);
+        certificates.push(newCertificate);
         res.status(201).json({
             success: true,
-            message: 'Certificate application submitted successfully',
-            applicationId: newApplication._id,
-            status: newApplication.status,
-            downloadUrl: `/api/certificates/${newApplication._id}/download`
+            applicationId: newCertificate.id,
+            status: newCertificate.status,
+            message: 'Certificate application submitted successfully'
         });
     }
     catch (error) {
         console.error('Error applying for certificate:', error);
-        res.status(500).json({
-            success: false,
-            message: error.message || 'Internal server error'
-        });
+        res.status(500).json({ message: 'Server error' });
     }
 };
 exports.applyForCertificate = applyForCertificate;
+// Get certificate preview data
 const getCertificatePreview = async (req, res) => {
     try {
         const { id } = req.params;
-        // Try to get from MongoDB first, then from in-memory storage
-        let application = null;
-        try {
-            application = await CertificateApplication_1.default.findById(id);
+        const certificate = certificates.find(cert => cert.id === id);
+        if (!certificate) {
+            return res.status(404).json({ message: 'Certificate not found' });
         }
-        catch (dbError) {
-            // If MongoDB is not available, check in-memory storage
-            application = inMemoryApplications.get(id);
-        }
-        if (!application) {
-            return res.status(404).json({
-                success: false,
-                message: 'Certificate application not found'
-            });
-        }
-        res.status(200).json(application);
+        // Return certificate with both _id and id for compatibility
+        res.json({
+            ...certificate,
+            _id: certificate._id || certificate.id
+        });
     }
     catch (error) {
         console.error('Error fetching certificate preview:', error);
-        res.status(500).json({
-            success: false,
-            message: error.message || 'Internal server error'
-        });
+        res.status(500).json({ message: 'Server error' });
     }
 };
 exports.getCertificatePreview = getCertificatePreview;
+// Update certificate data
 const updateCertificate = async (req, res) => {
     try {
         const { id } = req.params;
-        const updateData = req.body;
-        // Try to get from MongoDB first, then from in-memory storage
-        let application = null;
-        try {
-            application = await CertificateApplication_1.default.findById(id);
-            if (application) {
-                // Update the application with new data
-                Object.assign(application, updateData);
-                // Save the updated application
-                const updatedApplication = await application.save();
-                application = updatedApplication;
-            }
+        const updates = req.body;
+        const certificateIndex = certificates.findIndex(cert => cert.id === id);
+        if (certificateIndex === -1) {
+            return res.status(404).json({ message: 'Certificate not found' });
         }
-        catch (dbError) {
-            // If MongoDB is not available, check in-memory storage
-            application = inMemoryApplications.get(id);
-            if (application) {
-                // Update the in-memory application
-                Object.assign(application, updateData);
-                inMemoryApplications.set(id, application);
-            }
-        }
-        if (!application) {
-            return res.status(404).json({
-                success: false,
-                message: 'Certificate application not found'
-            });
-        }
-        // Regenerate the certificate file with updated data
-        const certificateFile = await generateCertificatePDF(application);
-        res.status(200).json(application);
+        // Ensure _id is preserved
+        certificates[certificateIndex] = {
+            ...certificates[certificateIndex],
+            ...updates,
+            _id: certificates[certificateIndex]._id || certificates[certificateIndex].id
+        };
+        res.json(certificates[certificateIndex]);
     }
     catch (error) {
         console.error('Error updating certificate:', error);
-        res.status(500).json({
-            success: false,
-            message: error.message || 'Internal server error'
-        });
+        res.status(500).json({ message: 'Server error' });
     }
 };
 exports.updateCertificate = updateCertificate;
+// Get certificate status
 const getCertificateStatus = async (req, res) => {
     try {
         const { id } = req.params;
-        // Try to get from MongoDB first, then from in-memory storage
-        let application = null;
-        try {
-            application = await CertificateApplication_1.default.findById(id);
+        const certificate = certificates.find(cert => cert.id === id);
+        if (!certificate) {
+            return res.status(404).json({ message: 'Certificate not found' });
         }
-        catch (dbError) {
-            // If MongoDB is not available, check in-memory storage
-            application = inMemoryApplications.get(id);
-        }
-        if (!application) {
-            return res.status(404).json({
-                success: false,
-                message: 'Certificate application not found'
-            });
-        }
-        res.status(200).json({
-            success: true,
-            applicationId: application._id,
-            status: application.status,
-            certificateType: application.certificateType,
-            applicantName: application.applicantName,
-            fatherName: application.fatherName,
-            motherName: application.motherName,
-            date: application.date,
-            place: application.place
-        });
+        res.json({ status: certificate.status });
     }
     catch (error) {
         console.error('Error fetching certificate status:', error);
-        res.status(500).json({
-            success: false,
-            message: error.message || 'Internal server error'
-        });
+        res.status(500).json({ message: 'Server error' });
     }
 };
 exports.getCertificateStatus = getCertificateStatus;
+// Download certificate
 const downloadCertificate = async (req, res) => {
     try {
         const { id } = req.params;
-        const { format } = req.query; // 'pdf' or 'jpg'
-        // Try to get from MongoDB first, then from in-memory storage
-        let application = null;
-        try {
-            application = await CertificateApplication_1.default.findById(id);
+        const { format } = req.query;
+        const certificate = certificates.find(cert => cert.id === id);
+        if (!certificate) {
+            return res.status(404).json({ message: 'Certificate not found' });
         }
-        catch (dbError) {
-            // If MongoDB is not available, check in-memory storage
-            application = inMemoryApplications.get(id);
-        }
-        if (!application) {
-            return res.status(404).json({
-                success: false,
-                message: 'Certificate application not found'
-            });
-        }
-        if (application.status !== 'Ready') {
-            return res.status(400).json({
-                success: false,
-                message: 'Certificate is not ready for download'
-            });
-        }
-        // Create proper filename based on certificate type
-        const fileNameBase = `${application.certificateType.toLowerCase()}-certificate`;
-        // For PDF format
-        if (format === 'pdf' || !format) {
-            const fileName = `certificate_${id}.pdf`;
-            const filePath = path_1.default.join(UPLOAD_DIR, fileName);
-            // Check if file exists, if not regenerate it
-            if (!fs_1.default.existsSync(filePath)) {
-                await generateCertificatePDF(application);
-            }
-            if (!fs_1.default.existsSync(filePath)) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Certificate file not found'
-                });
-            }
-            // Set appropriate headers for PDF download with proper filename
-            res.setHeader('Content-Disposition', `attachment; filename="${fileNameBase}.pdf"`);
-            res.setHeader('Content-Type', 'application/pdf');
-            // Send the file
-            res.sendFile(filePath);
-            return;
-        }
-        // For JPG format
+        // For demo purposes, allow download of all certificates
+        // In production, you might want to check status
+        // if (certificate.status !== 'Approved') {
+        //   return res.status(400).json({ message: 'Certificate not approved yet' });
+        // }
+        // Generate certificate filename
+        const fileName = `${certificate.type.replace(/\s+/g, '_')}_${certificate.id}`;
         if (format === 'jpg') {
+            // For JPG format, we need to generate a PDF first and then convert it to JPG
+            // Create a temporary PDF file
+            const pdfPath = await (0, documentGenerator_1.generateCertificatePDF)(certificate, fileName);
+            // Convert PDF to JPG using the shared utility function
             try {
-                const fileName = `certificate_${id}.jpg`;
-                const filePath = path_1.default.join(UPLOAD_DIR, fileName);
-                // Check if file exists, if not regenerate it
-                if (!fs_1.default.existsSync(filePath)) {
-                    await generateCertificateJPG(application);
+                const jpgPath = await (0, documentGenerator_1.convertPDFToJPG)(pdfPath, `${fileName}.jpg`);
+                // Check if JPG file exists
+                if (!fs_1.default.existsSync(jpgPath)) {
+                    throw new Error('JPG file was not generated successfully');
                 }
-                if (!fs_1.default.existsSync(filePath)) {
-                    return res.status(404).json({
-                        success: false,
-                        message: 'Certificate file not found'
-                    });
-                }
-                // Set appropriate headers for JPG download with proper filename
-                res.setHeader('Content-Disposition', `attachment; filename="${fileNameBase}.jpg"`);
+                // Send the JPG file
+                res.setHeader('Content-Disposition', `attachment; filename="${fileName}.jpg"`);
                 res.setHeader('Content-Type', 'image/jpeg');
-                // Send the file
-                res.sendFile(filePath);
-                return;
+                res.sendFile(jpgPath);
             }
-            catch (jpgError) {
-                console.error('Error generating JPG certificate:', jpgError);
-                return res.status(500).json({
-                    success: false,
-                    message: 'Failed to generate JPG certificate: ' + (jpgError.message || 'Unknown error')
-                });
+            catch (conversionError) {
+                console.error('Error converting PDF to JPG:', conversionError);
+                return res.status(500).json({ message: `Error generating JPG file: ${conversionError.message}. Please try downloading as PDF instead.` });
             }
         }
-        // If format is not supported
-        return res.status(400).json({
-            success: false,
-            message: 'Unsupported format. Use pdf or jpg.'
-        });
+        else {
+            // Generate PDF certificate
+            const doc = new pdfkit_1.default({
+                size: 'A4',
+                margin: 50
+            });
+            // Create buffer to store PDF
+            const chunks = [];
+            doc.on('data', chunk => chunks.push(chunk));
+            doc.on('end', () => {
+                const pdfBuffer = Buffer.concat(chunks);
+                res.setHeader('Content-Disposition', `attachment; filename="${fileName}.pdf"`);
+                res.setHeader('Content-Type', 'application/pdf');
+                res.send(pdfBuffer);
+            });
+            // Add header with panchayat info
+            doc.fillColor('#000000');
+            doc.fontSize(20);
+            doc.text('Digital E-Panchayat', 50, 50, { align: 'center' });
+            doc.fontSize(16);
+            doc.text(`${certificate.type}`, 50, 80, { align: 'center' });
+            doc.moveDown();
+            // Add horizontal line
+            doc.moveTo(50, 110).lineTo(550, 110).stroke();
+            doc.moveDown();
+            // Certificate details
+            doc.fontSize(12);
+            doc.text(`Certificate ID: ${certificate.id}`);
+            doc.text(`Applicant Name: ${certificate.applicantName}`);
+            if (certificate.fatherName) {
+                doc.text(`Father/Husband Name: ${certificate.fatherName}`);
+            }
+            if (certificate.motherName) {
+                doc.text(`Mother Name: ${certificate.motherName}`);
+            }
+            if (certificate.date) {
+                doc.text(`Date: ${certificate.date}`);
+            }
+            if (certificate.place) {
+                doc.text(`Place: ${certificate.place}`);
+            }
+            if (certificate.address) {
+                doc.text(`Address: ${certificate.address}`);
+            }
+            if (certificate.income) {
+                doc.text(`Income: ${certificate.income}`);
+            }
+            if (certificate.caste) {
+                doc.text(`Caste: ${certificate.caste}`);
+                if (certificate.subCaste) {
+                    doc.text(`Sub-Caste: ${certificate.subCaste}`);
+                }
+            }
+            if (certificate.ward) {
+                doc.text(`Ward: ${certificate.ward}`);
+            }
+            if (certificate.village) {
+                doc.text(`Village: ${certificate.village}`);
+            }
+            if (certificate.district) {
+                doc.text(`District: ${certificate.district}`);
+            }
+            doc.text(`Certificate Number: ${certificate.certificateNumber || 'N/A'}`);
+            doc.text(`Issued Date: ${certificate.issuedDate || new Date().toISOString().split('T')[0]}`);
+            doc.text(`Status: ${certificate.status}`);
+            doc.moveDown();
+            // Add footer with disclaimer
+            const footerY = 750;
+            doc.moveTo(50, footerY - 20).lineTo(550, footerY - 20).stroke();
+            doc.fontSize(8);
+            doc.text('This is a computer-generated document. No signature required.', 50, footerY);
+            doc.text('Valid digitally as per the provisions of the Digital Signature Act, 2000.', 50, footerY + 15);
+            doc.end();
+        }
     }
     catch (error) {
         console.error('Error downloading certificate:', error);
-        res.status(500).json({
-            success: false,
-            message: error.message || 'Internal server error'
-        });
+        res.status(500).json({ message: 'Server error' });
     }
 };
 exports.downloadCertificate = downloadCertificate;

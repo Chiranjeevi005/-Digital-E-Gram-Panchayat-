@@ -144,6 +144,10 @@ PORT=3000
 JWT_SECRET=your_jwt_secret_here
 ```
 
+## Deployment
+
+For detailed deployment instructions to Render (backend) and Vercel (frontend), please refer to the [DEPLOYMENT.md](DEPLOYMENT.md) file.
+
 ## Technologies Used
 
 ### Frontend

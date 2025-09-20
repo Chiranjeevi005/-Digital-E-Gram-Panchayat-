@@ -3,20 +3,12 @@
 import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { generateAndDownloadReport } from '../../utils/fileUtils';
-import { apiClient } from '../../lib/api';
+import { apiClient, Grievance } from '../../lib/api';
 
-interface Grievance {
-  _id: string;
-  citizenId: string;
-  title: string;
-  category: string;
-  status: string;
-  priority: string;
-  createdAt: string;
-}
+
 
 export default function GrievanceTracking() {
-  const [grievances, setGrievances] = useState<Grievance[]>([]);
+  const [grievances, setGrievances] = useState<Grievance[]>([]); // This is correct
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -280,10 +272,10 @@ export default function GrievanceTracking() {
                 {grievances.map((grievance) => (
                   <tr key={grievance._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {grievance.citizenId}
+                      {grievance.userId}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {grievance.title}
+                      {grievance.subject}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {grievance.category}

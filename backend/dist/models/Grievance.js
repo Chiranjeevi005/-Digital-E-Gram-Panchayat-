@@ -39,7 +39,11 @@ const GrievanceSchema = new mongoose_1.Schema({
     title: { type: String, required: true },
     description: { type: String, required: true },
     category: { type: String, required: true },
+    name: { type: String },
+    email: { type: String },
+    phone: { type: String },
     status: { type: String, enum: ['open', 'in-progress', 'resolved', 'closed'], default: 'open' },
+    remarks: { type: String },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
 });

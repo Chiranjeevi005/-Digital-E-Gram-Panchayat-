@@ -147,7 +147,7 @@ export default function NotificationsCenter() {
             </svg>
           </div>
           <h3 className="text-xl font-semibold text-gray-900 mb-2">No notifications</h3>
-          <p className="text-gray-600 max-w-md mx-auto">You're all caught up! Check back later for new notifications.</p>
+          <p className="text-gray-600 max-w-md mx-auto">You&apos;re all caught up! Check back later for new notifications.</p>
         </div>
       ) : (
         <div className="space-y-4">

@@ -3,25 +3,9 @@
 import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { generateAndDownloadReport } from '../../utils/fileUtils';
-import { apiClient } from '../../lib/api';
+import { apiClient, SchemeApplication } from '../../lib/api';
 
-interface SchemeApplication {
-  _id: string;
-  citizenId: string;
-  schemeId: string;
-  schemeName: string;
-  applicantName: string;
-  fatherName: string;
-  address: string;
-  phone: string;
-  email: string;
-  income: string;
-  caste: string;
-  documents: string[];
-  status: string;
-  submittedAt: string;
-  updatedAt: string;
-}
+
 
 export default function SchemesOverview() {
   const [schemeApplications, setSchemeApplications] = useState<SchemeApplication[]>([]);
@@ -33,7 +17,7 @@ export default function SchemesOverview() {
       try {
         setLoading(true);
         setError(null);
-        const allSchemeApplications: SchemeApplication[] = await apiClient.getAllSchemes();
+        const allSchemeApplications: SchemeApplication[] = await apiClient.getSchemeApplications('all');
         setSchemeApplications(allSchemeApplications);
         setLoading(false);
       } catch (error) {
@@ -240,9 +224,9 @@ export default function SchemesOverview() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {schemeApplications.map((application) => (
-                  <tr key={application._id} className="hover:bg-gray-50">
+                  <tr key={application.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {application.applicantName}
+                      {application.userId}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {application.schemeName}
@@ -257,7 +241,7 @@ export default function SchemesOverview() {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(application.submittedAt).toLocaleDateString()}
+                      {new Date(application.appliedAt).toLocaleDateString()}
                     </td>
                   </tr>
                 ))}

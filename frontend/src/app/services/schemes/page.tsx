@@ -5,6 +5,7 @@ import Navbar from '../../../components/Navbar';
 import Footer from '../../../components/Footer';
 import { apiClient } from '../../../lib/api';
 import { useToast } from '../../../components/ToastContainer';
+import { useAuth } from '../../../context/AuthContext';
 
 interface Scheme {
   _id: string;
@@ -94,6 +95,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
 
 const SchemesPage = () => {
   const { showToast } = useToast();
+  const { user } = useAuth(); // Get authenticated user
   const [schemes, setSchemes] = useState<Scheme[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -130,7 +132,33 @@ const SchemesPage = () => {
   });
   const [applicationFormErrors, setApplicationFormErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [previewData, setPreviewData] = useState<any>(null);
+  interface SchemeApplicationPreview {
+    applicationId: string;
+    date: string;
+    citizenId: string;
+    schemeId: string;
+    schemeName: string;
+    applicantName: string;
+    fatherName: string;
+    address: string;
+    phone: string;
+    email: string;
+    aadhaar: string;
+    age: string;
+    gender: string;
+    income: string;
+    caste: string;
+    education: string;
+    landSize: string;
+    documents: string[];
+    id: string;
+    userId: string;
+    status: string;
+    appliedAt: string;
+    remarks?: string;
+  }
+
+  const [previewData, setPreviewData] = useState<SchemeApplicationPreview | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   // Fetch schemes
@@ -161,14 +189,14 @@ const SchemesPage = () => {
     fetchSchemes();
   }, [showToast]);
 
-  // Fetch user applications for tracking
+  // Fetch user applications for tracking - Updated to use authenticated user
   const fetchApplications = async () => {
     try {
       setIsTrackingLoading(true);
       const startTime = Date.now();
       
-      // In a real implementation, this would use the actual user ID
-      const userId = 'CIT-001'; // This would come from auth context
+      // Use authenticated user ID or fallback to CIT-001 for testing
+      const userId = user?.id || 'CIT-001';
       const data = await apiClient.get<SchemeApplication[]>(`/schemes/tracking/${userId}`);
       setApplications(data);
       
@@ -186,10 +214,12 @@ const SchemesPage = () => {
     }
   };
 
-  // Fetch applications on component mount
+  // Fetch applications when user changes or component mounts
   useEffect(() => {
-    fetchApplications();
-  }, []);
+    if (user || !user) { // Always fetch, but use authenticated user when available
+      fetchApplications();
+    }
+  }, [user]);
 
   // Filter schemes based on search term and category, and remove Housing Subsidy Program
   const filteredSchemes = schemes.filter(scheme => {
@@ -218,7 +248,7 @@ const SchemesPage = () => {
 
   const openApplicationForm = (scheme: Scheme) => {
     setApplicationFormData({
-      citizenId: 'CIT-001', // This would come from auth context
+      citizenId: user?.id || 'CIT-001', // Use authenticated user ID or fallback
       schemeId: scheme._id,
       schemeName: scheme.name,
       applicantName: '',
@@ -244,7 +274,7 @@ const SchemesPage = () => {
   const closeApplicationForm = () => {
     setIsApplicationFormOpen(false);
     setApplicationFormData({
-      citizenId: 'CIT-001',
+      citizenId: user?.id || 'CIT-001', // Use authenticated user ID or fallback
       schemeId: '',
       schemeName: '',
       applicantName: '',
@@ -332,6 +362,10 @@ const SchemesPage = () => {
     
     setPreviewData({
       ...applicationFormData,
+      id: '',
+      userId: applicationFormData.citizenId,
+      status: 'pending',
+      appliedAt: new Date().toISOString(),
       applicationId: `APP-${Date.now()}`,
       date: new Date().toLocaleDateString('en-IN', {
         day: 'numeric',
@@ -863,7 +897,7 @@ const SchemesPage = () => {
                     
                     <div>
                       <label className="block text-sm font-medium text-dark-label mb-1">
-                        Father's Name <span className="text-red-500">*</span>
+                        Father&apos;s Name <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -1205,7 +1239,7 @@ const SchemesPage = () => {
                 </div>
                 
                 <div className="mb-6">
-                  <p className="text-sm text-gray-700">Father's Name</p>
+                  <p className="text-sm text-gray-700">Father&apos;s Name</p>
                   <p className="font-medium text-gray-900">{previewData.fatherName}</p>
                 </div>
                 

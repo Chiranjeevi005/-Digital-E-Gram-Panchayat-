@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: digital-e-panchayat-backend
+    env: node
+    buildCommand: npm run build
+    startCommand: npm run start
+    repo: https://github.com/your-username/digital-e-panchayat.git
+    rootDir: backend
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: PORT
+        value: 3002

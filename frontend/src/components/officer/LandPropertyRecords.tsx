@@ -5,10 +5,8 @@ import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, L
 import { generateAndDownloadReport } from '../../utils/fileUtils';
 import { apiClient, LandRecordData } from '../../lib/api';
 
-interface LandRecord extends LandRecordData {}
-
 export default function LandPropertyRecords() {
-  const [landRecords, setLandRecords] = useState<LandRecord[]>([]);
+  const [landRecords, setLandRecords] = useState<LandRecordData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -17,7 +15,7 @@ export default function LandPropertyRecords() {
       try {
         setLoading(true);
         setError(null);
-        const allLandRecords: LandRecord[] = await apiClient.getAllLandRecords();
+        const allLandRecords: LandRecordData[] = await apiClient.getAllLandRecords();
         setLandRecords(allLandRecords);
         setLoading(false);
       } catch (error) {

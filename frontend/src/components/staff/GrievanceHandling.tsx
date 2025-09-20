@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { apiClient } from '../../lib/api';
+import { apiClient, Grievance as ApiGrievance } from '../../lib/api';
 import { useToast } from '../../components/ToastContainer';
 
-interface Grievance {
+interface LocalGrievance {
   _id: string;
   citizenId: string;
   title: string;
@@ -21,9 +21,9 @@ interface Grievance {
 
 export default function GrievanceHandling() {
   const { showToast } = useToast();
-  const [grievances, setGrievances] = useState<Grievance[]>([]);
+  const [grievances, setGrievances] = useState<LocalGrievance[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedGrievance, setSelectedGrievance] = useState<Grievance | null>(null);
+  const [selectedGrievance, setSelectedGrievance] = useState<LocalGrievance | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [resolutionNotes, setResolutionNotes] = useState('');
   const [status, setStatus] = useState('in-progress');
@@ -34,7 +34,19 @@ export default function GrievanceHandling() {
         setLoading(true);
         const startTime = Date.now();
         
-        const allGrievances: Grievance[] = await apiClient.getAllGrievances();
+        const apiGrievances: ApiGrievance[] = await apiClient.getAllGrievances();
+        // Transform API Grievance to LocalGrievance
+        const allGrievances: LocalGrievance[] = apiGrievances.map(g => ({
+          _id: g._id,
+          citizenId: g.userId,
+          title: g.subject,
+          description: g.description,
+          category: g.category,
+          status: g.status,
+          priority: g.priority,
+          createdAt: g.createdAt,
+          updatedAt: g.updatedAt
+        }));
         setGrievances(allGrievances.filter(g => 
           g.status === 'open' || g.status === 'in-progress'
         ));
@@ -85,7 +97,7 @@ export default function GrievanceHandling() {
     }
   };
 
-  const handleViewDetails = (grievance: Grievance) => {
+  const handleViewDetails = (grievance: LocalGrievance) => {
     setSelectedGrievance(grievance);
     setShowModal(true);
   };

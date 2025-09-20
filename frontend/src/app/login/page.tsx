@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
 import InputField from '../../components/InputField';
 import Button from '../../components/Button';
 import Link from 'next/link';
 
-export default function LoginPage() {
+function LoginContent() {
   const [userType, setUserType] = useState<'Citizen' | 'Officer' | 'Staff'>('Citizen');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -42,24 +42,12 @@ export default function LoginPage() {
       
       // Redirect to home page instead of dashboard as per specifications
       router.push('/');
-    } catch (err: any) {
-      setError(err.message || 'Login failed');
+    } catch (err) {
+      setError((err as Error).message || 'Login failed');
     } finally {
       setLoading(false);
     }
   };
-
-  // Predefined credentials information
-  const getDefaultCredentials = () => {
-    if (userType === 'Officer') {
-      return { email: 'officer@epanchayat.com', password: 'officer123' };
-    } else if (userType === 'Staff') {
-      return { email: 'staff1@epanchayat.com or staff2@epanchayat.com', password: 'staff123' };
-    }
-    return null;
-  };
-
-  const defaultCredentials = getDefaultCredentials();
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sky-50 to-emerald-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -77,18 +65,6 @@ export default function LoginPage() {
           <div className="rounded-md bg-green-50 p-4">
             <div className="text-sm text-green-700">
               {success}
-            </div>
-          </div>
-        )}
-        
-        {/* Default credentials information */}
-        {defaultCredentials && (
-          <div className="rounded-md bg-blue-50 p-4">
-            <div className="text-sm text-blue-700">
-              <p className="font-medium">Default credentials for {userType}:</p>
-              <p>Email: {defaultCredentials.email}</p>
-              <p>Password: {defaultCredentials.password}</p>
-              <p className="mt-1 text-xs">Please change your password after first login.</p>
             </div>
           </div>
         )}
@@ -212,5 +188,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }

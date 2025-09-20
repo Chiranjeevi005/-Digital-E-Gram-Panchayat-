@@ -3,6 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const landrecords_controller_1 = require("../controllers/landrecords.controller");
 const router = (0, express_1.Router)();
+// Get all land records
+router.get('/', landrecords_controller_1.getAllLandRecords);
 // Create a new land record
 router.post('/', landrecords_controller_1.createLandRecord);
 // Get land record data

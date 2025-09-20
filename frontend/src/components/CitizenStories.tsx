@@ -79,7 +79,7 @@ const CitizenStories = () => {
                   {/* Testimonial content */}
                   <div className="max-w-3xl">
                     <p className="text-lg sm:text-xl md:text-2xl text-gray-700 italic mb-6 sm:mb-8 px-2 sm:px-4">
-                      "{stories[currentIndex].quote}"
+                      &quot;{stories[currentIndex].quote}&quot;
                     </p>
                     
                     {/* Author information */}

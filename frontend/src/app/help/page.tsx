@@ -363,8 +363,8 @@ const HelpSupportPage = () => {
               <div className="mt-8 bg-blue-50 rounded-lg p-6">
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">Need More Help?</h3>
                 <p className="text-gray-600 mb-4">
-                  If you can't find what you're looking for, please don't hesitate to contact our support team. 
-                  We're here to help you make the most of Digital E-Panchayat services.
+                  If you can&apos;t find what you&apos;re looking for, please don&apos;t hesitate to contact our support team. 
+                  We&apos;re here to help you make the most of Digital E-Panchayat services.
                 </p>
                 <button className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg">
                   Contact Support

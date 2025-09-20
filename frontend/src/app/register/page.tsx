@@ -83,8 +83,8 @@ export default function RegisterPage() {
       setTimeout(() => {
         router.push(`/login?email=${encodeURIComponent(email)}&registered=true`);
       }, 2000);
-    } catch (err: any) {
-      setError(err.message || 'Registration failed');
+    } catch (err) {
+      setError((err as Error).message || 'Registration failed');
     } finally {
       setLoading(false);
     }

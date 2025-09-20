@@ -58,7 +58,7 @@ const PropertyLandServices = () => {
   const [isMutationStatusLoading, setIsMutationStatusLoading] = useState(false);
 
   // State for preview modal
-  const [previewData, setPreviewData] = useState<any>(null);
+  const [previewData, setPreviewData] = useState<PropertyTaxData | LandRecordData | MutationStatusData | null>(null);
   const [previewType, setPreviewType] = useState<'propertyTax' | 'landRecord' | 'mutationStatus' | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
@@ -185,7 +185,7 @@ const PropertyLandServices = () => {
   };
 
   // Open preview modal
-  const openPreview = (data: any, type: 'propertyTax' | 'landRecord' | 'mutationStatus') => {
+  const openPreview = (data: PropertyTaxData | LandRecordData | MutationStatusData, type: 'propertyTax' | 'landRecord' | 'mutationStatus') => {
     setPreviewData(data);
     setPreviewType(type);
     setIsPreviewOpen(true);

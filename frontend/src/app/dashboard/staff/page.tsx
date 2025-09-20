@@ -5,28 +5,11 @@ import { useAuth } from '../../../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import ProtectedRoute from '../../../components/ProtectedRoute';
 import StaffDashboard from '../../../components/staff/StaffDashboard';
-import { apiClient } from '../../../lib/api';
+import { apiClient, CertificateApplication, Grievance } from '../../../lib/api';
 import Navbar from '../../../components/Navbar';
 import Footer from '../../../components/Footer';
 
-interface Certificate {
-  _id: string;
-  applicantName: string;
-  certificateType: string;
-  status: string;
-  createdAt: string;
-}
 
-interface Grievance {
-  _id: string;
-  citizenId: string;
-  title: string;
-  description: string;
-  category: string;
-  status: string;
-  priority: string;
-  createdAt: string;
-}
 
 // Skeleton Loader Component for Staff Dashboard
 const StaffDashboardSkeleton = () => (
@@ -145,13 +128,21 @@ export default function StaffDashboardPage() {
         const startTime = Date.now();
         
         // Fetch certificates
-        const certificates: Certificate[] = await apiClient.getAllCertificates();
+        const certificates: CertificateApplication[] = await apiClient.getAllCertificates();
         const pendingCertificates = certificates.filter(cert => 
           cert.status === 'pending' || cert.status === 'in-progress'
         ).length;
         
         // Fetch grievances
-        const grievances: Grievance[] = await apiClient.getAllGrievances();
+        const apiGrievances: Grievance[] = await apiClient.getAllGrievances();
+        // Transform API Grievance to local Grievance interface
+        const grievances = apiGrievances.map(g => ({
+          id: g._id,
+          description: g.description,
+          status: g.status,
+          createdAt: g.createdAt,
+          updatedAt: g.updatedAt
+        }));
         const assignedGrievances = grievances.filter(g => 
           g.status === 'open' || g.status === 'in-progress'
         ).length;

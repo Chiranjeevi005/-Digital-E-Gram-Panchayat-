@@ -1,35 +1,66 @@
 import { Request, Response } from 'express';
 import path from 'path';
 import fs from 'fs';
+import PDFDocument from 'pdfkit';
+import { generateCertificatePDF, convertPDFToJPG } from '../utils/documentGenerator';
 
 // Mock data for certificates
 interface Certificate {
+  _id: string;
   id: string;
   type: string;
+  certificateType: string;
   applicantName: string;
-  applicationDate: string;
+  fatherName?: string;
+  motherName?: string;
+  date?: string;
+  place?: string;
   status: string;
   certificateNumber?: string;
   issuedDate?: string;
+  // Marriage certificate fields
+  brideName?: string;
+  groomName?: string;
+  witnessNames?: string;
+  registrationNo?: string;
+  // Income/Caste/Residence certificate fields
+  address?: string;
+  income?: string;
+  caste?: string;
+  subCaste?: string;
+  ward?: string;
+  village?: string;
+  district?: string;
 }
 
 // Mock database
 let certificates: Certificate[] = [
   {
+    _id: '1',
     id: '1',
     type: 'Birth Certificate',
+    certificateType: 'Birth',
     applicantName: 'John Doe',
-    applicationDate: '2023-05-15',
+    date: '2023-05-15',
+    place: 'Village Hospital',
     status: 'Approved',
     certificateNumber: 'BC-2023-001',
-    issuedDate: '2023-05-20'
+    issuedDate: '2023-05-20',
+    fatherName: 'Robert Doe',
+    motherName: 'Mary Doe'
   },
   {
+    _id: '2',
     id: '2',
     type: 'Income Certificate',
+    certificateType: 'Income',
     applicantName: 'Jane Smith',
-    applicationDate: '2023-06-10',
-    status: 'Pending'
+    fatherName: 'Michael Smith',
+    address: '123 Main St, Sample Village',
+    income: '₹50,000',
+    status: 'Approved',
+    certificateNumber: 'IC-2023-002',
+    issuedDate: '2023-05-21'
   }
 ];
 
@@ -46,23 +77,65 @@ export const getAllCertificates = async (req: Request, res: Response) => {
 // Apply for a certificate
 export const applyForCertificate = async (req: Request, res: Response) => {
   try {
-    const { type, applicantName } = req.body;
+    // Extract all possible fields from request body
+    const {
+      type,
+      applicantName,
+      fatherName,
+      motherName,
+      date,
+      place,
+      brideName,
+      groomName,
+      witnessNames,
+      registrationNo,
+      address,
+      income,
+      caste,
+      subCaste,
+      ward,
+      village,
+      district
+    } = req.body;
     
     if (!type || !applicantName) {
       return res.status(400).json({ message: 'Type and applicant name are required' });
     }
     
     const newCertificate: Certificate = {
+      _id: (certificates.length + 1).toString(),
       id: (certificates.length + 1).toString(),
       type,
+      certificateType: type,
       applicantName,
-      applicationDate: new Date().toISOString().split('T')[0],
-      status: 'Pending'
+      fatherName,
+      motherName,
+      date,
+      place,
+      brideName,
+      groomName,
+      witnessNames,
+      registrationNo,
+      address,
+      income,
+      caste,
+      subCaste,
+      ward,
+      village,
+      district,
+      status: 'Approved',
+      certificateNumber: `${type.substring(0, 1).toUpperCase()}C-2025-${(certificates.length + 1).toString().padStart(3, '0')}`,
+      issuedDate: new Date().toISOString().split('T')[0]
     };
     
     certificates.push(newCertificate);
     
-    res.status(201).json(newCertificate);
+    res.status(201).json({
+      success: true,
+      applicationId: newCertificate.id,
+      status: newCertificate.status,
+      message: 'Certificate application submitted successfully'
+    });
   } catch (error) {
     console.error('Error applying for certificate:', error);
     res.status(500).json({ message: 'Server error' });
@@ -79,7 +152,11 @@ export const getCertificatePreview = async (req: Request, res: Response) => {
       return res.status(404).json({ message: 'Certificate not found' });
     }
     
-    res.json(certificate);
+    // Return certificate with both _id and id for compatibility
+    res.json({
+      ...certificate,
+      _id: certificate._id || certificate.id
+    });
   } catch (error) {
     console.error('Error fetching certificate preview:', error);
     res.status(500).json({ message: 'Server error' });
@@ -98,7 +175,12 @@ export const updateCertificate = async (req: Request, res: Response) => {
       return res.status(404).json({ message: 'Certificate not found' });
     }
     
-    certificates[certificateIndex] = { ...certificates[certificateIndex], ...updates };
+    // Ensure _id is preserved
+    certificates[certificateIndex] = { 
+      ...certificates[certificateIndex], 
+      ...updates,
+      _id: certificates[certificateIndex]._id || certificates[certificateIndex].id
+    };
     
     res.json(certificates[certificateIndex]);
   } catch (error) {
@@ -128,28 +210,148 @@ export const getCertificateStatus = async (req: Request, res: Response) => {
 export const downloadCertificate = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    const { format } = req.query;
     const certificate = certificates.find(cert => cert.id === id);
     
     if (!certificate) {
       return res.status(404).json({ message: 'Certificate not found' });
     }
     
-    if (certificate.status !== 'Approved') {
-      return res.status(400).json({ message: 'Certificate not approved yet' });
+    // For demo purposes, allow download of all certificates
+    // In production, you might want to check status
+    // if (certificate.status !== 'Approved') {
+    //   return res.status(400).json({ message: 'Certificate not approved yet' });
+    // }
+    
+    // Generate certificate filename
+    const fileName = `${certificate.type.replace(/\s+/g, '_')}_${certificate.id}`;
+    
+    if (format === 'jpg') {
+      // For JPG format, we need to generate a PDF first and then convert it to JPG
+      // Create a temporary PDF file
+      const pdfPath = await generateCertificatePDF(certificate, fileName);
+      
+      // Convert PDF to JPG using the shared utility function
+      try {
+        const jpgPath = await convertPDFToJPG(pdfPath, `${fileName}.jpg`);
+        
+        // Check if JPG file exists
+        if (!fs.existsSync(jpgPath)) {
+          throw new Error('JPG file was not generated successfully');
+        }
+        
+        // Send the JPG file
+        res.setHeader('Content-Disposition', `attachment; filename="${fileName}.jpg"`);
+        res.setHeader('Content-Type', 'image/jpeg');
+        res.sendFile(jpgPath);
+      } catch (conversionError: any) {
+        console.error('Error converting PDF to JPG:', conversionError);
+        // Clean up temporary PDF file
+        if (fs.existsSync(pdfPath)) {
+          fs.unlinkSync(pdfPath);
+        }
+        return res.status(500).json({ 
+          message: `Error generating JPG file: ${conversionError.message}. Please try downloading as PDF instead.` 
+        });
+      } finally {
+        // Clean up temporary PDF file after sending response
+        setTimeout(() => {
+          if (fs.existsSync(pdfPath)) {
+            fs.unlinkSync(pdfPath);
+          }
+        }, 1000); // Wait a bit to ensure file is sent
+      }
+    } else {
+      // Generate PDF certificate
+      const doc = new PDFDocument({
+        size: 'A4',
+        margin: 50
+      });
+      
+      // Create buffer to store PDF
+      const chunks: Buffer[] = [];
+      doc.on('data', chunk => chunks.push(chunk));
+      doc.on('end', () => {
+        const pdfBuffer = Buffer.concat(chunks);
+        res.setHeader('Content-Disposition', `attachment; filename="${fileName}.pdf"`);
+        res.setHeader('Content-Type', 'application/pdf');
+        res.send(pdfBuffer);
+      });
+      
+      // Add header with panchayat info
+      doc.fillColor('#000000');
+      doc.fontSize(20);
+      doc.text('Digital E-Panchayat', 50, 50, { align: 'center' });
+      doc.fontSize(16);
+      doc.text(`${certificate.type}`, 50, 80, { align: 'center' });
+      doc.moveDown();
+      
+      // Add horizontal line
+      doc.moveTo(50, 110).lineTo(550, 110).stroke();
+      doc.moveDown();
+      
+      // Certificate details
+      doc.fontSize(12);
+      doc.text(`Certificate ID: ${certificate.id}`);
+      doc.text(`Applicant Name: ${certificate.applicantName}`);
+      
+      if (certificate.fatherName) {
+        doc.text(`Father/Husband Name: ${certificate.fatherName}`);
+      }
+      
+      if (certificate.motherName) {
+        doc.text(`Mother Name: ${certificate.motherName}`);
+      }
+      
+      if (certificate.date) {
+        doc.text(`Date: ${certificate.date}`);
+      }
+      
+      if (certificate.place) {
+        doc.text(`Place: ${certificate.place}`);
+      }
+      
+      if (certificate.address) {
+        doc.text(`Address: ${certificate.address}`);
+      }
+      
+      if (certificate.income) {
+        doc.text(`Income: ${certificate.income}`);
+      }
+      
+      if (certificate.caste) {
+        doc.text(`Caste: ${certificate.caste}`);
+        if (certificate.subCaste) {
+          doc.text(`Sub-Caste: ${certificate.subCaste}`);
+        }
+      }
+      
+      if (certificate.ward) {
+        doc.text(`Ward: ${certificate.ward}`);
+      }
+      
+      if (certificate.village) {
+        doc.text(`Village: ${certificate.village}`);
+      }
+      
+      if (certificate.district) {
+        doc.text(`District: ${certificate.district}`);
+      }
+      
+      doc.text(`Certificate Number: ${certificate.certificateNumber || 'N/A'}`);
+      doc.text(`Issued Date: ${certificate.issuedDate || new Date().toISOString().split('T')[0]}`);
+      doc.text(`Status: ${certificate.status}`);
+      doc.moveDown();
+      
+      // Add footer with disclaimer
+      const footerY = 750;
+      doc.moveTo(50, footerY - 20).lineTo(550, footerY - 20).stroke();
+      doc.fontSize(8);
+      doc.text('This is a computer-generated document. No signature required.', 50, footerY);
+      doc.text('Valid digitally as per the provisions of the Digital Signature Act, 2000.', 50, footerY + 15);
+      
+      doc.end();
     }
-    
-    // In a real implementation, this would generate and return an actual PDF
-    // For now, we'll simulate a download with a text file
-    const fileName = `${certificate.type.replace(/\s+/g, '_')}_${certificate.id}.txt`;
-    const fileContent = `Certificate: ${certificate.type}
-Applicant: ${certificate.applicantName}
-Certificate Number: ${certificate.certificateNumber}
-Issued Date: ${certificate.issuedDate}
-Status: ${certificate.status}`;
-    
-    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
-    res.setHeader('Content-Type', 'text/plain');
-    res.send(fileContent);
   } catch (error) {
     console.error('Error downloading certificate:', error);
     res.status(500).json({ message: 'Server error' });

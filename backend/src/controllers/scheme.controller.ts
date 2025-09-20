@@ -31,7 +31,10 @@ export const createScheme = async (req: Request, res: Response) => {
 
 export const getSchemes = async (req: Request, res: Response) => {
   try {
+    console.log('Fetching schemes from database...');
     const schemes = await Scheme.find().sort({ createdAt: -1 });
+    console.log(`Found ${schemes.length} schemes`);
+    console.log('Schemes data:', JSON.stringify(schemes, null, 2));
     res.json(schemes);
   } catch (error) {
     console.error('Error fetching schemes:', error);
@@ -120,7 +123,7 @@ export const applyForScheme = async (req: Request, res: Response) => {
   }
 };
 
-// Get scheme applications for a user
+// Get scheme applications for a user or all applications
 export const getSchemeApplications = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
@@ -129,8 +132,15 @@ export const getSchemeApplications = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'User ID is required' });
     }
     
-    const applications = await SchemeApplication.find({ citizenId: userId })
-      .sort({ submittedAt: -1 });
+    let applications;
+    if (userId === 'all') {
+      // Get all scheme applications
+      applications = await SchemeApplication.find().sort({ submittedAt: -1 });
+    } else {
+      // Get scheme applications for a specific user
+      applications = await SchemeApplication.find({ citizenId: userId })
+        .sort({ submittedAt: -1 });
+    }
     
     res.json(applications);
   } catch (error) {

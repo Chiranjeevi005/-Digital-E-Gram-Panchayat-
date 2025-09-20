@@ -6,7 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
 const connectDB = async () => {
     try {
-        const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/digital-e-panchayat';
+        // Use MONGODB_URI if available, otherwise fallback to MONGO_URI, then to default
+        const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URI || 'mongodb://localhost:27017/digital-e-panchayat';
         await mongoose_1.default.connect(mongoUri);
         console.log("✅ MongoDB Connected");
     }

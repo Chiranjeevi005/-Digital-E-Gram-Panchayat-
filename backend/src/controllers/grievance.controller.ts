@@ -258,13 +258,28 @@ export const downloadGrievanceAcknowledgment = async (req: Request, res: Respons
         await generateGrievanceAcknowledgmentPDF(grievance);
       }
       
-      // Convert PDF to JPG
-      const jpgPath = await convertPDFToJPG(pdfPath, `${fileNameBase}.jpg`);
+      // Check if PDF was generated successfully
+      if (!fs.existsSync(pdfPath)) {
+        throw new Error('PDF file was not generated successfully');
+      }
       
-      // Send the JPG file
-      res.setHeader('Content-Disposition', `attachment; filename="${fileNameBase}.jpg"`);
-      res.setHeader('Content-Type', 'image/jpeg');
-      res.sendFile(jpgPath);
+      // Convert PDF to JPG
+      try {
+        const jpgPath = await convertPDFToJPG(pdfPath, `${fileNameBase}.jpg`);
+        
+        // Check if JPG file exists
+        if (!fs.existsSync(jpgPath)) {
+          throw new Error('JPG file was not generated successfully');
+        }
+        
+        // Send the JPG file
+        res.setHeader('Content-Disposition', `attachment; filename="${fileNameBase}.jpg"`);
+        res.setHeader('Content-Type', 'image/jpeg');
+        res.sendFile(jpgPath);
+      } catch (conversionError: any) {
+        console.error('Error converting PDF to JPG:', conversionError);
+        return res.status(500).json({ message: `Error generating JPG file: ${conversionError.message}. Please try downloading as PDF instead.` });
+      }
     } else {
       // Generate PDF (default)
       const pdfPath = path.join(__dirname, '../../uploads', `${fileNameBase}.pdf`);
@@ -314,13 +329,28 @@ export const downloadGrievanceResolution = async (req: Request, res: Response) =
         await generateGrievanceResolutionPDF(grievance);
       }
       
-      // Convert PDF to JPG
-      const jpgPath = await convertPDFToJPG(pdfPath, `${fileNameBase}.jpg`);
+      // Check if PDF was generated successfully
+      if (!fs.existsSync(pdfPath)) {
+        throw new Error('PDF file was not generated successfully');
+      }
       
-      // Send the JPG file
-      res.setHeader('Content-Disposition', `attachment; filename="${fileNameBase}.jpg"`);
-      res.setHeader('Content-Type', 'image/jpeg');
-      res.sendFile(jpgPath);
+      // Convert PDF to JPG
+      try {
+        const jpgPath = await convertPDFToJPG(pdfPath, `${fileNameBase}.jpg`);
+        
+        // Check if JPG file exists
+        if (!fs.existsSync(jpgPath)) {
+          throw new Error('JPG file was not generated successfully');
+        }
+        
+        // Send the JPG file
+        res.setHeader('Content-Disposition', `attachment; filename="${fileNameBase}.jpg"`);
+        res.setHeader('Content-Type', 'image/jpeg');
+        res.sendFile(jpgPath);
+      } catch (conversionError: any) {
+        console.error('Error converting PDF to JPG:', conversionError);
+        return res.status(500).json({ message: `Error generating JPG file: ${conversionError.message}. Please try downloading as PDF instead.` });
+      }
     } else {
       // Generate PDF (default)
       const pdfPath = path.join(__dirname, '../../uploads', `${fileNameBase}.pdf`);

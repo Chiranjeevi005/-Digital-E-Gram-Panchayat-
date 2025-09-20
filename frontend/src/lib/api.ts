@@ -1,5 +1,5 @@
 // API client for making requests to the backend
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3002/api';
 
 // Get token from localStorage or sessionStorage
 const getToken = () => {
@@ -55,6 +55,111 @@ interface MutationStatusData {
     status: string;
     date: string;
   }[];
+  createdAt: string;
+}
+
+// Additional interfaces for API responses
+export interface CertificateApplication {
+  id: string;
+  userId: string;
+  certificateType: string;
+  status: string;
+  appliedAt: string;
+  documents: string[];
+  remarks?: string;
+}
+
+export interface Certificate extends CertificateApplication {
+  _id: string;
+  id: string;
+  applicantName: string;
+  fatherName?: string;
+  motherName?: string;
+  certificateType: string;
+  type?: string;
+  date?: string;
+  place?: string;
+  address?: string;
+  income?: string;
+  caste?: string;
+  subCaste?: string;
+  ward?: string;
+  village?: string;
+  district?: string;
+  supportingFiles: string[];
+  createdAt: string;
+  status: string;
+  certificateNumber?: string;
+  issuedDate?: string;
+  // Marriage certificate fields
+  brideName?: string;
+  groomName?: string;
+  witnessNames?: string;
+  registrationNo?: string;
+}
+
+interface Scheme {
+  _id: string;
+  name: string;
+  description: string;
+  eligibility: string;
+  benefits: string;
+  createdAt: string;
+}
+
+export interface SchemeApplication {
+  id: string;
+  userId: string;
+  schemeId: string;
+  schemeName: string;
+  status: string;
+  appliedAt: string;
+  documents: string[];
+  remarks?: string;
+  // Additional fields for application form
+  applicantName?: string;
+  fatherName?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  aadhaar?: string;
+  age?: string;
+  gender?: string;
+  income?: string;
+  caste?: string;
+  education?: string;
+  landSize?: string;
+  // Preview fields
+  applicationId?: string;
+  date?: string;
+}
+
+export interface Grievance {
+  _id: string;
+  id: string;
+  userId: string;
+  subject: string;
+  description: string;
+  category: string;
+  status: string;
+  priority: string;
+  createdAt: string;
+  updatedAt: string;
+  remarks?: string;
+}
+
+export interface GrievanceExtended extends Grievance {
+  citizenId: string;
+  title: string;
+}
+
+export interface CitizenRecord {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  aadharNumber: string;
   createdAt: string;
 }
 
@@ -204,16 +309,24 @@ export const apiClient = {
   },
 
   // Certificate methods
-  applyForCertificate: async (data: any): Promise<any> => {
-    return apiClient.post<any>('/certificates/apply', data);
+  applyForCertificate: async (data: Partial<Certificate>): Promise<{success: boolean, applicationId: string, status: string, message: string}> => {
+    return apiClient.post<{success: boolean, applicationId: string, status: string, message: string}>('/certificates/apply', data);
   },
 
-  getAllCertificates: async (): Promise<any[]> => {
-    return apiClient.get<any[]>('/certificates');
+  getAllCertificates: async (): Promise<Certificate[]> => {
+    return apiClient.get<Certificate[]>('/certificates');
   },
 
-  getCertificateStatus: async (id: string): Promise<any> => {
-    return apiClient.get<any>(`/certificates/${id}/status`);
+  getCertificateById: async (id: string): Promise<Certificate> => {
+    return apiClient.get<Certificate>(`/certificates/${id}/preview`);
+  },
+
+  getCertificateStatus: async (id: string): Promise<{status: string}> => {
+    return apiClient.get<{status: string}>(`/certificates/${id}/status`);
+  },
+
+  updateCertificate: async (id: string, data: Partial<Certificate>): Promise<Certificate> => {
+    return apiClient.put<Certificate>(`/certificates/${id}/update`, data);
   },
 
   downloadCertificate: async (id: string, format: 'pdf' | 'jpg' = 'pdf'): Promise<Blob> => {
@@ -221,24 +334,24 @@ export const apiClient = {
   },
 
   // Schemes & Subsidies methods
-  getSchemes: async (): Promise<any[]> => {
-    return apiClient.get<any[]>('/schemes');
+  getSchemes: async (): Promise<Scheme[]> => {
+    return apiClient.get<Scheme[]>('/schemes');
   },
 
-  getAllSchemes: async (): Promise<any[]> => {
-    return apiClient.get<any[]>('/schemes');
+  getAllSchemes: async (): Promise<Scheme[]> => {
+    return apiClient.get<Scheme[]>('/schemes');
   },
 
-  applyForScheme: async (data: any): Promise<any> => {
-    return apiClient.post<any>('/schemes/apply', data);
+  applyForScheme: async (data: Partial<SchemeApplication>): Promise<SchemeApplication> => {
+    return apiClient.post<SchemeApplication>('/schemes/apply', data);
   },
 
-  getSchemeApplications: async (userId: string): Promise<any[]> => {
-    return apiClient.get<any[]>(`/schemes/tracking/${userId}`);
+  getSchemeApplications: async (userId: string): Promise<SchemeApplication[]> => {
+    return apiClient.get<SchemeApplication[]>(`/schemes/tracking/${userId}`);
   },
 
-  deleteSchemeApplication: async (applicationId: string): Promise<any> => {
-    return apiClient.delete<any>(`/schemes/tracking/${applicationId}`);
+  deleteSchemeApplication: async (applicationId: string): Promise<{ message: string }> => {
+    return apiClient.delete<{ message: string }>(`/schemes/tracking/${applicationId}`);
   },
 
   downloadSchemeAcknowledgment: async (applicationId: string, format: 'pdf' | 'jpg' = 'pdf'): Promise<Blob> => {
@@ -246,24 +359,24 @@ export const apiClient = {
   },
 
   // Grievance Redressal methods
-  getAllGrievances: async (): Promise<any[]> => {
-    return apiClient.get<any[]>('/grievances');
+  getAllGrievances: async (): Promise<Grievance[]> => {
+    return apiClient.get<Grievance[]>('/grievances');
   },
 
-  getGrievances: async (userId: string): Promise<any[]> => {
-    return apiClient.get<any[]>(`/grievances/user/${userId}`);
+  getGrievances: async (userId: string): Promise<Grievance[]> => {
+    return apiClient.get<Grievance[]>(`/grievances/user/${userId}`);
   },
 
-  submitGrievance: async (data: any): Promise<any> => {
-    return apiClient.post<any>('/grievances', data);
+  submitGrievance: async (data: Partial<Grievance>): Promise<Grievance> => {
+    return apiClient.post<Grievance>('/grievances', data);
   },
 
-  updateGrievance: async (grievanceId: string, data: any): Promise<any> => {
-    return apiClient.put<any>(`/grievances/view/${grievanceId}`, data);
+  updateGrievance: async (grievanceId: string, data: Partial<Grievance>): Promise<Grievance> => {
+    return apiClient.put<Grievance>(`/grievances/view/${grievanceId}`, data);
   },
 
-  resolveGrievance: async (grievanceId: string, remarks: string): Promise<any> => {
-    return apiClient.post<any>(`/grievances/resolve/${grievanceId}`, { remarks });
+  resolveGrievance: async (grievanceId: string, remarks: string): Promise<Grievance> => {
+    return apiClient.post<Grievance>(`/grievances/resolve/${grievanceId}`, { remarks });
   },
 
   downloadGrievanceAcknowledgment: async (grievanceId: string, format: 'pdf' | 'jpg' = 'pdf'): Promise<Blob> => {
@@ -274,8 +387,8 @@ export const apiClient = {
     return apiClient.download(`/grievances/resolution/${grievanceId}?format=${format}`);
   },
 
-  deleteGrievance: async (grievanceId: string): Promise<any> => {
-    return apiClient.delete<any>(`/grievances/view/${grievanceId}`);
+  deleteGrievance: async (grievanceId: string): Promise<{ message: string }> => {
+    return apiClient.delete<{ message: string }>(`/grievances/view/${grievanceId}`);
   },
 
   // Property Tax methods
@@ -324,19 +437,19 @@ export const apiClient = {
   },
   
   // Staff-specific methods
-  updateCertificateStatus: async (certificateId: string, status: string, remarks?: string): Promise<any> => {
-    return apiClient.put<any>(`/certificates/${certificateId}/status`, { status, remarks });
+  updateCertificateStatus: async (certificateId: string, status: string, remarks?: string): Promise<CertificateApplication> => {
+    return apiClient.put<CertificateApplication>(`/certificates/${certificateId}/status`, { status, remarks });
   },
   
-  updateGrievanceStatus: async (grievanceId: string, status: string, remarks?: string): Promise<any> => {
-    return apiClient.put<any>(`/grievances/${grievanceId}/status`, { status, remarks });
+  updateGrievanceStatus: async (grievanceId: string, status: string, remarks?: string): Promise<Grievance> => {
+    return apiClient.put<Grievance>(`/grievances/${grievanceId}/status`, { status, remarks });
   },
   
-  getCitizenRecords: async (): Promise<any[]> => {
-    return apiClient.get<any[]>('/citizens');
+  getCitizenRecords: async (): Promise<CitizenRecord[]> => {
+    return apiClient.get<CitizenRecord[]>('/citizens');
   },
   
-  getCitizenRecord: async (citizenId: string): Promise<any> => {
-    return apiClient.get<any>(`/citizens/${citizenId}`);
+  getCitizenRecord: async (citizenId: string): Promise<CitizenRecord> => {
+    return apiClient.get<CitizenRecord>(`/citizens/${citizenId}`);
   }
 };

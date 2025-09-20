@@ -8,22 +8,40 @@ import Link from 'next/link';
 import Navbar from '../../../components/Navbar';
 import Sidebar from '../../../components/Sidebar';
 import Footer from '../../../components/Footer';
-import { apiClient } from '../../../lib/api';
+import { apiClient, SchemeApplication } from '../../../lib/api';
 
 // Define types for our data
 interface Grievance {
+  _id: string;
   id: string;
+  userId: string;
+  subject: string;
   description: string;
+  category: string;
   status: string;
+  priority: string;
   createdAt: string;
   updatedAt: string;
+  remarks?: string;
 }
 
-interface SchemeApplication {
+// Add this interface for SchemeApplication to match the backend model
+interface CitizenSchemeApplication {
+  _id: string;
   id: string;
+  citizenId: string;
+  schemeId: string;
   schemeName: string;
+  applicantName: string;
+  fatherName: string;
+  address: string;
+  phone: string;
+  email: string;
+  income: string;
+  caste: string;
+  documents: string[];
   status: string;
-  createdAt: string;
+  submittedAt: string;
   updatedAt: string;
 }
 
@@ -205,7 +223,7 @@ export default function CitizenDashboard() {
         const schemeActivities = schemeApplications.map((scheme, index) => ({
           id: index + 100, // Different ID range to avoid conflicts
           title: `${scheme.schemeName || 'Scheme'} Application`,
-          date: new Date(scheme.createdAt).toLocaleDateString(),
+          date: new Date(scheme.appliedAt).toLocaleDateString(), // Use appliedAt which exists on SchemeApplication
           status: scheme.status,
           type: 'Schemes',
           details: `Application for ${scheme.schemeName || 'scheme'}`
@@ -312,7 +330,7 @@ export default function CitizenDashboard() {
                           <div className="flex items-center">
                             <div className="bg-emerald-600 p-1.5 md:p-2 rounded-full mr-2 md:mr-3">
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 md:h-4 md:w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                               </svg>
                             </div>
                             <div>
@@ -359,7 +377,7 @@ export default function CitizenDashboard() {
                           <div className="flex flex-col items-center justify-center h-full">
                             <div className="bg-blue-100 p-2 rounded-full mb-2">
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                               </svg>
                             </div>
                             <span className="text-xs font-medium text-gray-700">Track Applications</span>
@@ -614,10 +632,11 @@ export default function CitizenDashboard() {
                 )}
               </div>
             </main>
-            
-            <Footer />
           </div>
         </div>
+        
+        {/* Footer moved outside the main content area to occupy full width */}
+        <Footer />
       </div>
     </ProtectedRoute>
   );

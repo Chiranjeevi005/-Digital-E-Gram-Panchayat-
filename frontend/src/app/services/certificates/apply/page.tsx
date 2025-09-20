@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Navbar from '../../../../components/Navbar';
 import Footer from '../../../../components/Footer';
@@ -22,7 +22,7 @@ interface User {
   userType: string;
 }
 
-const CertificateApplication = () => {
+const CertificateApplicationContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const certificateTypeParam = searchParams.get('type');
@@ -289,12 +289,13 @@ const CertificateApplication = () => {
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
       
-      // Prepare form data for submission
-      const submissionData: Record<string, any> = {
+      // Prepare form data for submission - Fix field names to match backend expectations
+      const submissionData: Record<string, string | string[] | boolean> = {
+        certificateType: formData.certificateType, // Keep as certificateType to match backend expectations
+        type: formData.certificateType, // Also include type for compatibility
         applicantName: formData.applicantName,
         fatherName: formData.fatherName,
         motherName: formData.motherName,
-        certificateType: formData.certificateType,
         brideName: formData.brideName,
         groomName: formData.groomName,
         witnessNames: formData.witnessNames,
@@ -328,7 +329,7 @@ const CertificateApplication = () => {
       console.log('Submitting certificate application data:', submissionData);
       
       // Send the form data to the backend
-      const response: ApplyResponse = await apiClient.post<ApplyResponse>('/certificates/apply', submissionData);
+      const response: ApplyResponse = await apiClient.applyForCertificate(submissionData);
       
       if (response.success && response.applicationId) {
         // Show success toast
@@ -368,7 +369,7 @@ const CertificateApplication = () => {
       }
       
       // Use the API client to download the file
-      const blob = await apiClient.download(`/certificates/${applicationResult.applicationId}/download?format=${format}`);
+      const blob = await apiClient.downloadCertificate(applicationResult.applicationId, format);
       
       // Create a download link
       const url = window.URL.createObjectURL(blob);
@@ -945,4 +946,10 @@ const CertificateApplication = () => {
   );
 };
 
-export default CertificateApplication;
+export default function CertificateApplication() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <CertificateApplicationContent />
+    </Suspense>
+  );
+}

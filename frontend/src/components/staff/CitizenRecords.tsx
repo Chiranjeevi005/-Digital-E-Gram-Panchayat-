@@ -2,24 +2,21 @@
 
 import { useState, useEffect } from 'react';
 import { generateAndDownloadReport } from '../../utils/fileUtils';
-import { apiClient } from '../../lib/api';
+import { apiClient, CitizenRecord } from '../../lib/api';
 
-interface CitizenRecord {
-  id: string;
-  name: string;
-  aadhaar: string;
-  email: string;
-  phone: string;
+// Extend the API interface with additional fields needed for the UI
+interface UICitizenRecord extends CitizenRecord {
   village: string;
   applications: number;
   grievances: number;
   schemes: number;
   lastAccessed: string;
+  aadhaar: string; // Alias for aadharNumber
 }
 
 export default function CitizenRecords() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [records, setRecords] = useState<CitizenRecord[]>([]);
+  const [records, setRecords] = useState<UICitizenRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -29,7 +26,18 @@ export default function CitizenRecords() {
         const startTime = Date.now();
         
         // Fetch citizen records from API
-        const citizenRecords: CitizenRecord[] = await apiClient.getCitizenRecords();
+        const apiRecords: CitizenRecord[] = await apiClient.getCitizenRecords();
+        
+        // Transform API records to include UI-specific fields
+        const transformedRecords: UICitizenRecord[] = apiRecords.map(record => ({
+          ...record,
+          aadhaar: record.aadharNumber, // Create alias for aadharNumber
+          village: 'Not specified', // Default value, would come from address or separate field
+          applications: 0, // Default value, would come from API
+          grievances: 0, // Default value, would come from API
+          schemes: 0, // Default value, would come from API
+          lastAccessed: new Date(record.createdAt).toLocaleDateString() // Transform createdAt
+        }));
         
         // Ensure minimum loading time of 1-2 seconds for better UX
         const elapsedTime = Date.now() - startTime;
@@ -38,7 +46,7 @@ export default function CitizenRecords() {
           await new Promise(resolve => setTimeout(resolve, minLoadingTime - elapsedTime));
         }
         
-        setRecords(citizenRecords);
+        setRecords(transformedRecords);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching citizen records:', error);
@@ -55,7 +63,7 @@ export default function CitizenRecords() {
     record.village.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleViewHistory = async (record: CitizenRecord) => {
+  const handleViewHistory = async (record: UICitizenRecord) => {
     // Generate citizen history report
     const historyData = {
       "Citizen Information": {
@@ -66,9 +74,9 @@ export default function CitizenRecords() {
         "Village": record.village
       },
       "Record Summary": {
-        "Total Applications": record.applications,
-        "Grievances Filed": record.grievances,
-        "Schemes Applied": record.schemes,
+        "Total Applications": record.applications.toString(),
+        "Grievances Filed": record.grievances.toString(),
+        "Schemes Applied": record.schemes.toString(),
         "Last Accessed": record.lastAccessed
       },
       "Application History": {
@@ -87,7 +95,7 @@ export default function CitizenRecords() {
     await generateAndDownloadReport(`Citizen History - ${record.name}`, historyData, 'pdf');
   };
 
-  const handleDownloadReport = async (record: CitizenRecord) => {
+  const handleDownloadReport = async (record: UICitizenRecord) => {
     // Generate citizen report
     const reportData = {
       "Citizen Profile": {
@@ -98,9 +106,9 @@ export default function CitizenRecords() {
         "Residential Village": record.village
       },
       "Service Utilization": {
-        "Certificates Processed": record.applications,
-        "Grievances Filed": record.grievances,
-        "Schemes Enrolled": record.schemes,
+        "Certificates Processed": record.applications.toString(),
+        "Grievances Filed": record.grievances.toString(),
+        "Schemes Enrolled": record.schemes.toString(),
         "Last Activity": record.lastAccessed
       },
       "Detailed Records": {

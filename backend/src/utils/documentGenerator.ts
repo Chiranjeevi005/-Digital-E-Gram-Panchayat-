@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { promisify } from 'util';
 import sharp from 'sharp';
+const pdf = require('pdf-poppler');
 
 const writeFileAsync = promisify(fs.writeFile);
 const mkdirAsync = promisify(fs.mkdir);
@@ -264,18 +265,178 @@ export const generateGrievanceResolutionPDF = async (grievanceData: any) => {
   });
 };
 
+// Function to generate certificate PDF
+export const generateCertificatePDF = async (certificateData: any, fileName: string): Promise<string> => {
+  return new Promise<string>(async (resolve, reject) => {
+    try {
+      const filePath = path.join(uploadsDir, `${fileName}.pdf`);
+      
+      const doc = new PDFDocument({
+        size: 'A4',
+        margin: 50
+      });
+      
+      // Create write stream
+      const writeStream = fs.createWriteStream(filePath);
+      doc.pipe(writeStream);
+      
+      // Use basic fonts to avoid potential issues
+      doc.font('Helvetica');
+      
+      // Add header with panchayat info
+      doc.fillColor('#000000');
+      doc.fontSize(20);
+      doc.text('Digital E-Panchayat', 0, 50, { align: 'center' });
+      doc.fontSize(16);
+      doc.text(`${certificateData.type}`, 0, 80, { align: 'center' });
+      doc.moveDown();
+      
+      // Add horizontal line using simple rectangle
+      doc.rect(50, 110, 500, 1).fill('#000000');
+      doc.moveDown(2);
+      
+      // Certificate details with simpler formatting
+      doc.fontSize(12);
+      doc.text(`Certificate ID: ${certificateData.id}`);
+      doc.text(`Applicant Name: ${certificateData.applicantName}`);
+      
+      if (certificateData.fatherName) {
+        doc.text(`Father/Husband Name: ${certificateData.fatherName}`);
+      }
+      
+      if (certificateData.motherName) {
+        doc.text(`Mother Name: ${certificateData.motherName}`);
+      }
+      
+      if (certificateData.date) {
+        doc.text(`Date: ${certificateData.date}`);
+      }
+      
+      if (certificateData.place) {
+        doc.text(`Place: ${certificateData.place}`);
+      }
+      
+      if (certificateData.address) {
+        doc.text(`Address: ${certificateData.address}`);
+      }
+      
+      if (certificateData.income) {
+        doc.text(`Income: ${certificateData.income}`);
+      }
+      
+      if (certificateData.caste) {
+        doc.text(`Caste: ${certificateData.caste}`);
+        if (certificateData.subCaste) {
+          doc.text(`Sub-Caste: ${certificateData.subCaste}`);
+        }
+      }
+      
+      if (certificateData.ward) {
+        doc.text(`Ward: ${certificateData.ward}`);
+      }
+      
+      if (certificateData.village) {
+        doc.text(`Village: ${certificateData.village}`);
+      }
+      
+      if (certificateData.district) {
+        doc.text(`District: ${certificateData.district}`);
+      }
+      
+      doc.text(`Certificate Number: ${certificateData.certificateNumber || 'N/A'}`);
+      doc.text(`Issued Date: ${certificateData.issuedDate || new Date().toISOString().split('T')[0]}`);
+      doc.text(`Status: ${certificateData.status}`);
+      doc.moveDown(2);
+      
+      // Add footer with disclaimer using simpler approach
+      const footerY = 750;
+      doc.rect(50, footerY - 20, 500, 1).fill('#000000');
+      doc.fontSize(8);
+      doc.text('This is a computer-generated document. No signature required.', 50, footerY);
+      doc.text('Valid digitally as per the provisions of the Digital Signature Act, 2000.', 50, footerY + 15);
+      
+      doc.end();
+      
+      writeStream.on('finish', () => {
+        resolve(filePath);
+      });
+      
+      writeStream.on('error', (err) => {
+        reject(err);
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
 // Function to convert PDF to JPG
 export const convertPDFToJPG = async (pdfPath: string, filename: string): Promise<string> => {
+  const jpgPath = path.join(uploadsDir, filename.replace('.pdf', '.jpg'));
+  
   try {
-    const jpgPath = path.join(uploadsDir, filename.replace('.pdf', '.jpg'));
+    // First, let's check if the PDF file exists and is valid
+    if (!fs.existsSync(pdfPath)) {
+      throw new Error('PDF file does not exist');
+    }
     
-    // Convert PDF to JPG using sharp
-    await sharp(pdfPath, { density: 150 })
-      .jpeg({ quality: 90 })
-      .toFile(jpgPath);
-    
-    return jpgPath;
-  } catch (error) {
-    throw new Error(`Error converting PDF to JPG: ${error}`);
+    // Try using pdf-poppler first as it's more reliable for PDF conversion
+    try {
+      const opts = {
+        format: 'jpeg',
+        out_dir: uploadsDir,
+        out_prefix: filename.replace('.pdf', ''),
+        page: 1
+      };
+      
+      await pdf.convert(pdfPath, opts);
+      
+      // pdf-poppler saves as {prefix}-1.jpg, so we need to rename it
+      const generatedPath = path.join(uploadsDir, `${filename.replace('.pdf', '')}-1.jpg`);
+      if (fs.existsSync(generatedPath)) {
+        fs.renameSync(generatedPath, jpgPath);
+        return jpgPath;
+      } else {
+        throw new Error('PDF conversion failed - output file not found');
+      }
+    } catch (popplerError) {
+      // Fallback to sharp with improved options
+      await sharp(pdfPath, { 
+        density: 150,
+        failOnError: false
+      })
+        .flatten({ background: { r: 255, g: 255, b: 255 } })
+        .jpeg({ quality: 90 })
+        .toFile(jpgPath);
+      
+      return jpgPath;
+    }
+  } catch (error: any) {
+    // If direct conversion fails, try alternative approach
+    try {
+      // Alternative approach: Convert to PNG first, then to JPG
+      const pngPath = pdfPath.replace('.pdf', '_temp.png');
+      await sharp(pdfPath, { 
+        density: 150,
+        failOnError: false
+      })
+        .flatten({ background: { r: 255, g: 255, b: 255 } })
+        .png()
+        .toFile(pngPath);
+      
+      // Then convert PNG to JPG
+      await sharp(pngPath)
+        .jpeg({ quality: 90 })
+        .toFile(jpgPath);
+      
+      // Clean up temporary PNG file
+      if (fs.existsSync(pngPath)) {
+        fs.unlinkSync(pngPath);
+      }
+      
+      return jpgPath;
+    } catch (secondaryError: any) {
+      throw new Error(`Error converting PDF to JPG: ${secondaryError.message}`);
+    }
   }
 };

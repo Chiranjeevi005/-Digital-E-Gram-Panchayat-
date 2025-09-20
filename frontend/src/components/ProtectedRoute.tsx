@@ -36,7 +36,7 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
   }
 
   // If allowedRoles is specified, check if user has the required role
-  if (allowedRoles && !allowedRoles.includes(user.userType as any)) {
+  if (allowedRoles && !allowedRoles.includes(user.userType as 'Citizen' | 'Officer' | 'Staff')) {
     // Redirect to appropriate dashboard based on user role
     switch (user.userType) {
       case 'Citizen':

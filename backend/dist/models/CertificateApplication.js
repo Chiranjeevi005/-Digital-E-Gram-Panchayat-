@@ -41,10 +41,25 @@ const CertificateApplicationSchema = new mongoose_1.Schema({
     certificateType: {
         type: String,
         required: true,
-        enum: ['Birth', 'Death']
+        enum: ['Birth', 'Death', 'Marriage', 'Income', 'Caste', 'Residence']
     },
     date: { type: Date, required: true },
     place: { type: String, required: true },
+    // Marriage certificate fields
+    brideName: { type: String },
+    groomName: { type: String },
+    witnessNames: { type: String },
+    registrationNo: { type: String },
+    // Income/Caste/Residence certificate fields
+    address: { type: String },
+    income: { type: String },
+    caste: { type: String },
+    subCaste: { type: String },
+    ward: { type: String },
+    village: { type: String },
+    district: { type: String },
+    issueDate: { type: Date },
+    validity: { type: Number },
     supportingFiles: [{ type: String }],
     status: {
         type: String,

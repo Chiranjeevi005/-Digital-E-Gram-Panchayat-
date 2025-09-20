@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.downloadLandRecordCertificateJPG = exports.downloadLandRecordCertificatePDF = exports.getLandRecord = exports.createLandRecord = void 0;
+exports.downloadLandRecordCertificateJPG = exports.downloadLandRecordCertificatePDF = exports.getAllLandRecords = exports.getLandRecord = exports.createLandRecord = void 0;
 const LandRecord_1 = __importDefault(require("../models/LandRecord"));
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
@@ -128,6 +128,32 @@ const getLandRecord = async (req, res) => {
     }
 };
 exports.getLandRecord = getLandRecord;
+// Get all land records
+const getAllLandRecords = async (req, res) => {
+    try {
+        let landRecords = [];
+        try {
+            // Try to get from MongoDB first
+            landRecords = await LandRecord_1.default.find({});
+        }
+        catch (dbError) {
+            // If MongoDB is not available, get from in-memory storage
+            landRecords = Array.from(inMemoryLandRecords.values());
+        }
+        res.status(200).json({
+            success: true,
+            landRecords: landRecords
+        });
+    }
+    catch (error) {
+        console.error('Error fetching all land records:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message || 'Internal server error'
+        });
+    }
+};
+exports.getAllLandRecords = getAllLandRecords;
 // Generate a PDF certificate with professional design (following the same pattern as Birth/Death certificates)
 const generateLandRecordCertificatePDF = async (landRecord) => {
     return new Promise((resolve, reject) => {

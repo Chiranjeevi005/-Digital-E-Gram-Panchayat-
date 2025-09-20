@@ -3,18 +3,15 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../../../components/Navbar';
 import Footer from '../../../components/Footer';
-import { apiClient } from '../../../lib/api';
+import { apiClient, Grievance } from '../../../lib/api';
 import { useToast } from '../../../components/ToastContainer';
 
-interface Grievance {
+interface LocalGrievance {
   _id: string;
   citizenId: string;
-  title: string;
+  subject: string; // Changed from title to subject to match API
   description: string;
   category: string;
-  name: string;
-  email: string;
-  phone: string;
   status: 'open' | 'in-progress' | 'resolved' | 'closed';
   remarks?: string;
   createdAt: string;
@@ -92,7 +89,7 @@ const GrievancePage = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     citizenId: 'CIT-001', // This would come from auth context in a real app
-    title: '',
+    subject: '', // Changed from title to subject
     description: '',
     category: '',
     name: '',
@@ -100,14 +97,29 @@ const GrievancePage = () => {
     phone: ''
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const [previewData, setPreviewData] = useState<any>(null);
+  interface GrievancePreview {
+    _id: string;
+    userId: string;
+    subject: string; // This is correct
+    description: string;
+    category: string;
+    status: 'open' | 'in-progress' | 'resolved' | 'closed'; // Fixed to match API
+    priority: string;
+    createdAt: string;
+    updatedAt: string;
+    grievanceId: string;
+    date: string;
+  }
+
+  const [previewData, setPreviewData] = useState<GrievancePreview | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedGrievance, setSelectedGrievance] = useState<Grievance | null>(null);
   const [isResolutionModalOpen, setIsResolutionModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [grievanceToDelete, setGrievanceToDelete] = useState<{id: string, title: string} | null>(null);
+  const [grievanceToDelete, setGrievanceToDelete] = useState<{id: string, subject: string} | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
   
   // Search and filter states
   const [searchTerm, setSearchTerm] = useState('');
@@ -152,7 +164,7 @@ const GrievancePage = () => {
     setIsFormOpen(false);
     setFormData({
       citizenId: 'CIT-001',
-      title: '',
+      subject: '',
       description: '',
       category: '',
       name: '',
@@ -184,7 +196,7 @@ const GrievancePage = () => {
     const errors: Record<string, string> = {};
     
     if (currentStep === 1) {
-      if (!formData.title.trim()) errors.title = 'Title is required';
+      if (!formData.subject.trim()) errors.subject = 'Subject is required';
       if (!formData.category) errors.category = 'Category is required';
     } else if (currentStep === 2) {
       if (!formData.description.trim()) errors.description = 'Description is required';
@@ -222,7 +234,15 @@ const GrievancePage = () => {
     }
     
     setPreviewData({
-      ...formData,
+      _id: '',
+      userId: formData.citizenId,
+      subject: formData.subject,
+      description: formData.description,
+      category: formData.category,
+      status: 'open',
+      priority: 'Medium',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       grievanceId: `GRV-${Date.now()}`,
       date: new Date().toLocaleDateString('en-IN', {
         day: 'numeric',
@@ -242,8 +262,17 @@ const GrievancePage = () => {
     try {
       setIsSubmitting(true);
       
-      // Submit the grievance to the backend
-      const response = await apiClient.post('/grievances', formData);
+      // Submit the grievance to the backend with only the required fields
+      const grievanceData = {
+        citizenId: formData.citizenId,
+        subject: formData.subject,
+        description: formData.description,
+        category: formData.category,
+        // Note: name, email, and phone are collected in the form but not sent to the API
+        // as they are not part of the Grievance interface
+      };
+      
+      const response = await apiClient.post('/grievances', grievanceData);
       
       showToast('Grievance submitted successfully!', 'success');
       closePreview();
@@ -262,7 +291,17 @@ const GrievancePage = () => {
   };
 
   const handleDownload = async (grievanceId: string, format: 'pdf' | 'jpg' = 'pdf', type: 'acknowledgment' | 'resolution' = 'acknowledgment') => {
+    if (isDownloading) return;
+    
     try {
+      setIsDownloading(true);
+      
+      // Show loading state with animation
+      showToast('Preparing your document...', 'info');
+      
+      // Add a delay to show the animation
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
       const blob = type === 'resolution' 
         ? await apiClient.downloadGrievanceResolution(grievanceId, format)
         : await apiClient.downloadGrievanceAcknowledgment(grievanceId, format);
@@ -275,14 +314,19 @@ const GrievancePage = () => {
       a.click();
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
+      
+      // Show success message
+      showToast('Document downloaded successfully!', 'success');
     } catch (err) {
       console.error('Error downloading document:', err);
-      showToast('Failed to download document', 'error');
+      showToast('Failed to download document. Please try again.', 'error');
+    } finally {
+      setIsDownloading(false);
     }
   };
 
-  const handleDelete = async (grievanceId: string, title: string) => {
-    setGrievanceToDelete({ id: grievanceId, title: title });
+  const handleDelete = async (grievanceId: string, subject: string) => {
+    setGrievanceToDelete({ id: grievanceId, subject });
     setIsDeleteModalOpen(true);
   };
 
@@ -342,7 +386,7 @@ const GrievancePage = () => {
 
   // Filter grievances based on search term, category, and status
   const filteredGrievances = grievances.filter(grievance => {
-    const matchesSearch = grievance.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    const matchesSearch = grievance.subject.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           grievance.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           grievance.category.toLowerCase().includes(searchTerm.toLowerCase());
     
@@ -417,9 +461,9 @@ const GrievancePage = () => {
                 <select
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 shadow-sm"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 shadow-sm text-gray-800"
                 >
-                  <option value="all">All Categories</option>
+                  <option value="all" className="text-gray-800">All Categories</option>
                   <option value="Roads and Infrastructure">Roads and Infrastructure</option>
                   <option value="Water Supply">Water Supply</option>
                   <option value="Electricity">Electricity</option>
@@ -434,9 +478,9 @@ const GrievancePage = () => {
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 shadow-sm"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 shadow-sm text-gray-800"
                 >
-                  <option value="all">All Statuses</option>
+                  <option value="all" className="text-gray-800">All Statuses</option>
                   <option value="open">Open</option>
                   <option value="in-progress">In Progress</option>
                   <option value="resolved">Resolved</option>
@@ -519,7 +563,7 @@ const GrievancePage = () => {
                       Ready to Submit?
                     </h3>
                     <p className="text-gray-600 mb-6 flex-grow">
-                      Your grievance will be reviewed by our team and you'll receive updates on its progress.
+                      Your grievance will be reviewed by our team and you&apos;ll receive updates on its progress.
                     </p>
                     <button
                       onClick={openForm}
@@ -616,15 +660,26 @@ const GrievancePage = () => {
                               >
                                 View
                               </button>
+                              <div className="inline-flex gap-2">
+                                <button 
+                                  onClick={() => handleDownload(grievance._id, 'pdf')}
+                                  disabled={isDownloading}
+                                  className={`text-emerald-green hover:text-emerald-700 font-medium ${isDownloading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                >
+                                  PDF
+                                </button>
+                                <span className="text-gray-300">|</span>
+                                <button 
+                                  onClick={() => handleDownload(grievance._id, 'jpg')}
+                                  disabled={isDownloading}
+                                  className={`text-blue-500 hover:text-blue-700 font-medium ${isDownloading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                >
+                                  JPG
+                                </button>
+                              </div>
                               <button 
-                                onClick={() => handleDownload(grievance._id, 'pdf')}
-                                className="text-emerald-green hover:text-emerald-700 font-medium mr-3"
-                              >
-                                Download
-                              </button>
-                              <button 
-                                onClick={() => handleDelete(grievance._id, grievance.title)}
-                                className="text-red-600 hover:text-red-800 font-medium"
+                                onClick={() => handleDelete(grievance._id, grievance.subject)}
+                                className="text-red-600 hover:text-red-800 font-medium ml-3"
                               >
                                 Delete
                               </button>
@@ -642,7 +697,7 @@ const GrievancePage = () => {
                         <div className="p-4 hover:bg-gray-50">
                           <div className="flex justify-between items-start">
                             <div>
-                              <h3 className="font-medium text-gray-900">{grievance.title}</h3>
+                              <h3 className="font-medium text-gray-900">{grievance.subject}</h3>
                               <p className="text-sm text-gray-500 mt-1">{grievance.category}</p>
                             </div>
                             <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(grievance.status)}`}>
@@ -667,7 +722,7 @@ const GrievancePage = () => {
                                 Download
                               </button>
                               <button 
-                                onClick={() => handleDelete(grievance._id, grievance.title)}
+                                onClick={() => handleDelete(grievance._id, grievance.subject)}
                                 className="text-red-600 hover:text-red-800 font-medium text-sm"
                               >
                                 Delete
@@ -736,20 +791,20 @@ const GrievancePage = () => {
                   <div className="space-y-5">
                     <div>
                       <label className="block text-sm font-medium text-dark-label mb-1">
-                        Title <span className="text-red-500">*</span>
+                        Subject <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
-                        name="title"
-                        value={formData.title}
+                        name="subject"
+                        value={formData.subject}
                         onChange={handleInputChange}
                         className={`w-full px-4 py-2.5 rounded-xl border text-gray-800 transition-all duration-300 ${
-                          formErrors.title ? 'border-red-500 shake' : 'border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500'
+                          formErrors.subject ? 'border-red-500 shake' : 'border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500'
                         }`}
                         placeholder="Enter a brief title for your grievance"
                       />
-                      {formErrors.title && (
-                        <p className="mt-1 text-sm text-red-600 animate-shake" role="alert">{formErrors.title}</p>
+                      {formErrors.subject && (
+                        <p className="mt-1 text-sm text-red-600 animate-shake" role="alert">{formErrors.subject}</p>
                       )}
                     </div>
                     
@@ -765,14 +820,14 @@ const GrievancePage = () => {
                           formErrors.category ? 'border-red-500 shake' : 'border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500'
                         }`}
                       >
-                        <option value="">Select a category</option>
-                        <option value="Roads and Infrastructure">Roads and Infrastructure</option>
-                        <option value="Water Supply">Water Supply</option>
-                        <option value="Electricity">Electricity</option>
-                        <option value="Sanitation">Sanitation</option>
-                        <option value="Healthcare">Healthcare</option>
-                        <option value="Education">Education</option>
-                        <option value="Other">Other</option>
+                        <option value="" className="text-gray-800">Select a category</option>
+                        <option value="Roads and Infrastructure" className="text-gray-800">Roads and Infrastructure</option>
+                        <option value="Water Supply" className="text-gray-800">Water Supply</option>
+                        <option value="Electricity" className="text-gray-800">Electricity</option>
+                        <option value="Sanitation" className="text-gray-800">Sanitation</option>
+                        <option value="Healthcare" className="text-gray-800">Healthcare</option>
+                        <option value="Education" className="text-gray-800">Education</option>
+                        <option value="Other" className="text-gray-800">Other</option>
                       </select>
                       {formErrors.category && (
                         <p className="mt-1 text-sm text-red-600 animate-shake" role="alert">{formErrors.category}</p>
@@ -932,17 +987,17 @@ const GrievancePage = () => {
                   </div>
                   <div>
                     <p className="text-sm text-gray-700">Name</p>
-                    <p className="font-medium text-gray-900">{previewData.name || 'Not provided'}</p>
+                    <p className="font-medium text-gray-900">{'Not provided'}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-700">Contact</p>
-                    <p className="font-medium text-gray-900">{previewData.email || previewData.phone || 'Not provided'}</p>
+                    <p className="font-medium text-gray-900">{'Not provided'}</p>
                   </div>
                 </div>
                 
                 <div className="mb-6">
-                  <p className="text-sm text-gray-700">Title</p>
-                  <p className="font-medium text-gray-900">{previewData.title}</p>
+                  <p className="text-sm text-gray-700">Subject</p>
+                  <p className="font-medium text-gray-900">{previewData.subject}</p>
                 </div>
                 
                 <div className="mb-6">
@@ -1041,8 +1096,8 @@ const GrievancePage = () => {
                 </div>
                 
                 <div className="mb-6">
-                  <p className="text-sm text-gray-700">Title</p>
-                  <p className="font-medium text-gray-900">{selectedGrievance.title}</p>
+                  <p className="text-sm text-gray-700">Subject</p>
+                  <p className="font-medium text-gray-900">{selectedGrievance.subject}</p>
                 </div>
                 
                 <div className="mb-6">
@@ -1058,12 +1113,22 @@ const GrievancePage = () => {
               </div>
               
               <div className="flex flex-col sm:flex-row gap-3">
-                <button
-                  onClick={() => handleDownload(selectedGrievance._id, 'pdf', 'resolution')}
-                  className="flex-1 bg-gradient-to-r from-emerald-green to-deep-blue text-white py-3 rounded-xl shadow-soft hover:shadow-md transition-all font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                >
-                  Download Resolution Certificate
-                </button>
+                <div className="flex flex-col sm:flex-row gap-3 w-full">
+                  <button
+                    onClick={() => handleDownload(selectedGrievance._id, 'pdf', 'resolution')}
+                    disabled={isDownloading}
+                    className={`flex-1 bg-gradient-to-r from-emerald-green to-deep-blue text-white py-3 rounded-xl shadow-soft hover:shadow-md transition-all font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 ${isDownloading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    {isDownloading ? 'Preparing...' : 'Download PDF'}
+                  </button>
+                  <button
+                    onClick={() => handleDownload(selectedGrievance._id, 'jpg', 'resolution')}
+                    disabled={isDownloading}
+                    className={`flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3 rounded-xl shadow-soft hover:shadow-md transition-all font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 ${isDownloading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    {isDownloading ? 'Preparing...' : 'Download JPG'}
+                  </button>
+                </div>
                 <button
                   onClick={closeResolutionModal}
                   className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-xl hover:bg-gray-300 transition-colors font-medium focus:outline-none focus:ring-2 focus:ring-gray-500"
@@ -1098,7 +1163,7 @@ const GrievancePage = () => {
               <div className="border-2 border-gray-200 rounded-xl p-6 mb-6">
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h3 className="text-xl font-bold text-gray-800">{selectedGrievance.title}</h3>
+                    <h3 className="text-xl font-bold text-gray-800">{selectedGrievance.subject}</h3>
                     <p className="text-gray-600">{selectedGrievance.category}</p>
                   </div>
                   <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
@@ -1125,11 +1190,11 @@ const GrievancePage = () => {
                   </div>
                   <div>
                     <p className="text-sm text-gray-700">Name</p>
-                    <p className="font-medium text-gray-900">{selectedGrievance.name || 'Not provided'}</p>
+                    <p className="font-medium text-gray-900">{'Not provided'}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-700">Contact</p>
-                    <p className="font-medium text-gray-900">{selectedGrievance.email || selectedGrievance.phone || 'Not provided'}</p>
+                    <p className="font-medium text-gray-900">{'Not provided'}</p>
                   </div>
                 </div>
                 
@@ -1147,12 +1212,22 @@ const GrievancePage = () => {
               </div>
               
               <div className="flex flex-col sm:flex-row gap-3">
-                <button
-                  onClick={() => handleDownload(selectedGrievance._id, 'pdf')}
-                  className="flex-1 bg-gradient-to-r from-emerald-green to-deep-blue text-white py-3 rounded-xl shadow-soft hover:shadow-md transition-all font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                >
-                  Download
-                </button>
+                <div className="flex flex-col sm:flex-row gap-3 w-full">
+                  <button
+                    onClick={() => handleDownload(selectedGrievance._id, 'pdf')}
+                    disabled={isDownloading}
+                    className={`flex-1 bg-gradient-to-r from-emerald-green to-deep-blue text-white py-3 rounded-xl shadow-soft hover:shadow-md transition-all font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 ${isDownloading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    {isDownloading ? 'Preparing...' : 'Download PDF'}
+                  </button>
+                  <button
+                    onClick={() => handleDownload(selectedGrievance._id, 'jpg')}
+                    disabled={isDownloading}
+                    className={`flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3 rounded-xl shadow-soft hover:shadow-md transition-all font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 ${isDownloading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    {isDownloading ? 'Preparing...' : 'Download JPG'}
+                  </button>
+                </div>
                 <button
                   onClick={closeViewModal}
                   className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-xl hover:bg-gray-300 transition-colors font-medium focus:outline-none focus:ring-2 focus:ring-gray-500"
@@ -1170,7 +1245,7 @@ const GrievancePage = () => {
         isOpen={isDeleteModalOpen}
         onClose={closeDeleteModal}
         onConfirm={confirmDelete}
-        itemName={grievanceToDelete?.title || ''}
+        itemName={grievanceToDelete?.subject || ''}
       />
       
       <Footer />

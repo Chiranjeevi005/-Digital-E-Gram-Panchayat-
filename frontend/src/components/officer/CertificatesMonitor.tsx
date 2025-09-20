@@ -3,18 +3,12 @@
 import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { generateAndDownloadReport } from '../../utils/fileUtils';
-import { apiClient } from '../../lib/api';
+import { apiClient, CertificateApplication, Certificate } from '../../lib/api';
 
-interface Certificate {
-  _id: string;
-  applicantName: string;
-  certificateType: string;
-  status: string;
-  createdAt: string;
-}
+
 
 export default function CertificatesMonitor() {
-  const [certificates, setCertificates] = useState<Certificate[]>([]);
+  const [certificates, setCertificates] = useState<CertificateApplication[]>([]); // Changed from Certificate[] to CertificateApplication[]
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,8 +17,9 @@ export default function CertificatesMonitor() {
       try {
         setLoading(true);
         setError(null);
-        const allCertificates: Certificate[] = await apiClient.getAllCertificates();
-        setCertificates(allCertificates);
+        const certificateApplications: CertificateApplication[] = await apiClient.getAllCertificates();
+        // No need to transform since we're using the correct type
+        setCertificates(certificateApplications);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching certificates:', error);
@@ -237,15 +232,15 @@ export default function CertificatesMonitor() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {certificates.map((certificate) => (
-                  <tr key={certificate._id} className="hover:bg-gray-50">
+                  <tr key={certificate.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {certificate.applicantName}
+                      {certificate.userId}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {certificate.certificateType}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(certificate.createdAt).toLocaleDateString()}
+                      {new Date(certificate.appliedAt).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(certificate.status)}`}>
