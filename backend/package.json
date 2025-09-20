@@ -2,7 +2,7 @@
   "name": "digital-e-panchayat-backend",
   "version": "1.0.0",
   "description": "Backend for Digital E-Panchayat",
-  "main": "src/server.ts",
+  "main": "dist/server.js",
   "scripts": {
     "start": "node dist/server.js",
     "dev": "ts-node-dev src/server.ts",
