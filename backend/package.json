@@ -9,7 +9,7 @@
     "build": "tsc",
     "test": "jest",
     "seed": "ts-node src/seedSchemes.ts",
-    "postinstall": "node scripts/rebuild-bcrypt.js"
+    "postinstall": "node scripts/rebuild-bcrypt.js && npm rebuild sharp --update-binary"
   },
   "dependencies": {
     "@types/bcrypt": "^5.0.0",
