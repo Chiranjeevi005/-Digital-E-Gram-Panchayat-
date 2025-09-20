@@ -3,7 +3,7 @@ services:
     name: digital-e-panchayat-backend
     env: node
     buildCommand: cd backend && npm install && npm run build
-    startCommand: cd backend && npm run start
+    startCommand: cd backend && npm rebuild bcrypt --update-binary && npm run start
     repo: https://github.com/Chiranjeevi005/-Digital-E-Gram-Panchayat-
     rootDir: .
     envVars:
@@ -30,4 +30,4 @@ services:
       - key: NODE_ENV
         value: production
       - key: PORT
-        value: 3000
+        value: 3001
