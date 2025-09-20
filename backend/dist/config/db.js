@@ -8,8 +8,10 @@ const connectDB = async () => {
     try {
         // Use MONGODB_URI if available, otherwise fallback to MONGO_URI, then to default
         const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URI || 'mongodb://localhost:27017/digital-e-panchayat';
+        console.log('Connecting to MongoDB with URI:', mongoUri);
         await mongoose_1.default.connect(mongoUri);
         console.log("✅ MongoDB Connected");
+        console.log('MongoDB connection state:', mongoose_1.default.connection.readyState);
     }
     catch (error) {
         console.error("❌ MongoDB Connection Failed", error);

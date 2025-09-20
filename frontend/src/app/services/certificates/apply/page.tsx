@@ -4,7 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Navbar from '../../../../components/Navbar';
 import Footer from '../../../../components/Footer';
-import { apiClient } from '../../../../lib/api';
+import { apiClient } from '../../../../services/api';
 import { useToast } from '../../../../components/ToastContainer';
 
 interface ApplyResponse {

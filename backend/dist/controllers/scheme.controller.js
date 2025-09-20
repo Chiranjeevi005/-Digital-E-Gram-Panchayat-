@@ -33,7 +33,10 @@ const createScheme = async (req, res) => {
 exports.createScheme = createScheme;
 const getSchemes = async (req, res) => {
     try {
+        console.log('Fetching schemes from database...');
         const schemes = await Scheme_1.default.find().sort({ createdAt: -1 });
+        console.log(`Found ${schemes.length} schemes`);
+        console.log('Schemes data:', JSON.stringify(schemes, null, 2));
         res.json(schemes);
     }
     catch (error) {

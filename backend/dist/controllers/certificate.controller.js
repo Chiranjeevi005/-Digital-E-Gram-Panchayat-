@@ -188,7 +188,21 @@ const downloadCertificate = async (req, res) => {
             }
             catch (conversionError) {
                 console.error('Error converting PDF to JPG:', conversionError);
-                return res.status(500).json({ message: `Error generating JPG file: ${conversionError.message}. Please try downloading as PDF instead.` });
+                // Clean up temporary PDF file
+                if (fs_1.default.existsSync(pdfPath)) {
+                    fs_1.default.unlinkSync(pdfPath);
+                }
+                return res.status(500).json({
+                    message: `Error generating JPG file: ${conversionError.message}. Please try downloading as PDF instead.`
+                });
+            }
+            finally {
+                // Clean up temporary PDF file after sending response
+                setTimeout(() => {
+                    if (fs_1.default.existsSync(pdfPath)) {
+                        fs_1.default.unlinkSync(pdfPath);
+                    }
+                }, 1000); // Wait a bit to ensure file is sent
             }
         }
         else {

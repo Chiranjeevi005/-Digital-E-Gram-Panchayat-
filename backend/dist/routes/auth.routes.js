@@ -6,5 +6,6 @@ const router = (0, express_1.Router)();
 router.post('/register', auth_controller_1.register);
 router.post('/login', auth_controller_1.login);
 router.get('/user/me', auth_controller_1.getCurrentUser);
+router.get('/citizens', auth_controller_1.getCitizenRecords);
 router.get('/debug/users', auth_controller_1.debugUsers); // Temporary debug route
 exports.default = router;

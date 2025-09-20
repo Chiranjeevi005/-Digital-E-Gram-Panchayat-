@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCurrentUser = exports.debugUsers = exports.login = exports.register = void 0;
+exports.getCitizenRecords = exports.getCurrentUser = exports.debugUsers = exports.login = exports.register = void 0;
 const User_1 = __importDefault(require("../models/User"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const mongoose_1 = __importDefault(require("mongoose"));
@@ -260,3 +260,24 @@ const getCurrentUser = async (req, res) => {
     }
 };
 exports.getCurrentUser = getCurrentUser;
+// Get all citizen records
+const getCitizenRecords = async (req, res) => {
+    try {
+        // Only fetch users with userType 'Citizen'
+        const citizens = await User_1.default.find({ userType: 'Citizen' }).select('-password');
+        // Format the response to match frontend expectations
+        const citizenRecords = citizens.map(citizen => ({
+            id: citizen._id.toString(),
+            name: citizen.name,
+            email: citizen.email,
+            userType: citizen.userType,
+            createdAt: citizen.createdAt
+        }));
+        res.json(citizenRecords);
+    }
+    catch (error) {
+        console.error('Error fetching citizen records:', error);
+        res.status(500).json({ message: 'Server error while fetching citizen records' });
+    }
+};
+exports.getCitizenRecords = getCitizenRecords;

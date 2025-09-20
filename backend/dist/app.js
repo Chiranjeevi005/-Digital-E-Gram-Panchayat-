@@ -14,6 +14,8 @@ const certificate_routes_1 = __importDefault(require("./routes/certificate.route
 const property_routes_1 = __importDefault(require("./routes/property.routes"));
 const landrecord_routes_1 = __importDefault(require("./routes/landrecord.routes"));
 const landrecords_routes_1 = __importDefault(require("./routes/landrecords.routes"));
+const tracking_routes_1 = __importDefault(require("./routes/tracking.routes"));
+const Scheme_1 = __importDefault(require("./models/Scheme")); // Add this import
 // Load environment variables
 dotenv_1.default.config();
 const app = (0, express_1.default)();
@@ -31,6 +33,21 @@ app.use((0, cors_1.default)({
     credentials: true
 }));
 app.use(express_1.default.json());
+// Health check endpoint
+app.get('/', (req, res) => {
+    res.json({ message: 'Digital E-Panchayat API' });
+});
+// Add a direct test route for schemes
+app.get('/api/schemes/test', async (req, res) => {
+    try {
+        const schemes = await Scheme_1.default.find().sort({ createdAt: -1 });
+        res.json(schemes);
+    }
+    catch (error) {
+        console.error('Error fetching schemes:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
 // Routes
 app.use('/api/auth', auth_routes_1.default);
 app.use('/api/grievances', grievance_routes_1.default);
@@ -40,10 +57,7 @@ app.use('/api/certificates', certificate_routes_1.default);
 app.use('/api', property_routes_1.default);
 app.use('/api/landrecord', landrecord_routes_1.default);
 app.use('/api/landrecords', landrecords_routes_1.default);
-// Health check endpoint
-app.get('/', (req, res) => {
-    res.json({ message: 'Digital E-Panchayat API' });
-});
+app.use('/api/tracking', tracking_routes_1.default);
 // 404 handler
 app.use('*', (req, res) => {
     res.status(404).json({ message: 'Route not found' });
