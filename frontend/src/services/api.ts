@@ -1,5 +1,10 @@
 // API client for making requests to the backend
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3002/api';
+// Use NEXT_PUBLIC_API_BASE_URL from environment or fallback to localhost
+const API_BASE_URL = typeof window !== 'undefined' 
+  ? (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3002/api')
+  : (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3002/api');
+
+console.log('API Base URL:', API_BASE_URL); // Debug log
 
 // Get token from localStorage or sessionStorage
 const getToken = () => {
@@ -464,6 +469,23 @@ export const apiClient = {
   // User authentication methods
   getCurrentUser: async (): Promise<User> => {
     return apiClient.get<User>('/auth/user/me');
+  },
+  
+  login: async (credentials: { email: string; password: string; userType: string }): Promise<LoginResponse> => {
+    console.log('Attempting login with credentials:', {
+      email: credentials.email,
+      userType: credentials.userType,
+      apiBaseUrl: API_BASE_URL
+    });
+    
+    try {
+      const response = await apiClient.post<LoginResponse>('/auth/login', credentials);
+      console.log('Login response:', response);
+      return response;
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
+    }
   },
   
   register: async (userData: { name: string; email: string; password: string }): Promise<RegisterResponse> => {

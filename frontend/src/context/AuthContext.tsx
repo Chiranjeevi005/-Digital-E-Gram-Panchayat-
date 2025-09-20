@@ -54,7 +54,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (email: string, password: string, userType: 'Citizen' | 'Officer' | 'Staff') => {
     try {
-      const response = await apiClient.post<LoginResponse>('/auth/login', {
+      const response = await apiClient.login({
         email,
         password,
         userType,
@@ -68,8 +68,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         id: response.user.id,
         name: response.user.name,
         email: response.user.email,
-        userType: response.user.userType
+        userType: response.user.userType as 'Citizen' | 'Officer' | 'Staff'
       });
+
     } catch (error) {
       throw error;
     }
