@@ -3,10 +3,10 @@ services:
   - type: web
     name: digital-e-panchayat-backend
     env: node
-    buildCommand: npm install && npm run build
-    startCommand: npm run start
+    buildCommand: cd backend && npm install && npm run build
+    startCommand: cd backend && npm run start
     repo: https://github.com/Chiranjeevi005/-Digital-E-Gram-Panchayat-
-    rootDir: backend
+    rootDir: .
     envVars:
       - key: NODE_ENV
         value: production
