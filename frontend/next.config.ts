@@ -11,7 +11,8 @@ const nextConfig: NextConfig = {
   },
   // Enable experimental features for better performance
   experimental: {
-    optimizeCss: true,
+    // Disable optimizeCss to prevent critters issues
+    optimizeCss: false,
   },
   // Enable compression
   compress: true,
