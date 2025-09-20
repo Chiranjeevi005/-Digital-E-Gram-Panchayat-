@@ -1,5 +1,4 @@
 services:
-  # Backend service
   - type: web
     name: digital-e-panchayat-backend
     env: node
@@ -18,3 +17,17 @@ services:
         sync: false
       - key: PORT
         value: 3002
+
+  # Frontend service
+  - type: web
+    name: digital-e-panchayat-frontend
+    env: node
+    buildCommand: cd frontend && npm install && npm run build
+    startCommand: cd frontend && npm run start
+    repo: https://github.com/Chiranjeevi005/-Digital-E-Gram-Panchayat-
+    rootDir: .
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
