@@ -7,6 +7,6 @@
     }
   ],
   "env": {
-    "NEXT_PUBLIC_API_BASE_URL": "https://your-backend-url.onrender.com/api"
+    "NEXT_PUBLIC_API_BASE_URL": "https://digital-e-gram-panchayat-rjkb.onrender.com/api"
   }
 }
