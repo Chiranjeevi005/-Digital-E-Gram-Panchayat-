@@ -9,7 +9,6 @@ const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const util_1 = require("util");
 const sharp_1 = __importDefault(require("sharp"));
-const pdf = require('pdf-poppler');
 const writeFileAsync = (0, util_1.promisify)(fs_1.default.writeFile);
 const mkdirAsync = (0, util_1.promisify)(fs_1.default.mkdir);
 // Ensure uploads directory exists
@@ -315,7 +314,7 @@ const generateCertificatePDF = async (certificateData, fileName) => {
     });
 };
 exports.generateCertificatePDF = generateCertificatePDF;
-// Function to convert PDF to JPG
+// Function to convert PDF to JPG using only sharp
 const convertPDFToJPG = async (pdfPath, filename) => {
     const jpgPath = path_1.default.join(uploadsDir, filename.replace('.pdf', '.jpg'));
     try {
@@ -323,36 +322,15 @@ const convertPDFToJPG = async (pdfPath, filename) => {
         if (!fs_1.default.existsSync(pdfPath)) {
             throw new Error('PDF file does not exist');
         }
-        // Try using pdf-poppler first as it's more reliable for PDF conversion
-        try {
-            const opts = {
-                format: 'jpeg',
-                out_dir: uploadsDir,
-                out_prefix: filename.replace('.pdf', ''),
-                page: 1
-            };
-            await pdf.convert(pdfPath, opts);
-            // pdf-poppler saves as {prefix}-1.jpg, so we need to rename it
-            const generatedPath = path_1.default.join(uploadsDir, `${filename.replace('.pdf', '')}-1.jpg`);
-            if (fs_1.default.existsSync(generatedPath)) {
-                fs_1.default.renameSync(generatedPath, jpgPath);
-                return jpgPath;
-            }
-            else {
-                throw new Error('PDF conversion failed - output file not found');
-            }
-        }
-        catch (popplerError) {
-            // Fallback to sharp with improved options
-            await (0, sharp_1.default)(pdfPath, {
-                density: 150,
-                failOnError: false
-            })
-                .flatten({ background: { r: 255, g: 255, b: 255 } })
-                .jpeg({ quality: 90 })
-                .toFile(jpgPath);
-            return jpgPath;
-        }
+        // Convert PDF to JPG using sharp with improved options
+        await (0, sharp_1.default)(pdfPath, {
+            density: 150,
+            failOnError: false
+        })
+            .flatten({ background: { r: 255, g: 255, b: 255 } })
+            .jpeg({ quality: 90 })
+            .toFile(jpgPath);
+        return jpgPath;
     }
     catch (error) {
         // If direct conversion fails, try alternative approach

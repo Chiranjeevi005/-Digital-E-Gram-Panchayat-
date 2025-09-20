@@ -3,7 +3,6 @@ import fs from 'fs';
 import path from 'path';
 import { promisify } from 'util';
 import sharp from 'sharp';
-const pdf = require('pdf-poppler');
 
 const writeFileAsync = promisify(fs.writeFile);
 const mkdirAsync = promisify(fs.mkdir);
@@ -370,7 +369,7 @@ export const generateCertificatePDF = async (certificateData: any, fileName: str
   });
 };
 
-// Function to convert PDF to JPG
+// Function to convert PDF to JPG using only sharp
 export const convertPDFToJPG = async (pdfPath: string, filename: string): Promise<string> => {
   const jpgPath = path.join(uploadsDir, filename.replace('.pdf', '.jpg'));
   
@@ -380,37 +379,16 @@ export const convertPDFToJPG = async (pdfPath: string, filename: string): Promis
       throw new Error('PDF file does not exist');
     }
     
-    // Try using pdf-poppler first as it's more reliable for PDF conversion
-    try {
-      const opts = {
-        format: 'jpeg',
-        out_dir: uploadsDir,
-        out_prefix: filename.replace('.pdf', ''),
-        page: 1
-      };
-      
-      await pdf.convert(pdfPath, opts);
-      
-      // pdf-poppler saves as {prefix}-1.jpg, so we need to rename it
-      const generatedPath = path.join(uploadsDir, `${filename.replace('.pdf', '')}-1.jpg`);
-      if (fs.existsSync(generatedPath)) {
-        fs.renameSync(generatedPath, jpgPath);
-        return jpgPath;
-      } else {
-        throw new Error('PDF conversion failed - output file not found');
-      }
-    } catch (popplerError) {
-      // Fallback to sharp with improved options
-      await sharp(pdfPath, { 
-        density: 150,
-        failOnError: false
-      })
-        .flatten({ background: { r: 255, g: 255, b: 255 } })
-        .jpeg({ quality: 90 })
-        .toFile(jpgPath);
-      
-      return jpgPath;
-    }
+    // Convert PDF to JPG using sharp with improved options
+    await sharp(pdfPath, { 
+      density: 150,
+      failOnError: false
+    })
+      .flatten({ background: { r: 255, g: 255, b: 255 } })
+      .jpeg({ quality: 90 })
+      .toFile(jpgPath);
+    
+    return jpgPath;
   } catch (error: any) {
     // If direct conversion fails, try alternative approach
     try {
