@@ -4,7 +4,7 @@ const API_BASE_URL = typeof window !== 'undefined'
   ? (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3002/api')
   : (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3002/api');
 
-console.log('API Base URL:', API_BASE_URL); // Debug log
+console.log('API Base URL (determined at runtime):', API_BASE_URL); // Debug log
 
 // Get token from localStorage or sessionStorage
 const getToken = () => {
@@ -216,7 +216,9 @@ const handleFetchError = async (response: Response) => {
       // If we can't parse JSON, use the status text
       errorMessage = response.statusText || errorMessage;
     }
-    throw new Error(errorMessage);
+    const error = new Error(errorMessage);
+    (error as any).status = response.status;
+    throw error;
   }
   return response;
 };

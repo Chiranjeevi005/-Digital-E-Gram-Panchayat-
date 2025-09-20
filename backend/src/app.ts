@@ -34,7 +34,20 @@ app.use(express.json());
 
 // Health check endpoint
 app.get('/', (req: Request, res: Response) => {
-  res.json({ message: 'Digital E-Panchayat API' });
+  res.json({ 
+    message: 'Digital E-Panchayat API', 
+    status: 'running',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Simple health check endpoint for testing
+app.get('/health', (req: Request, res: Response) => {
+  res.json({ 
+    status: 'OK', 
+    message: 'Backend is running properly',
+    timestamp: new Date().toISOString()
+  });
 });
 
 // Add a direct test route for schemes

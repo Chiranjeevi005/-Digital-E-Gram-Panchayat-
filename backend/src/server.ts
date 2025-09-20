@@ -10,10 +10,10 @@ dotenv.config();
 // Connect to database
 connectDB();
 
-// Set port to 3002 as default
-const PORT = process.env.PORT || 3002;
+// Set port from environment variable or default to 3002
+const PORT = process.env.PORT || '3002';
 
 // Start server
-app.listen(PORT, () => {
+app.listen(parseInt(PORT, 10), '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
 });
