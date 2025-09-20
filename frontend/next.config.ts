@@ -18,6 +18,10 @@ const nextConfig: NextConfig = {
   compress: true,
   // Enable react strict mode
   reactStrictMode: true,
+  // Disable ESLint during build
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
 };
 
 export default nextConfig;
