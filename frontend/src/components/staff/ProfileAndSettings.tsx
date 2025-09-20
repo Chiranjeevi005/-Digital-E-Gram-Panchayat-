@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../ToastContainer';
-import { apiClient } from '../../lib/api';
+import { apiClient } from '../../services/api';
 
 interface StaffProfile {
   id: string;

@@ -292,3 +292,25 @@ export const getCurrentUser = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Server error while fetching user data' });
   }
 };
+
+// Get all citizen records
+export const getCitizenRecords = async (req: Request, res: Response) => {
+  try {
+    // Only fetch users with userType 'Citizen'
+    const citizens = await User.find({ userType: 'Citizen' }).select('-password');
+    
+    // Format the response to match frontend expectations
+    const citizenRecords = citizens.map(citizen => ({
+      id: citizen._id.toString(),
+      name: citizen.name,
+      email: citizen.email,
+      userType: citizen.userType,
+      createdAt: citizen.createdAt
+    }));
+    
+    res.json(citizenRecords);
+  } catch (error) {
+    console.error('Error fetching citizen records:', error);
+    res.status(500).json({ message: 'Server error while fetching citizen records' });
+  }
+};

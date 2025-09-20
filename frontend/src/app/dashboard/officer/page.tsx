@@ -7,7 +7,7 @@ import ProtectedRoute from '../../../components/ProtectedRoute';
 import Navbar from '../../../components/Navbar';
 import Footer from '../../../components/Footer';
 import OfficerDashboard from '../../../components/officer/OfficerDashboard';
-import { apiClient } from '../../../lib/api';
+import { apiClient } from '../../../services/api';
 
 // Skeleton Loader Component for Officer Dashboard Page
 const OfficerDashboardSkeleton = () => (

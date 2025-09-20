@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import CertificateManagement from './CertificateManagement';
 import GrievanceHandling from './GrievanceHandling';
 import CitizenRecords from './CitizenRecords';
@@ -9,6 +10,7 @@ import ReportsAndAnalytics from './ReportsAndAnalytics';
 import ProfileAndSettings from './ProfileAndSettings';
 import NotificationsCenter from './NotificationsCenter';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { apiClient, ApplicationStats, RecentActivity } from '../../services/api';
 
 // Skeleton Loader Component for Staff Dashboard
 const StaffDashboardSkeleton = () => (
@@ -116,11 +118,45 @@ const StaffDashboardSkeleton = () => (
 );
 
 export default function StaffDashboard() {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [loading, setLoading] = useState(false); // Set to false by default for now
+  const [loading, setLoading] = useState(false);
+  const [stats, setStats] = useState<ApplicationStats | null>(null);
+  const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
 
-  // Mock data for summary statistics
-  const summaryData = [
+  // Fetch tracking data when component mounts
+  useEffect(() => {
+    const fetchTrackingData = async () => {
+      if (user?.id) {
+        try {
+          setLoading(true);
+          
+          // Fetch application stats
+          const statsData = await apiClient.getApplicationStats(user.id);
+          setStats(statsData);
+          
+          // Fetch recent activity
+          const activityData = await apiClient.getRecentActivity(user.id);
+          setRecentActivity(activityData);
+          
+          setLoading(false);
+        } catch (error) {
+          console.error('Error fetching tracking data:', error);
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchTrackingData();
+  }, [user]);
+
+  // Mock data for summary statistics (fallback if API fails)
+  const summaryData = stats ? [
+    { name: 'Certificates', value: stats.totals.certificates },
+    { name: 'Grievances', value: stats.totals.grievances },
+    { name: 'Schemes', value: stats.totals.schemes },
+    { name: 'Total', value: stats.totals.total },
+  ] : [
     { name: 'Certificates', value: 45 },
     { name: 'Grievances', value: 32 },
     { name: 'Schemes', value: 28 },
@@ -373,9 +409,42 @@ export default function StaffDashboard() {
                 </div>
               </div>
               <div className="space-y-4">
-                <div className="text-center py-8 text-gray-500">
-                  <p>No recent activity to display</p>
-                </div>
+                {recentActivity.length > 0 ? (
+                  recentActivity.map((activity) => (
+                    <div key={activity.id} className="flex">
+                      <div className="flex flex-col items-center mr-3">
+                        <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                        <div className="w-0.5 h-full bg-blue-200"></div>
+                      </div>
+                      <div className="flex-1 pb-3">
+                        <div className="flex justify-between flex-wrap">
+                          <h4 className="font-medium text-gray-900 text-sm">{activity.title}</h4>
+                          <span className={`px-1.5 py-0.5 text-xs rounded-full ${
+                            activity.status === 'Approved' || activity.status === 'Completed' || activity.status === 'Resolved' ? 'bg-green-100 text-green-800' :
+                            activity.status === 'Pending' || activity.status === 'Submitted' ? 'bg-yellow-100 text-yellow-800' :
+                            activity.status === 'In Progress' || activity.status === 'In Process' ? 'bg-blue-100 text-blue-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {activity.status}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-600 mt-1">{activity.details}</p>
+                        <div className="flex justify-between items-center mt-1 flex-wrap">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            {activity.type}
+                          </span>
+                          <p className="text-xs text-gray-500">
+                            {new Date(activity.date).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <p>No recent activity to display</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>

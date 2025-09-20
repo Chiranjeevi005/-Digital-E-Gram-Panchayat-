@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { generateAndDownloadReport } from '../../utils/fileUtils';
+import { generateAndDownloadReport } from '../../services/fileUtils';
 
 interface StaffMember {
   id: string;

@@ -1,12 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import CertificatesMonitor from './CertificatesMonitor';
 import GrievanceTracking from './GrievanceTracking';
 import SchemesOverview from './SchemesOverview';
 import LandPropertyRecords from './LandPropertyRecords';
 import StaffActivity from './StaffActivity';
 import ReportsLogs from './ReportsLogs';
+import { apiClient, ApplicationStats, RecentActivity } from '../../services/api';
 
 // Skeleton Loader Component for Officer Dashboard
 const OfficerDashboardSkeleton = () => (
@@ -58,8 +60,37 @@ const OfficerDashboardSkeleton = () => (
 );
 
 export default function OfficerDashboard() {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<ApplicationStats | null>(null);
+  const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
+
+  // Fetch tracking data when component mounts
+  useEffect(() => {
+    const fetchTrackingData = async () => {
+      if (user?.id) {
+        try {
+          setLoading(true);
+          
+          // Fetch application stats
+          const statsData = await apiClient.getApplicationStats(user.id);
+          setStats(statsData);
+          
+          // Fetch recent activity
+          const activityData = await apiClient.getRecentActivity(user.id);
+          setRecentActivity(activityData);
+          
+          setLoading(false);
+        } catch (error) {
+          console.error('Error fetching tracking data:', error);
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchTrackingData();
+  }, [user]);
 
   // Simulate loading state for demonstration
   // In a real implementation, each component would manage its own loading state
@@ -93,61 +124,68 @@ export default function OfficerDashboard() {
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Quick Statistics</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-emerald-50 rounded-lg p-4 border border-emerald-100">
-                  <div className="text-2xl font-bold text-emerald-700">142</div>
+                  <div className="text-2xl font-bold text-emerald-700">
+                    {stats ? stats.totals.certificates : '142'}
+                  </div>
                   <div className="text-sm text-emerald-600">Certificates Applied</div>
                 </div>
                 <div className="bg-green-50 rounded-lg p-4 border border-green-100">
-                  <div className="text-2xl font-bold text-green-700">87</div>
+                  <div className="text-2xl font-bold text-green-700">
+                    {stats ? stats.totals.grievances : '87'}
+                  </div>
                   <div className="text-sm text-green-600">Grievances Filed</div>
                 </div>
                 <div className="bg-teal-50 rounded-lg p-4 border border-teal-100">
-                  <div className="text-2xl font-bold text-teal-700">24</div>
+                  <div className="text-2xl font-bold text-teal-700">
+                    {stats ? stats.totals.schemes : '24'}
+                  </div>
                   <div className="text-sm text-teal-600">Active Schemes</div>
                 </div>
                 <div className="bg-cyan-50 rounded-lg p-4 border border-cyan-100">
-                  <div className="text-2xl font-bold text-cyan-700">1,248</div>
-                  <div className="text-sm text-cyan-600">Property Records</div>
+                  <div className="text-2xl font-bold text-cyan-700">
+                    {stats ? stats.totals.total : '1,248'}
+                  </div>
+                  <div className="text-sm text-cyan-600">Total Applications</div>
                 </div>
               </div>
             </div>
 
-            {/* Notifications */}
+            {/* Recent Activity */}
             <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 lg:col-span-3">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Recent Updates</h3>
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Recent Activity</h3>
               <div className="space-y-3">
-                <div className="flex items-start p-3 bg-emerald-50 rounded-lg border border-emerald-100">
-                  <div className="bg-emerald-100 p-2 rounded-full mr-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                {recentActivity.length > 0 ? (
+                  recentActivity.map((activity) => (
+                    <div key={activity.id} className="flex items-start p-3 bg-gray-50 rounded-lg border border-gray-100">
+                      <div className="bg-blue-100 p-2 rounded-full mr-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900">{activity.title}</p>
+                        <p className="text-xs text-gray-600">{activity.details}</p>
+                        <div className="flex justify-between items-center mt-1">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                            activity.status === 'Approved' || activity.status === 'Completed' || activity.status === 'Resolved' ? 'bg-green-100 text-green-800' :
+                            activity.status === 'Pending' || activity.status === 'Submitted' ? 'bg-yellow-100 text-yellow-800' :
+                            activity.status === 'In Progress' || activity.status === 'In Process' ? 'bg-blue-100 text-blue-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {activity.status}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            {new Date(activity.date).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-4 text-gray-500">
+                    <p>No recent activity to display</p>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">New certificate applications</p>
-                    <p className="text-xs text-gray-600">12 new applications received today</p>
-                  </div>
-                </div>
-                <div className="flex items-start p-3 bg-green-50 rounded-lg border border-green-100">
-                  <div className="bg-green-100 p-2 rounded-full mr-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">Grievance resolved</p>
-                    <p className="text-xs text-gray-600">Grievance #G-7892 has been resolved</p>
-                  </div>
-                </div>
-                <div className="flex items-start p-3 bg-teal-50 rounded-lg border border-teal-100">
-                  <div className="bg-teal-100 p-2 rounded-full mr-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">Scheme update</p>
-                    <p className="text-xs text-gray-600">New beneficiaries added to PMAY scheme</p>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
           </div>

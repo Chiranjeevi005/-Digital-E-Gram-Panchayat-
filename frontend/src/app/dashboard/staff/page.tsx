@@ -5,7 +5,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import ProtectedRoute from '../../../components/ProtectedRoute';
 import StaffDashboard from '../../../components/staff/StaffDashboard';
-import { apiClient, CertificateApplication, Grievance } from '../../../lib/api';
+import { apiClient, CertificateApplication, Grievance, ApplicationStats } from '../../../services/api';
 import Navbar from '../../../components/Navbar';
 import Footer from '../../../components/Footer';
 
@@ -127,6 +127,7 @@ export default function StaffDashboardPage() {
         setLoading(true);
         const startTime = Date.now();
         
+        // For staff dashboard, we'll keep the existing logic but enhance it
         // Fetch certificates
         const certificates: CertificateApplication[] = await apiClient.getAllCertificates();
         const pendingCertificates = certificates.filter(cert => 

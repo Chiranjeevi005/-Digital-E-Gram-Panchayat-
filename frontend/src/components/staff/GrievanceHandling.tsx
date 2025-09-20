@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { apiClient, Grievance as ApiGrievance } from '../../lib/api';
+import { apiClient, Grievance as ApiGrievance } from '../../services/api';
 import { useToast } from '../../components/ToastContainer';
 
 interface LocalGrievance {

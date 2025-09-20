@@ -9,6 +9,7 @@ import certificateRoutes from './routes/certificate.routes';
 import propertyRoutes from './routes/property.routes';
 import landRecordRoutes from './routes/landrecord.routes';
 import landRecordsRoutes from './routes/landrecords.routes';
+import trackingRoutes from './routes/tracking.routes';
 import Scheme from './models/Scheme'; // Add this import
 
 // Load environment variables
@@ -56,6 +57,7 @@ app.use('/api/certificates', certificateRoutes);
 app.use('/api', propertyRoutes);
 app.use('/api/landrecord', landRecordRoutes);
 app.use('/api/landrecords', landRecordsRoutes);
+app.use('/api/tracking', trackingRoutes);
 
 // 404 handler
 app.use('*', (req: Request, res: Response) => {

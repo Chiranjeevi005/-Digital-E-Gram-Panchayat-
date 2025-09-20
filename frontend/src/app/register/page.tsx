@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import InputField from '../../components/InputField';
 import Button from '../../components/Button';
 import Link from 'next/link';
-import { apiClient } from '../../lib/api';
+import { apiClient } from '../../services/api';
 
 export default function RegisterPage() {
   const [name, setName] = useState('');

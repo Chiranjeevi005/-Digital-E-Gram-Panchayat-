@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../../../components/Navbar';
 import Footer from '../../../components/Footer';
-import { apiClient } from '../../../lib/api';
+import { apiClient } from '../../../services';
 import { useToast } from '../../../components/ToastContainer';
 import { useAuth } from '../../../context/AuthContext';
 

@@ -5,7 +5,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   LineChart, Line, PieChart, Pie, Cell
 } from 'recharts';
-import { generateAndDownloadReport } from '../../utils/fileUtils';
+import { generateAndDownloadReport } from '../../services/fileUtils';
 
 export default function ReportsAndAnalytics() {
   // Mock data for certificates processed

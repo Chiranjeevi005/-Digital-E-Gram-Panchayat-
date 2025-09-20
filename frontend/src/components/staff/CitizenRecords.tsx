@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { generateAndDownloadReport } from '../../utils/fileUtils';
-import { apiClient, CitizenRecord } from '../../lib/api';
+import { generateAndDownloadReport } from '../../services/fileUtils';
+import { apiClient, CitizenRecord } from '../../services/api';
 
 // Extend the API interface with additional fields needed for the UI
 interface UICitizenRecord extends CitizenRecord {

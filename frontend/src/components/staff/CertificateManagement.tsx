@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { apiClient, Certificate } from '../../lib/api';
+import { apiClient, Certificate } from '../../services/api';
 import { useToast } from '../ToastContainer';
 
 export default function CertificateManagement() {

@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { generateAndDownloadReport } from '../../utils/fileUtils';
+import { generateAndDownloadReport } from '../../services/fileUtils';
 import { useToast } from '../../components/ToastContainer';
-import { apiClient, SchemeApplication } from '../../lib/api';
+import { apiClient, SchemeApplication } from '../../services/api';
 
 
 

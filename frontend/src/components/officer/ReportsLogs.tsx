@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { generateAndDownloadReport } from '../../utils/fileUtils';
+import { generateAndDownloadReport } from '../../services/fileUtils';
 
 interface LogEntry {
   id: string;

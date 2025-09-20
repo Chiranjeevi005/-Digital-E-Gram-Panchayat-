@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { generateAndDownloadReport } from '../../utils/fileUtils';
-import { apiClient, LandRecordData } from '../../lib/api';
+import { generateAndDownloadReport } from '../../services/fileUtils';
+import { apiClient, LandRecordData } from '../../services/api';
 
 export default function LandPropertyRecords() {
   const [landRecords, setLandRecords] = useState<LandRecordData[]>([]);

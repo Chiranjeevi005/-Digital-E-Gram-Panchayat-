@@ -69,6 +69,40 @@ export interface CertificateApplication {
   remarks?: string;
 }
 
+// Unified tracking interface
+export interface TrackingItem {
+  id: string;
+  type: 'certificate' | 'scheme' | 'grievance';
+  title: string;
+  status: string;
+  date: string;
+  referenceNumber: string;
+  serviceType: 'Certificates' | 'Schemes' | 'Grievances';
+}
+
+export interface ApplicationStats {
+  totals: {
+    certificates: number;
+    schemes: number;
+    grievances: number;
+    total: number;
+  };
+  statuses: {
+    certificates: Record<string, number>;
+    schemes: Record<string, number>;
+    grievances: Record<string, number>;
+  };
+}
+
+export interface RecentActivity {
+  id: string;
+  title: string;
+  date: string;
+  status: string;
+  type: string;
+  details: string;
+}
+
 export interface Certificate extends CertificateApplication {
   _id: string;
   id: string;
@@ -446,10 +480,23 @@ export const apiClient = {
   },
   
   getCitizenRecords: async (): Promise<CitizenRecord[]> => {
-    return apiClient.get<CitizenRecord[]>('/citizens');
+    return apiClient.get<CitizenRecord[]>('/auth/citizens');
   },
   
   getCitizenRecord: async (citizenId: string): Promise<CitizenRecord> => {
-    return apiClient.get<CitizenRecord>(`/citizens/${citizenId}`);
+    return apiClient.get<CitizenRecord>(`/auth/citizens/${citizenId}`);
+  },
+  
+  // Tracking methods
+  getUserApplications: async (userId: string): Promise<TrackingItem[]> => {
+    return apiClient.get<TrackingItem[]>(`/tracking/user/${userId}`);
+  },
+  
+  getApplicationStats: async (userId: string): Promise<ApplicationStats> => {
+    return apiClient.get<ApplicationStats>(`/tracking/stats/${userId}`);
+  },
+  
+  getRecentActivity: async (userId: string): Promise<RecentActivity[]> => {
+    return apiClient.get<RecentActivity[]>(`/tracking/activity/${userId}`);
   }
 };

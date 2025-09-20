@@ -2,10 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { generateAndDownloadReport } from '../../utils/fileUtils';
-import { apiClient, Grievance } from '../../lib/api';
-
-
+import { generateAndDownloadReport } from '../../services/fileUtils';
+import { apiClient, Grievance } from '../../services';
 
 export default function GrievanceTracking() {
   const [grievances, setGrievances] = useState<Grievance[]>([]); // This is correct
