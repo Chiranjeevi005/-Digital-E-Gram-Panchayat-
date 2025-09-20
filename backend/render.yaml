@@ -2,7 +2,7 @@ services:
   - type: web
     name: digital-e-panchayat-backend
     env: node
-    buildCommand: npm run build
+    buildCommand: npm install --include=dev && npm run build
     startCommand: npm run start
     repo: https://github.com/your-username/digital-e-panchayat.git
     rootDir: backend
