@@ -9,6 +9,7 @@ const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const pdfkit_1 = __importDefault(require("pdfkit"));
 const sharp_1 = __importDefault(require("sharp"));
+const socket_1 = require("../utils/socket"); // Import socket utility
 // In-memory storage for demo purposes when MongoDB is not available
 const inMemoryLandRecords = new Map();
 // In-memory storage for demo purposes
@@ -453,6 +454,16 @@ const downloadLandRecordCertificatePDF = async (req, res) => {
             inMemoryLandRecords.set(id, landRecord);
             console.log('Created and stored minimal land record data');
         }
+        // Emit real-time update
+        console.log('Emitting application update for PDF download:', {
+            citizenId: landRecord.owner,
+            landRecordId: id,
+            serviceType: 'Land Records',
+            status: 'Completed',
+            message: `Land record certificate downloaded in PDF format`
+        });
+        (0, socket_1.emitApplicationUpdate)(landRecord.owner, // Using owner as citizenId for demo purposes
+        id, 'Land Records', 'Completed', `Land record certificate downloaded in PDF format`);
         // Generate PDF (following the same pattern as Birth/Death certificates)
         console.log('Generating PDF for land record:', landRecord._id);
         const fileName = await generateLandRecordCertificatePDF(landRecord);
@@ -521,6 +532,16 @@ const downloadLandRecordCertificateJPG = async (req, res) => {
             inMemoryLandRecords.set(id, landRecord);
             console.log('Created and stored minimal land record data');
         }
+        // Emit real-time update
+        console.log('Emitting application update for JPG download:', {
+            citizenId: landRecord.owner,
+            landRecordId: id,
+            serviceType: 'Land Records',
+            status: 'Completed',
+            message: `Land record certificate downloaded in JPG format`
+        });
+        (0, socket_1.emitApplicationUpdate)(landRecord.owner, // Using owner as citizenId for demo purposes
+        id, 'Land Records', 'Completed', `Land record certificate downloaded in JPG format`);
         // Generate JPG (following the same pattern as Birth/Death certificates)
         console.log('Generating JPG for land record:', landRecord._id);
         const fileName = await generateLandRecordCertificateJPG(landRecord);

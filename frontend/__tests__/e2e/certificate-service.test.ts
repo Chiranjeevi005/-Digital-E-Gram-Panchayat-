@@ -1,4 +1,4 @@
-import { apiClient } from '../../src/lib/api';
+import { apiClient } from '../../src/services/api';
 
 // Define types for our test
 interface CertificateApplication {
@@ -22,7 +22,7 @@ interface CertificatePreview {
 
 // Mock the browser APIs that aren't available in Node.js
 const mockBlob = jest.fn(() => Promise.resolve('mock blob content'));
-global.fetch = jest.fn();
+global.fetch = jest.fn() as jest.Mock;
 global.Blob = jest.fn(() => ({ type: 'application/pdf' })) as any;
 
 describe('Certificate Service End-to-End Flow', () => {
@@ -33,14 +33,14 @@ describe('Certificate Service End-to-End Flow', () => {
 
   it('should complete the full certificate application and download flow', async () => {
     // Mock the fetch implementation for API calls
-    (global.fetch as jest.Mock).mockImplementation((url, options) => {
+    (global.fetch as jest.Mock).mockImplementation((url: string, options: any) => {
       // Mock certificate application submission
       if (url.includes('/api/certificates/apply') && options.method === 'POST') {
         return Promise.resolve({
           ok: true,
           json: () => Promise.resolve({
             id: 'test-cert-123',
-            applicantName: 'John Doe',
+            applicantName: 'Test Applicant',
             certificateType: 'Birth',
             status: 'Submitted',
             createdAt: new Date().toISOString()
@@ -55,9 +55,9 @@ describe('Certificate Service End-to-End Flow', () => {
           ok: true,
           json: () => Promise.resolve({
             _id: 'test-cert-123',
-            applicantName: 'John Doe',
-            fatherName: 'Richard Doe',
-            motherName: 'Jane Doe',
+            applicantName: 'Test Applicant',
+            fatherName: 'Test Father',
+            motherName: 'Test Mother',
             certificateType: 'Birth',
             date: '2023-01-15',
             place: 'District Hospital',
@@ -88,9 +88,9 @@ describe('Certificate Service End-to-End Flow', () => {
     // Step 1: Submit certificate application
     const applicationData = {
       userId: 'test-user-id', // Add userId for authentication
-      applicantName: 'John Doe',
-      fatherName: 'Richard Doe',
-      motherName: 'Jane Doe',
+      applicantName: 'Test Applicant',
+      fatherName: 'Test Father',
+      motherName: 'Test Mother',
       certificateType: 'Birth',
       date: '2023-01-15',
       place: 'District Hospital'
@@ -100,7 +100,7 @@ describe('Certificate Service End-to-End Flow', () => {
     
     // Verify application was submitted successfully
     expect(applicationResponse).toHaveProperty('id');
-    expect(applicationResponse.applicantName).toBe('John Doe');
+    expect(applicationResponse.applicantName).toBe('Test Applicant');
     expect(applicationResponse.certificateType).toBe('Birth');
     expect(applicationResponse.status).toBe('Submitted');
     
@@ -111,7 +111,7 @@ describe('Certificate Service End-to-End Flow', () => {
     
     // Verify preview data is correct
     expect(previewData._id).toBe(applicationId);
-    expect(previewData.applicantName).toBe('John Doe');
+    expect(previewData.applicantName).toBe('Test Applicant');
     expect(previewData.certificateType).toBe('Birth');
     expect(previewData.status).toBe('Approved');
     
@@ -156,8 +156,8 @@ describe('Certificate Service End-to-End Flow', () => {
       certificateType: 'Birth'
     };
 
-    await expect(apiClient.post('/certificates/apply', invalidApplicationData))
-      .rejects
-      .toThrow('Invalid application data');
+    await expect(async () => {
+      await apiClient.post('/certificates/apply', invalidApplicationData);
+    }).rejects.toThrow('Invalid application data');
   });
 });

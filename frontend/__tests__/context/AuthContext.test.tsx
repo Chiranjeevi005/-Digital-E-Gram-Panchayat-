@@ -4,7 +4,7 @@ import React from 'react';
 import { AuthProvider, useAuth } from '../../src/context/AuthContext';
 
 // Mock the apiClient
-jest.mock('../../src/lib/api', () => ({
+jest.mock('../../src/services/api', () => ({
   apiClient: {
     post: jest.fn(),
     getCurrentUser: jest.fn(),
@@ -59,7 +59,7 @@ describe('AuthContext', () => {
       }
     };
     
-    const { apiClient } = require('../../src/lib/api');
+    const { apiClient } = require('../../src/services/api');
     apiClient.post.mockResolvedValue(mockLoginResponse);
     
     const { getByTestId } = render(

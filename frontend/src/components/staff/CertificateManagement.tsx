@@ -26,15 +26,15 @@ export default function CertificateManagement() {
           id: app.id,
           _id: app.id, // Adding _id since it's required in the interface
           userId: app.userId, // Adding userId since it's required in the interface
-          applicantName: 'John Doe', // Placeholder - would come from actual data
-          fatherName: 'Robert Doe', // Placeholder
-          motherName: 'Jane Doe', // Placeholder
-          certificateType: 'Income Certificate', // Placeholder - would come from actual data
-          date: new Date().toISOString(), // Placeholder
-          place: 'Village Panchayat', // Placeholder
-          address: '123 Main St', // Placeholder
-          income: '50000', // Placeholder
-          caste: 'General', // Placeholder
+          applicantName: app.applicantName || 'Unknown Applicant', // Use actual applicant name or default
+          fatherName: app.fatherName || 'Unknown Father', // Use actual father name or default
+          motherName: app.motherName || 'Unknown Mother', // Use actual mother name or default
+          certificateType: app.certificateType || 'Unknown Certificate', // Use actual certificate type or default
+          date: app.date || new Date().toISOString(), // Use actual date or current date
+          place: app.place || 'Unknown Place', // Use actual place or default
+          address: app.address || 'Unknown Address', // Use actual address or default
+          income: app.income || 'Unknown Income', // Use actual income or default
+          caste: app.caste || 'Unknown Caste', // Use actual caste or default
           supportingFiles: app.documents || [],
           status: app.status,
           appliedAt: app.appliedAt, // Adding appliedAt since it's required in the interface

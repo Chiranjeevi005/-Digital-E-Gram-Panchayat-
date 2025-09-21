@@ -1,28 +1,28 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import React from 'react';
-import LoginPage from '../../src/app/login/page';
-import RegisterPage from '../../src/app/register/page';
-import { apiClient } from '../../src/lib/api';
+import { useRouter } from 'next/router';
+import { useAuth } from '../../src/context/AuthContext';
+import Login from '../../src/app/login/page';
+import Register from '../../src/app/register/page';
+import { apiClient } from '../../src/services/api';
 
-// Mock next/navigation
-jest.mock('next/navigation', () => ({
-  useRouter: () => ({
-    push: jest.fn(),
-    replace: jest.fn(),
-    prefetch: jest.fn(),
-  }),
-  useSearchParams: () => ({
-    get: jest.fn(),
-  }),
+// Mock next/router
+jest.mock('next/router', () => ({
+  useRouter: jest.fn(),
 }));
 
 // Mock AuthContext
 jest.mock('../../src/context/AuthContext', () => ({
-  useAuth: () => ({
+  useAuth: jest.fn(),
+}));
+
+// Mock apiClient
+jest.mock('../../src/services/api', () => ({
+  apiClient: {
     login: jest.fn(),
     register: jest.fn(),
-  }),
+  },
 }));
 
 // Mock components
@@ -53,7 +53,7 @@ jest.mock('next/link', () => {
 describe('Authentication Pages', () => {
   describe('Login Page', () => {
     it('should render Login & Register forms correctly', () => {
-      render(<LoginPage />);
+      render(<Login />);
       
       expect(screen.getByText('Digital E-Panchayat Login')).toBeTruthy();
       expect(screen.getByLabelText('Email Address')).toBeTruthy();
@@ -61,7 +61,7 @@ describe('Authentication Pages', () => {
     });
 
     it('should show errors for invalid inputs', async () => {
-      render(<LoginPage />);
+      render(<Login />);
       
       const emailInput = screen.getByLabelText('Email Address');
       const passwordInput = screen.getByLabelText('Password');
@@ -75,7 +75,7 @@ describe('Authentication Pages', () => {
     });
 
     it('should allow role-based login (citizen/staff/officer) to work', () => {
-      render(<LoginPage />);
+      render(<Login />);
       
       // Check that user type buttons exist
       expect(screen.getByText('Citizen')).toBeTruthy();
@@ -92,7 +92,7 @@ describe('Authentication Pages', () => {
 
   describe('Register Page', () => {
     it('should render registration form correctly', () => {
-      render(<RegisterPage />);
+      render(<Register />);
       
       expect(screen.getByText('Digital E-Panchayat Registration')).toBeTruthy();
       expect(screen.getByLabelText('Full Name')).toBeTruthy();
@@ -102,7 +102,7 @@ describe('Authentication Pages', () => {
     });
 
     it('should show errors for invalid inputs', () => {
-      render(<RegisterPage />);
+      render(<Register />);
       
       const registerButton = screen.getByText('Register');
       
@@ -114,7 +114,7 @@ describe('Authentication Pages', () => {
     });
 
     it('should allow citizens to create unlimited accounts', async () => {
-      render(<RegisterPage />);
+      render(<Register />);
       
       const nameInput = screen.getByLabelText('Full Name');
       const emailInput = screen.getByLabelText('Email Address');

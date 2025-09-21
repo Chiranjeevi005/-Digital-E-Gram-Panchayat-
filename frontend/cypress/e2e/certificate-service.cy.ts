@@ -21,9 +21,9 @@ describe('Certificate Service End-to-End Flow', () => {
     cy.get('[data-testid="birth-certificate-card"]').click();
     
     // Step 5: Fill out the application form
-    cy.get('[data-testid="applicant-name"]').type('John Doe');
-    cy.get('[data-testid="father-name"]').type('Richard Doe');
-    cy.get('[data-testid="mother-name"]').type('Jane Doe');
+    cy.get('[data-testid="applicant-name"]').type('Test Applicant');
+    cy.get('[data-testid="father-name"]').type('Test Father');
+    cy.get('[data-testid="mother-name"]').type('Test Mother');
     cy.get('[data-testid="date-of-birth"]').type('2023-01-15');
     cy.get('[data-testid="place-of-birth"]').type('District Hospital');
     
@@ -35,7 +35,7 @@ describe('Certificate Service End-to-End Flow', () => {
     
     // Step 8: Verify preview page content
     cy.get('[data-testid="certificate-preview"]').should('be.visible');
-    cy.contains('John Doe').should('be.visible');
+    cy.contains('Test Applicant').should('be.visible');
     cy.contains('Birth Certificate').should('be.visible');
     
     // Step 9: Download as PDF

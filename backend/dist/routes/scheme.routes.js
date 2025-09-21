@@ -11,4 +11,6 @@ router.post('/apply', scheme_controller_1.applyForScheme);
 router.get('/tracking/:userId', scheme_controller_1.getSchemeApplications);
 router.delete('/tracking/:applicationId', scheme_controller_1.deleteSchemeApplication);
 router.get('/acknowledgment/:applicationId', scheme_controller_1.downloadSchemeAcknowledgment);
+// Add seeding endpoint
+router.post('/seed', scheme_controller_1.seedSchemes);
 exports.default = router;

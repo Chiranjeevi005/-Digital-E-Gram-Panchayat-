@@ -15,7 +15,8 @@ const property_routes_1 = __importDefault(require("./routes/property.routes"));
 const landrecord_routes_1 = __importDefault(require("./routes/landrecord.routes"));
 const landrecords_routes_1 = __importDefault(require("./routes/landrecords.routes"));
 const tracking_routes_1 = __importDefault(require("./routes/tracking.routes"));
-const Scheme_1 = __importDefault(require("./models/Scheme")); // Add this import
+const Scheme_1 = __importDefault(require("./models/Scheme"));
+const path_1 = __importDefault(require("path"));
 // Load environment variables
 dotenv_1.default.config();
 const app = (0, express_1.default)();
@@ -38,6 +39,13 @@ app.use((0, cors_1.default)({
     credentials: true
 }));
 app.use(express_1.default.json());
+// Serve static files
+app.use('/public', express_1.default.static(path_1.default.join(__dirname, 'public')));
+// Add logging middleware
+app.use((req, res, next) => {
+    console.log(`${req.method} ${req.path}`); // Debug log
+    next();
+});
 // Health check endpoint
 app.get('/', (req, res) => {
     res.json({
@@ -54,15 +62,61 @@ app.get('/health', (req, res) => {
         timestamp: new Date().toISOString()
     });
 });
-// Add a direct test route for schemes
+// Add a direct test route for schemes with seeding capability
 app.get('/api/schemes/test', async (req, res) => {
     try {
+        // Check if we should seed schemes (special parameter for testing)
+        const shouldSeed = req.query.seed === 'true';
+        if (shouldSeed) {
+            console.log('Seeding schemes requested via test endpoint');
+            // Sample schemes data
+            const sampleSchemes = [
+                {
+                    name: 'Agricultural Subsidy Program',
+                    description: 'Financial assistance for farmers to purchase seeds, fertilizers, and farming equipment.',
+                    eligibility: 'All registered farmers with valid land ownership documents',
+                    benefits: 'Up to ₹50,000 subsidy for crop cultivation and farm equipment'
+                },
+                {
+                    name: 'Educational Scholarship Scheme',
+                    description: 'Merit-based scholarships for students from economically weaker sections.',
+                    eligibility: 'Students with family income below ₹2.5 lakh per annum',
+                    benefits: 'Tuition fees coverage and monthly stipend of ₹2,000'
+                },
+                {
+                    name: 'Healthcare Support Initiative',
+                    description: 'Free medical checkups and subsidized treatment for senior citizens.',
+                    eligibility: 'Citizens above 60 years of age',
+                    benefits: 'Annual health checkup packages and 70% discount on medicines'
+                },
+                {
+                    name: 'Women Empowerment Grant',
+                    description: 'Financial support for women entrepreneurs to start small businesses.',
+                    eligibility: 'Women above 18 years with valid Aadhaar and bank account',
+                    benefits: 'Interest-free loan up to ₹5 lakh and business mentoring'
+                },
+                {
+                    name: 'Rural Infrastructure Development',
+                    description: 'Funding for village infrastructure projects like roads, water supply, and sanitation.',
+                    eligibility: 'Community groups and local bodies',
+                    benefits: 'Up to 80% funding for approved infrastructure projects'
+                }
+            ];
+            console.log('Clearing existing schemes');
+            // Clear existing schemes
+            await Scheme_1.default.deleteMany({});
+            console.log('🧹 Cleared existing schemes');
+            console.log('Inserting sample schemes');
+            // Insert sample schemes
+            await Scheme_1.default.insertMany(sampleSchemes);
+            console.log('✅ Sample schemes seeded successfully');
+        }
         const schemes = await Scheme_1.default.find().sort({ createdAt: -1 });
         res.json(schemes);
     }
     catch (error) {
-        console.error('Error fetching schemes:', error);
-        res.status(500).json({ message: 'Server error' });
+        console.error('Error fetching/creating schemes:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
     }
 });
 // Routes

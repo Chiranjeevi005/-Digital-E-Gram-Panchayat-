@@ -48,6 +48,10 @@ const PropertyLandServices = () => {
 
   // State for land records
   const [surveyNo, setSurveyNo] = useState('');
+  const [landOwner, setLandOwner] = useState('');
+  const [area, setArea] = useState('');
+  const [landType, setLandType] = useState('');
+  const [encumbranceStatus, setEncumbranceStatus] = useState('');
   const [landRecordData, setLandRecordData] = useState<LandRecordData | null>(null);
   const [landRecordId, setLandRecordId] = useState<string | null>(null);
   const [isLandRecordLoading, setIsLandRecordLoading] = useState(false);
@@ -89,11 +93,11 @@ const PropertyLandServices = () => {
     try {
       // Create the land record first
       const createResponse = await apiClient.createLandRecord({
-        owner: 'Land Owner', // This would typically come from form inputs
+        owner: landOwner,
         surveyNo,
-        area: '1 Acre', // This would typically come from form inputs
-        landType: 'Agricultural', // This would typically come from form inputs
-        encumbranceStatus: 'Nil' // This would typically come from form inputs
+        area,
+        landType,
+        encumbranceStatus
       });
       
       // Get the created land record
@@ -385,6 +389,70 @@ const PropertyLandServices = () => {
                     onChange={(e) => setSurveyNo(e.target.value)}
                     className="input-field w-full"
                     placeholder="Enter Survey Number or Property ID"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="landOwner" className="block text-sm font-medium text-dark-label mb-1">
+                    Owner Name
+                  </label>
+                  <input
+                    type="text"
+                    id="landOwner"
+                    value={landOwner}
+                    onChange={(e) => setLandOwner(e.target.value)}
+                    className="input-field w-full"
+                    placeholder="Enter Owner Name"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="area" className="block text-sm font-medium text-dark-label mb-1">
+                    Area
+                  </label>
+                  <input
+                    type="text"
+                    id="area"
+                    value={area}
+                    onChange={(e) => setArea(e.target.value)}
+                    className="input-field w-full"
+                    placeholder="Enter Area (e.g., 1 Acre, 100 sq.m)"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="landType" className="block text-sm font-medium text-dark-label mb-1">
+                    Land Type
+                  </label>
+                  <select
+                    id="landType"
+                    value={landType}
+                    onChange={(e) => setLandType(e.target.value)}
+                    className="select-field w-full"
+                    required
+                  >
+                    <option value="">Select Land Type</option>
+                    <option value="Agricultural">Agricultural</option>
+                    <option value="Residential">Residential</option>
+                    <option value="Commercial">Commercial</option>
+                    <option value="Industrial">Industrial</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label htmlFor="encumbranceStatus" className="block text-sm font-medium text-dark-label mb-1">
+                    Encumbrance Status
+                  </label>
+                  <input
+                    type="text"
+                    id="encumbranceStatus"
+                    value={encumbranceStatus}
+                    onChange={(e) => setEncumbranceStatus(e.target.value)}
+                    className="input-field w-full"
+                    placeholder="Enter Encumbrance Status"
                     required
                   />
                 </div>

@@ -652,11 +652,11 @@ export const getMutationStatus = async (req: Request, res: Response) => {
       });
     }
     
-    // Create mock mutation status data
+    // Create mutation status data with custom input
     const mutationStatusData = {
       applicationId,
-      propertyId: 'PROP-2023-001',
-      statusTimeline: [
+      propertyId: req.body.propertyId || 'Unknown Property',
+      statusTimeline: req.body.statusTimeline || [
         { step: 'Submitted', status: 'Completed', date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000) },
         { step: 'Verification', status: 'Completed', date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000) },
         { step: 'Officer Approval', status: 'In Progress', date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000) },

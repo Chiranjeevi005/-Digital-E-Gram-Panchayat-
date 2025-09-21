@@ -52,7 +52,7 @@ jest.mock('../../src/components/Footer', () => {
 });
 
 // Mock API client
-jest.mock('../../src/lib/api', () => ({
+jest.mock('../../src/services/api', () => ({
   apiClient: {
     getCurrentUser: jest.fn(() => Promise.resolve({
       id: 'user123',

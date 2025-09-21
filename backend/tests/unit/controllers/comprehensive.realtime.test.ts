@@ -99,11 +99,11 @@ describe('Comprehensive Real-time Updates', () => {
         citizenId: 'user123',
         schemeId: 'scheme456',
         schemeName: 'Test Scheme',
-        applicantName: 'John Doe',
-        fatherName: 'Robert Doe',
+        applicantName: 'Test Applicant',
+        fatherName: 'Test Father',
         address: '123 Main St',
         phone: '1234567890',
-        email: 'john@example.com'
+        email: 'test@example.com'
       };
       
       await applyForScheme(mockRequest, mockResponse);

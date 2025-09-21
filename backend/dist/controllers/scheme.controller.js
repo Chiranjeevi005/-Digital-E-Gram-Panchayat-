@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.downloadSchemeAcknowledgment = exports.deleteScheme = exports.deleteSchemeApplication = exports.getSchemeApplications = exports.applyForScheme = exports.getSchemeById = exports.getSchemes = exports.createScheme = void 0;
+exports.downloadSchemeAcknowledgment = exports.seedSchemes = exports.deleteScheme = exports.deleteSchemeApplication = exports.getSchemeApplications = exports.applyForScheme = exports.getSchemeById = exports.getSchemes = exports.createScheme = void 0;
 const Scheme_1 = __importDefault(require("../models/Scheme"));
 const SchemeApplication_1 = __importDefault(require("../models/SchemeApplication"));
 const documentGenerator_1 = require("../utils/documentGenerator");
@@ -34,15 +34,64 @@ const createScheme = async (req, res) => {
 exports.createScheme = createScheme;
 const getSchemes = async (req, res) => {
     try {
+        // Check if we should seed schemes (special parameter for testing)
+        const shouldSeed = req.query.seed === 'true';
+        if (shouldSeed) {
+            console.log('Seeding schemes requested');
+            // Sample schemes data
+            const sampleSchemes = [
+                {
+                    name: 'Agricultural Subsidy Program',
+                    description: 'Financial assistance for farmers to purchase seeds, fertilizers, and farming equipment.',
+                    eligibility: 'All registered farmers with valid land ownership documents',
+                    benefits: 'Up to ₹50,000 subsidy for crop cultivation and farm equipment'
+                },
+                {
+                    name: 'Educational Scholarship Scheme',
+                    description: 'Merit-based scholarships for students from economically weaker sections.',
+                    eligibility: 'Students with family income below ₹2.5 lakh per annum',
+                    benefits: 'Tuition fees coverage and monthly stipend of ₹2,000'
+                },
+                {
+                    name: 'Healthcare Support Initiative',
+                    description: 'Free medical checkups and subsidized treatment for senior citizens.',
+                    eligibility: 'Citizens above 60 years of age',
+                    benefits: 'Annual health checkup packages and 70% discount on medicines'
+                },
+                {
+                    name: 'Women Empowerment Grant',
+                    description: 'Financial support for women entrepreneurs to start small businesses.',
+                    eligibility: 'Women above 18 years with valid Aadhaar and bank account',
+                    benefits: 'Interest-free loan up to ₹5 lakh and business mentoring'
+                },
+                {
+                    name: 'Rural Infrastructure Development',
+                    description: 'Funding for village infrastructure projects like roads, water supply, and sanitation.',
+                    eligibility: 'Community groups and local bodies',
+                    benefits: 'Up to 80% funding for approved infrastructure projects'
+                }
+            ];
+            console.log('Clearing existing schemes');
+            // Clear existing schemes
+            await Scheme_1.default.deleteMany({});
+            console.log('🧹 Cleared existing schemes');
+            console.log('Inserting sample schemes');
+            // Insert sample schemes
+            await Scheme_1.default.insertMany(sampleSchemes);
+            console.log('✅ Sample schemes seeded successfully');
+        }
         console.log('Fetching schemes from database...');
         const schemes = await Scheme_1.default.find().sort({ createdAt: -1 });
         console.log(`Found ${schemes.length} schemes`);
         console.log('Schemes data:', JSON.stringify(schemes, null, 2));
-        res.json(schemes);
+        // Filter out Housing Subsidy Program
+        const filteredSchemes = schemes.filter(scheme => scheme.name !== 'Housing Subsidy Program');
+        console.log(`Filtered to ${filteredSchemes.length} schemes after removing Housing Subsidy Program`);
+        res.json(filteredSchemes);
     }
     catch (error) {
         console.error('Error fetching schemes:', error);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
 exports.getSchemes = getSchemes;
@@ -64,6 +113,19 @@ exports.getSchemeById = getSchemeById;
 const applyForScheme = async (req, res) => {
     try {
         const { citizenId, schemeId, schemeName, applicantName, fatherName, address, phone, email, income, caste, documents } = req.body;
+        console.log('Applying for scheme with data:', {
+            citizenId,
+            schemeId,
+            schemeName,
+            applicantName,
+            fatherName,
+            address,
+            phone,
+            email,
+            income,
+            caste,
+            documents
+        }); // Debug log
         // Validate required fields
         if (!citizenId || !schemeId || !schemeName || !applicantName || !fatherName ||
             !address || !phone || !email) {
@@ -92,6 +154,7 @@ const applyForScheme = async (req, res) => {
             updatedAt: new Date()
         });
         await application.save();
+        console.log('Saved scheme application:', application._id); // Debug log
         // Generate acknowledgment PDF
         try {
             await (0, documentGenerator_1.generateSchemeAcknowledgmentPDF)(application);
@@ -100,6 +163,13 @@ const applyForScheme = async (req, res) => {
             console.error('Error generating PDF:', pdfError);
         }
         // Emit real-time update to the citizen who applied for the scheme
+        console.log('Emitting application update for scheme application:', {
+            citizenId,
+            applicationId: application._id.toString(),
+            serviceType: 'Schemes',
+            status: application.status,
+            message: `Scheme application for ${schemeName} submitted successfully`
+        });
         (0, socket_1.emitApplicationUpdate)(citizenId, application._id.toString(), 'Schemes', application.status, `Scheme application for ${schemeName} submitted successfully`);
         res.status(201).json({
             success: true,
@@ -193,16 +263,78 @@ const deleteScheme = async (req, res) => {
     }
 };
 exports.deleteScheme = deleteScheme;
+// Seed schemes with sample data
+const seedSchemes = async (req, res) => {
+    try {
+        console.log('Seeding schemes requested via POST endpoint');
+        // Sample schemes data
+        const sampleSchemes = [
+            {
+                name: 'Agricultural Subsidy Program',
+                description: 'Financial assistance for farmers to purchase seeds, fertilizers, and farming equipment.',
+                eligibility: 'All registered farmers with valid land ownership documents',
+                benefits: 'Up to ₹50,000 subsidy for crop cultivation and farm equipment'
+            },
+            {
+                name: 'Educational Scholarship Scheme',
+                description: 'Merit-based scholarships for students from economically weaker sections.',
+                eligibility: 'Students with family income below ₹2.5 lakh per annum',
+                benefits: 'Tuition fees coverage and monthly stipend of ₹2,000'
+            },
+            {
+                name: 'Healthcare Support Initiative',
+                description: 'Free medical checkups and subsidized treatment for senior citizens.',
+                eligibility: 'Citizens above 60 years of age',
+                benefits: 'Annual health checkup packages and 70% discount on medicines'
+            },
+            {
+                name: 'Women Empowerment Grant',
+                description: 'Financial support for women entrepreneurs to start small businesses.',
+                eligibility: 'Women above 18 years with valid Aadhaar and bank account',
+                benefits: 'Interest-free loan up to ₹5 lakh and business mentoring'
+            },
+            {
+                name: 'Rural Infrastructure Development',
+                description: 'Funding for village infrastructure projects like roads, water supply, and sanitation.',
+                eligibility: 'Community groups and local bodies',
+                benefits: 'Up to 80% funding for approved infrastructure projects'
+            }
+        ];
+        console.log('Clearing existing schemes');
+        // Clear existing schemes
+        await Scheme_1.default.deleteMany({});
+        console.log('🧹 Cleared existing schemes');
+        console.log('Inserting sample schemes');
+        // Insert sample schemes
+        const insertedSchemes = await Scheme_1.default.insertMany(sampleSchemes);
+        console.log('✅ Sample schemes seeded successfully');
+        res.status(200).json({
+            message: 'Schemes seeded successfully',
+            count: insertedSchemes.length,
+            schemes: insertedSchemes.map(scheme => scheme.name)
+        });
+    }
+    catch (error) {
+        console.error('Error seeding schemes:', error);
+        res.status(500).json({
+            message: 'Error seeding schemes',
+            error: error.message
+        });
+    }
+};
+exports.seedSchemes = seedSchemes;
 // Download scheme acknowledgment (PDF or JPG)
 const downloadSchemeAcknowledgment = async (req, res) => {
     try {
         const { applicationId } = req.params;
         const { format } = req.query; // 'pdf' or 'jpg'
+        console.log('Downloading scheme acknowledgment:', { applicationId, format }); // Debug log
         // Find the application
         const application = await SchemeApplication_1.default.findById(applicationId);
         if (!application) {
             return res.status(404).json({ message: 'Application not found' });
         }
+        console.log('Found application:', application._id); // Debug log
         // Generate filename
         const fileNameBase = `scheme-application-${applicationId}`;
         if (format === 'jpg') {
@@ -214,7 +346,18 @@ const downloadSchemeAcknowledgment = async (req, res) => {
             }
             // Convert PDF to JPG
             const jpgPath = await (0, documentGenerator_1.convertPDFToJPG)(pdfPath, `${fileNameBase}.jpg`);
+            // Check if JPG file exists
+            if (!fs_1.default.existsSync(jpgPath)) {
+                throw new Error('JPG file was not generated successfully');
+            }
             // Emit real-time update to the citizen who applied for the scheme
+            console.log('Emitting application update for JPG download:', {
+                citizenId: application.citizenId,
+                applicationId: application._id.toString(),
+                serviceType: 'Schemes',
+                status: application.status,
+                message: `Scheme acknowledgment downloaded in JPG format`
+            });
             (0, socket_1.emitApplicationUpdate)(application.citizenId, applicationId, 'Schemes', application.status, `Scheme acknowledgment downloaded in JPG format`);
             // Send the JPG file
             res.setHeader('Content-Disposition', `attachment; filename="${fileNameBase}.jpg"`);
@@ -229,6 +372,13 @@ const downloadSchemeAcknowledgment = async (req, res) => {
                 await (0, documentGenerator_1.generateSchemeAcknowledgmentPDF)(application);
             }
             // Emit real-time update to the citizen who applied for the scheme
+            console.log('Emitting application update for PDF download:', {
+                citizenId: application.citizenId,
+                applicationId: application._id.toString(),
+                serviceType: 'Schemes',
+                status: application.status,
+                message: `Scheme acknowledgment downloaded in PDF format`
+            });
             (0, socket_1.emitApplicationUpdate)(application.citizenId, applicationId, 'Schemes', application.status, `Scheme acknowledgment downloaded in PDF format`);
             // Send the PDF file
             res.setHeader('Content-Disposition', `attachment; filename="${fileNameBase}.pdf"`);

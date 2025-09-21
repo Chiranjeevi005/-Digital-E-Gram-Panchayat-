@@ -476,6 +476,7 @@ const downloadPropertyTaxReceipt = async (req, res) => {
     try {
         const { id } = req.params;
         const { format } = req.query; // 'pdf' or 'jpg'
+        console.log('Downloading property tax receipt:', { id, format }); // Debug log
         // Try to get from in-memory storage
         let propertyData = inMemoryProperties.get(id);
         // If not found in in-memory storage, create minimal data to prevent errors
@@ -506,6 +507,13 @@ const downloadPropertyTaxReceipt = async (req, res) => {
                 });
             }
             // Emit real-time update (assuming ownerName is the citizenId)
+            console.log('Emitting application update for PDF download:', {
+                citizenId: propertyData.ownerName,
+                propertyId: id,
+                serviceType: 'Property Tax',
+                status: propertyData.status,
+                message: `Property tax receipt downloaded in PDF format`
+            });
             (0, socket_1.emitApplicationUpdate)(propertyData.ownerName, // Using ownerName as citizenId for demo purposes
             id, 'Property Tax', propertyData.status, `Property tax receipt downloaded in PDF format`);
             // Set appropriate headers for PDF download
@@ -549,11 +557,11 @@ const getMutationStatus = async (req, res) => {
                 message: 'Application ID is required'
             });
         }
-        // Create mock mutation status data
+        // Create mutation status data with custom input
         const mutationStatusData = {
             applicationId,
-            propertyId: 'PROP-2023-001',
-            statusTimeline: [
+            propertyId: req.body.propertyId || 'Unknown Property',
+            statusTimeline: req.body.statusTimeline || [
                 { step: 'Submitted', status: 'Completed', date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000) },
                 { step: 'Verification', status: 'Completed', date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000) },
                 { step: 'Officer Approval', status: 'In Progress', date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000) },
@@ -621,6 +629,13 @@ const downloadMutationAcknowledgement = async (req, res) => {
                 });
             }
             // Emit real-time update (assuming applicationId contains citizen info)
+            console.log('Emitting application update for PDF download:', {
+                citizenId: mutationData.applicationId,
+                applicationId: id,
+                serviceType: 'Mutation',
+                status: 'Completed',
+                message: `Mutation acknowledgement downloaded in PDF format`
+            });
             (0, socket_1.emitApplicationUpdate)(mutationData.applicationId, // Using applicationId as citizenId for demo purposes
             id, 'Mutation', 'Completed', `Mutation acknowledgement downloaded in PDF format`);
             // Set appropriate headers for PDF download

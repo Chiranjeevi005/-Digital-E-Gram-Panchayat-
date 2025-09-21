@@ -422,6 +422,7 @@ const downloadLandRecordCertificate = async (req, res) => {
     try {
         const { id } = req.params;
         const { format } = req.query; // 'pdf' or 'jpg'
+        console.log('Downloading land record certificate:', { id, format }); // Debug log
         // Try to get from MongoDB first, then from in-memory storage
         let landRecord = null;
         try {
@@ -460,6 +461,13 @@ const downloadLandRecordCertificate = async (req, res) => {
                 });
             }
             // Emit real-time update (assuming owner is the citizenId)
+            console.log('Emitting application update for PDF download:', {
+                citizenId: landRecord.owner,
+                landRecordId: id,
+                serviceType: 'Land Records',
+                status: landRecord.status,
+                message: `Land record certificate downloaded in PDF format`
+            });
             (0, socket_1.emitApplicationUpdate)(landRecord.owner, // Using owner as citizenId for demo purposes
             id, 'Land Records', landRecord.status, `Land record certificate downloaded in PDF format`);
             // Set appropriate headers for PDF download with proper filename
@@ -485,6 +493,13 @@ const downloadLandRecordCertificate = async (req, res) => {
                     });
                 }
                 // Emit real-time update (assuming owner is the citizenId)
+                console.log('Emitting application update for JPG download:', {
+                    citizenId: landRecord.owner,
+                    landRecordId: id,
+                    serviceType: 'Land Records',
+                    status: landRecord.status,
+                    message: `Land record certificate downloaded in JPG format`
+                });
                 (0, socket_1.emitApplicationUpdate)(landRecord.owner, // Using owner as citizenId for demo purposes
                 id, 'Land Records', landRecord.status, `Land record certificate downloaded in JPG format`);
                 // Set appropriate headers for JPG download with proper filename
