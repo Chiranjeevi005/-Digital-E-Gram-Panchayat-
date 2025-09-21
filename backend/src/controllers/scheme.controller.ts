@@ -24,7 +24,7 @@ export const createScheme = async (req: Request, res: Response) => {
     
     await scheme.save();
     res.status(201).json(scheme);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating scheme:', error);
     res.status(500).json({ message: 'Server error' });
   }
@@ -32,14 +32,68 @@ export const createScheme = async (req: Request, res: Response) => {
 
 export const getSchemes = async (req: Request, res: Response) => {
   try {
+    // Check if we should seed schemes (special parameter for testing)
+    const shouldSeed = req.query.seed === 'true';
+    if (shouldSeed) {
+      console.log('Seeding schemes requested');
+      // Sample schemes data
+      const sampleSchemes = [
+        {
+          name: 'Agricultural Subsidy Program',
+          description: 'Financial assistance for farmers to purchase seeds, fertilizers, and farming equipment.',
+          eligibility: 'All registered farmers with valid land ownership documents',
+          benefits: 'Up to ₹50,000 subsidy for crop cultivation and farm equipment'
+        },
+        {
+          name: 'Educational Scholarship Scheme',
+          description: 'Merit-based scholarships for students from economically weaker sections.',
+          eligibility: 'Students with family income below ₹2.5 lakh per annum',
+          benefits: 'Tuition fees coverage and monthly stipend of ₹2,000'
+        },
+        {
+          name: 'Healthcare Support Initiative',
+          description: 'Free medical checkups and subsidized treatment for senior citizens.',
+          eligibility: 'Citizens above 60 years of age',
+          benefits: 'Annual health checkup packages and 70% discount on medicines'
+        },
+        {
+          name: 'Women Empowerment Grant',
+          description: 'Financial support for women entrepreneurs to start small businesses.',
+          eligibility: 'Women above 18 years with valid Aadhaar and bank account',
+          benefits: 'Interest-free loan up to ₹5 lakh and business mentoring'
+        },
+        {
+          name: 'Rural Infrastructure Development',
+          description: 'Funding for village infrastructure projects like roads, water supply, and sanitation.',
+          eligibility: 'Community groups and local bodies',
+          benefits: 'Up to 80% funding for approved infrastructure projects'
+        }
+      ];
+      
+      console.log('Clearing existing schemes');
+      // Clear existing schemes
+      await Scheme.deleteMany({});
+      console.log('🧹 Cleared existing schemes');
+      
+      console.log('Inserting sample schemes');
+      // Insert sample schemes
+      await Scheme.insertMany(sampleSchemes);
+      console.log('✅ Sample schemes seeded successfully');
+    }
+    
     console.log('Fetching schemes from database...');
     const schemes = await Scheme.find().sort({ createdAt: -1 });
     console.log(`Found ${schemes.length} schemes`);
     console.log('Schemes data:', JSON.stringify(schemes, null, 2));
-    res.json(schemes);
-  } catch (error) {
+    
+    // Filter out Housing Subsidy Program
+    const filteredSchemes = schemes.filter(scheme => scheme.name !== 'Housing Subsidy Program');
+    console.log(`Filtered to ${filteredSchemes.length} schemes after removing Housing Subsidy Program`);
+    
+    res.json(filteredSchemes);
+  } catch (error: any) {
     console.error('Error fetching schemes:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
@@ -50,7 +104,7 @@ export const getSchemeById = async (req: Request, res: Response) => {
       return res.status(404).json({ message: 'Scheme not found' });
     }
     res.json(scheme);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching scheme:', error);
     res.status(500).json({ message: 'Server error' });
   }
@@ -72,6 +126,20 @@ export const applyForScheme = async (req: Request, res: Response) => {
       caste, 
       documents 
     } = req.body;
+    
+    console.log('Applying for scheme with data:', { 
+      citizenId, 
+      schemeId, 
+      schemeName,
+      applicantName, 
+      fatherName, 
+      address, 
+      phone, 
+      email, 
+      income, 
+      caste, 
+      documents 
+    }); // Debug log
     
     // Validate required fields
     if (!citizenId || !schemeId || !schemeName || !applicantName || !fatherName || 
@@ -104,15 +172,24 @@ export const applyForScheme = async (req: Request, res: Response) => {
     });
     
     await application.save();
+    console.log('Saved scheme application:', application._id); // Debug log
     
     // Generate acknowledgment PDF
     try {
       await generateSchemeAcknowledgmentPDF(application);
-    } catch (pdfError) {
+    } catch (pdfError: any) {
       console.error('Error generating PDF:', pdfError);
     }
     
     // Emit real-time update to the citizen who applied for the scheme
+    console.log('Emitting application update for scheme application:', {
+      citizenId,
+      applicationId: application._id.toString(),
+      serviceType: 'Schemes',
+      status: application.status,
+      message: `Scheme application for ${schemeName} submitted successfully`
+    });
+    
     emitApplicationUpdate(
       citizenId,
       application._id.toString(),
@@ -127,7 +204,7 @@ export const applyForScheme = async (req: Request, res: Response) => {
       applicationId: application._id,
       status: application.status
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error applying for scheme:', error);
     res.status(500).json({ message: 'Server error' });
   }
@@ -153,7 +230,7 @@ export const getSchemeApplications = async (req: Request, res: Response) => {
     }
     
     res.json(applications);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching scheme applications:', error);
     res.status(500).json({ message: 'Server error' });
   }
@@ -199,7 +276,7 @@ export const deleteSchemeApplication = async (req: Request, res: Response) => {
       success: true, 
       message: 'Application deleted successfully' 
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error deleting scheme application:', error);
     res.status(500).json({ message: 'Server error' });
   }
@@ -221,7 +298,7 @@ export const deleteScheme = async (req: Request, res: Response) => {
       success: true, 
       message: 'Scheme deleted successfully' 
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error deleting scheme:', error);
     res.status(500).json({ message: 'Server error' });
   }
@@ -233,11 +310,15 @@ export const downloadSchemeAcknowledgment = async (req: Request, res: Response) 
     const { applicationId } = req.params;
     const { format } = req.query; // 'pdf' or 'jpg'
     
+    console.log('Downloading scheme acknowledgment:', { applicationId, format }); // Debug log
+    
     // Find the application
     const application = await SchemeApplication.findById(applicationId);
     if (!application) {
       return res.status(404).json({ message: 'Application not found' });
     }
+    
+    console.log('Found application:', application._id); // Debug log
     
     // Generate filename
     const fileNameBase = `scheme-application-${applicationId}`;
@@ -254,7 +335,20 @@ export const downloadSchemeAcknowledgment = async (req: Request, res: Response) 
       // Convert PDF to JPG
       const jpgPath = await convertPDFToJPG(pdfPath, `${fileNameBase}.jpg`);
       
+      // Check if JPG file exists
+      if (!fs.existsSync(jpgPath)) {
+        throw new Error('JPG file was not generated successfully');
+      }
+      
       // Emit real-time update to the citizen who applied for the scheme
+      console.log('Emitting application update for JPG download:', {
+        citizenId: application.citizenId,
+        applicationId: application._id.toString(),
+        serviceType: 'Schemes',
+        status: application.status,
+        message: `Scheme acknowledgment downloaded in JPG format`
+      });
+      
       emitApplicationUpdate(
         application.citizenId,
         applicationId,
@@ -277,6 +371,14 @@ export const downloadSchemeAcknowledgment = async (req: Request, res: Response) 
       }
       
       // Emit real-time update to the citizen who applied for the scheme
+      console.log('Emitting application update for PDF download:', {
+        citizenId: application.citizenId,
+        applicationId: application._id.toString(),
+        serviceType: 'Schemes',
+        status: application.status,
+        message: `Scheme acknowledgment downloaded in PDF format`
+      });
+      
       emitApplicationUpdate(
         application.citizenId,
         applicationId,
@@ -290,7 +392,7 @@ export const downloadSchemeAcknowledgment = async (req: Request, res: Response) 
       res.setHeader('Content-Type', 'application/pdf');
       res.sendFile(pdfPath);
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error downloading scheme acknowledgment:', error);
     res.status(500).json({ message: 'Server error' });
   }

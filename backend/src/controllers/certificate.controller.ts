@@ -6,72 +6,10 @@ import { generateCertificatePDF, convertPDFToJPG } from '../utils/documentGenera
 import { emitApplicationUpdate } from '../utils/socket';
 import CertificateApplication, { ICertificateApplication } from '../models/CertificateApplication';
 
-// Mock data for certificates
-interface Certificate {
-  _id: string;
-  id: string;
-  userId?: string; // Add userId field
-  type: string;
-  certificateType: string;
-  applicantName: string;
-  fatherName?: string;
-  motherName?: string;
-  date?: string;
-  place?: string;
-  status: string;
-  certificateNumber?: string;
-  issuedDate?: string;
-  // Marriage certificate fields
-  brideName?: string;
-  groomName?: string;
-  witnessNames?: string;
-  registrationNo?: string;
-  // Income/Caste/Residence certificate fields
-  address?: string;
-  income?: string;
-  caste?: string;
-  subCaste?: string;
-  ward?: string;
-  village?: string;
-  district?: string;
-}
-
-// Mock database - for demo purposes
-let certificates: Certificate[] = [
-  {
-    _id: '1',
-    id: '1',
-    userId: 'user1', // Add userId
-    type: 'Birth Certificate',
-    certificateType: 'Birth',
-    applicantName: 'John Doe',
-    date: '2023-05-15',
-    place: 'Village Hospital',
-    status: 'Approved',
-    certificateNumber: 'BC-2023-001',
-    issuedDate: '2023-05-20',
-    fatherName: 'Robert Doe',
-    motherName: 'Mary Doe'
-  },
-  {
-    _id: '2',
-    id: '2',
-    userId: 'user2', // Add userId
-    type: 'Income Certificate',
-    certificateType: 'Income',
-    applicantName: 'Jane Smith',
-    fatherName: 'Michael Smith',
-    address: '123 Main St, Sample Village',
-    income: '₹50,000',
-    status: 'Approved',
-    certificateNumber: 'IC-2023-002',
-    issuedDate: '2023-05-21'
-  }
-];
-
 // Get all certificates
 export const getAllCertificates = async (req: Request, res: Response) => {
   try {
+    const certificates = await CertificateApplication.find().sort({ createdAt: -1 });
     res.json(certificates);
   } catch (error) {
     console.error('Error fetching certificates:', error);
@@ -108,18 +46,14 @@ export const applyForCertificate = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Type and applicant name are required' });
     }
     
-    // In production, you would save to MongoDB
-    // For now, we'll use the mock data
-    const newCertificate: Certificate = {
-      _id: (certificates.length + 1).toString(),
-      id: (certificates.length + 1).toString(),
+    // Create new certificate application in database
+    const newCertificate = new CertificateApplication({
       userId, // Add userId
-      type,
       certificateType: type,
       applicantName,
       fatherName,
       motherName,
-      date,
+      date: date ? new Date(date) : new Date(),
       place,
       brideName,
       groomName,
@@ -132,16 +66,15 @@ export const applyForCertificate = async (req: Request, res: Response) => {
       ward,
       village,
       district,
-      status: 'Approved',
-      certificateNumber: `${type.substring(0, 1).toUpperCase()}C-2025-${(certificates.length + 1).toString().padStart(3, '0')}`,
-      issuedDate: new Date().toISOString().split('T')[0]
-    };
+      status: 'Submitted',
+      supportingFiles: []
+    });
     
-    certificates.push(newCertificate);
+    await newCertificate.save();
     
     res.status(201).json({
       success: true,
-      applicationId: newCertificate.id,
+      applicationId: newCertificate._id,
       status: newCertificate.status,
       message: 'Certificate application submitted successfully'
     });
@@ -155,17 +88,13 @@ export const applyForCertificate = async (req: Request, res: Response) => {
 export const getCertificatePreview = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const certificate = certificates.find(cert => cert.id === id);
+    const certificate = await CertificateApplication.findById(id);
     
     if (!certificate) {
       return res.status(404).json({ message: 'Certificate not found' });
     }
     
-    // Return certificate with both _id and id for compatibility
-    res.json({
-      ...certificate,
-      _id: certificate._id || certificate.id
-    });
+    res.json(certificate);
   } catch (error) {
     console.error('Error fetching certificate preview:', error);
     res.status(500).json({ message: 'Server error' });
@@ -178,20 +107,17 @@ export const updateCertificate = async (req: Request, res: Response) => {
     const { id } = req.params;
     const updates = req.body;
     
-    const certificateIndex = certificates.findIndex(cert => cert.id === id);
+    const certificate = await CertificateApplication.findByIdAndUpdate(
+      id,
+      updates,
+      { new: true, runValidators: true }
+    );
     
-    if (certificateIndex === -1) {
+    if (!certificate) {
       return res.status(404).json({ message: 'Certificate not found' });
     }
     
-    // Ensure _id is preserved
-    certificates[certificateIndex] = { 
-      ...certificates[certificateIndex], 
-      ...updates,
-      _id: certificates[certificateIndex]._id || certificates[certificateIndex].id
-    };
-    
-    res.json(certificates[certificateIndex]);
+    res.json(certificate);
   } catch (error) {
     console.error('Error updating certificate:', error);
     res.status(500).json({ message: 'Server error' });
@@ -202,7 +128,7 @@ export const updateCertificate = async (req: Request, res: Response) => {
 export const getCertificateStatus = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const certificate = certificates.find(cert => cert.id === id);
+    const certificate = await CertificateApplication.findById(id);
     
     if (!certificate) {
       return res.status(404).json({ message: 'Certificate not found' });
@@ -220,11 +146,16 @@ export const downloadCertificate = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { format } = req.query;
-    const certificate = certificates.find(cert => cert.id === id);
+    
+    console.log('Downloading certificate:', { id, format }); // Debug log
+    
+    const certificate = await CertificateApplication.findById(id);
     
     if (!certificate) {
       return res.status(404).json({ message: 'Certificate not found' });
     }
+    
+    console.log('Found certificate:', certificate._id); // Debug log
     
     // For demo purposes, allow download of all certificates
     // In production, you might want to check status
@@ -232,19 +163,8 @@ export const downloadCertificate = async (req: Request, res: Response) => {
     //   return res.status(400).json({ message: 'Certificate not approved yet' });
     // }
     
-    // Emit event for real-time dashboard update if userId exists
-    if (certificate.userId) {
-      emitApplicationUpdate(
-        certificate.userId, 
-        certificate.id, 
-        'Certificates', 
-        certificate.status, 
-        `Certificate downloaded in ${format || 'PDF'} format`
-      );
-    }
-    
     // Generate certificate filename
-    const fileName = `${certificate.type.replace(/\s+/g, '_')}_${certificate.id}`;
+    const fileName = `${certificate.certificateType.replace(/\s+/g, '_')}_${certificate._id}`;
     
     if (format === 'jpg') {
       // For JPG format, we need to generate a PDF first and then convert it to JPG
@@ -258,6 +178,27 @@ export const downloadCertificate = async (req: Request, res: Response) => {
         // Check if JPG file exists
         if (!fs.existsSync(jpgPath)) {
           throw new Error('JPG file was not generated successfully');
+        }
+        
+        // Emit event for real-time dashboard update if userId exists
+        if (certificate.userId) {
+          console.log('Emitting application update for JPG download:', {
+            userId: certificate.userId,
+            certificateId: certificate._id.toString(),
+            serviceType: 'Certificates',
+            status: certificate.status,
+            message: `Certificate downloaded in JPG format`
+          });
+          
+          emitApplicationUpdate(
+            certificate.userId, 
+            certificate._id.toString(), 
+            'Certificates', 
+            certificate.status, 
+            `Certificate downloaded in JPG format`
+          );
+        } else {
+          console.log('No userId found for certificate, skipping real-time update');
         }
         
         // Send the JPG file
@@ -298,12 +239,33 @@ export const downloadCertificate = async (req: Request, res: Response) => {
         res.send(pdfBuffer);
       });
       
+      // Emit event for real-time dashboard update if userId exists
+      if (certificate.userId) {
+        console.log('Emitting application update for PDF download:', {
+          userId: certificate.userId,
+          certificateId: certificate._id.toString(),
+          serviceType: 'Certificates',
+          status: certificate.status,
+          message: `Certificate downloaded in PDF format`
+        });
+        
+        emitApplicationUpdate(
+          certificate.userId, 
+          certificate._id.toString(), 
+          'Certificates', 
+          certificate.status, 
+          `Certificate downloaded in PDF format`
+        );
+      } else {
+        console.log('No userId found for certificate, skipping real-time update');
+      }
+      
       // Add header with panchayat info
       doc.fillColor('#000000');
       doc.fontSize(20);
       doc.text('Digital E-Panchayat', 50, 50, { align: 'center' });
       doc.fontSize(16);
-      doc.text(`${certificate.type}`, 50, 80, { align: 'center' });
+      doc.text(`${certificate.certificateType} Certificate`, 50, 80, { align: 'center' });
       doc.moveDown();
       
       // Add horizontal line
@@ -312,7 +274,7 @@ export const downloadCertificate = async (req: Request, res: Response) => {
       
       // Certificate details
       doc.fontSize(12);
-      doc.text(`Certificate ID: ${certificate.id}`);
+      doc.text(`Certificate ID: ${certificate._id}`);
       doc.text(`Applicant Name: ${certificate.applicantName}`);
       
       if (certificate.fatherName) {
@@ -324,7 +286,7 @@ export const downloadCertificate = async (req: Request, res: Response) => {
       }
       
       if (certificate.date) {
-        doc.text(`Date: ${certificate.date}`);
+        doc.text(`Date: ${new Date(certificate.date).toLocaleDateString()}`);
       }
       
       if (certificate.place) {
@@ -358,8 +320,8 @@ export const downloadCertificate = async (req: Request, res: Response) => {
         doc.text(`District: ${certificate.district}`);
       }
       
-      doc.text(`Certificate Number: ${certificate.certificateNumber || 'N/A'}`);
-      doc.text(`Issued Date: ${certificate.issuedDate || new Date().toISOString().split('T')[0]}`);
+      doc.text(`Certificate Number: ${certificate._id || 'N/A'}`);
+      doc.text(`Issued Date: ${certificate.createdAt ? new Date(certificate.createdAt).toLocaleDateString() : new Date().toLocaleDateString()}`);
       doc.text(`Status: ${certificate.status}`);
       doc.moveDown();
       

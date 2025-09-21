@@ -113,7 +113,7 @@ const SchemesPage = () => {
   const [isApplicationFormOpen, setIsApplicationFormOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [applicationFormData, setApplicationFormData] = useState({
-    citizenId: 'CIT-001', // This would come from auth context in a real app
+    citizenId: user?.id || '', // Use authenticated user ID
     schemeId: '',
     schemeName: '',
     applicantName: '',
@@ -168,7 +168,9 @@ const SchemesPage = () => {
         setLoading(true);
         const startTime = Date.now();
         
+        console.log('Fetching schemes from API'); // Debug log
         const data = await apiClient.get<Scheme[]>('/schemes');
+        console.log('Fetched schemes data:', data); // Debug log
         setSchemes(data);
         
         // Ensure minimum loading time of 1-2 seconds for better UX
@@ -195,8 +197,14 @@ const SchemesPage = () => {
       setIsTrackingLoading(true);
       const startTime = Date.now();
       
-      // Use authenticated user ID or fallback to CIT-001 for testing
-      const userId = user?.id || 'CIT-001';
+      // Use authenticated user ID - only fetch if user is logged in
+      if (!user?.id) {
+        setApplications([]);
+        setIsTrackingLoading(false);
+        return;
+      }
+      
+      const userId = user.id;
       const data = await apiClient.get<SchemeApplication[]>(`/schemes/tracking/${userId}`);
       setApplications(data);
       
@@ -216,24 +224,38 @@ const SchemesPage = () => {
 
   // Fetch applications when user changes or component mounts
   useEffect(() => {
-    if (user || !user) { // Always fetch, but use authenticated user when available
+    if (user?.id) { // Only fetch if user is authenticated
       fetchApplications();
+    } else {
+      // Clear applications if user is not authenticated
+      setApplications([]);
     }
   }, [user]);
 
   // Filter schemes based on search term and category, and remove Housing Subsidy Program
   const filteredSchemes = schemes.filter(scheme => {
+    console.log('Filtering scheme:', scheme.name); // Debug log
     // Exclude Housing Subsidy Program
     if (scheme.name === 'Housing Subsidy Program') {
       return false;
     }
     
-    const matchesSearch = scheme.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    const matchesSearch = searchTerm === '' || 
+                          scheme.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           scheme.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           scheme.eligibility.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           scheme.benefits.toLowerCase().includes(searchTerm.toLowerCase());
-    // In a real implementation, you would filter by actual category
-    return matchesSearch;
+    
+    // Fix the category filtering logic to match actual scheme categories
+    // When 'all' is selected, show all schemes (except Housing Subsidy Program)
+    // When a specific category is selected, show schemes that match that category
+    const matchesCategory = filterCategory === 'all' || 
+                           (filterCategory === 'agriculture' && (scheme.name.includes('Agricultural') || scheme.name.includes('Farm') || scheme.name.includes('Agriculture'))) ||
+                           (filterCategory === 'education' && (scheme.name.includes('Educational') || scheme.name.includes('Scholarship') || scheme.name.includes('Education'))) ||
+                           (filterCategory === 'healthcare' && (scheme.name.includes('Healthcare') || scheme.name.includes('Welfare') || scheme.name.includes('Health')));
+    
+    console.log('Scheme matches search:', matchesSearch, 'matches category:', matchesCategory); // Debug log
+    return matchesSearch && matchesCategory;
   });
 
   const openSchemeDetails = (scheme: Scheme) => {
@@ -248,7 +270,7 @@ const SchemesPage = () => {
 
   const openApplicationForm = (scheme: Scheme) => {
     setApplicationFormData({
-      citizenId: user?.id || 'CIT-001', // Use authenticated user ID or fallback
+      citizenId: user?.id || '', // Use authenticated user ID
       schemeId: scheme._id,
       schemeName: scheme.name,
       applicantName: '',
@@ -274,7 +296,7 @@ const SchemesPage = () => {
   const closeApplicationForm = () => {
     setIsApplicationFormOpen(false);
     setApplicationFormData({
-      citizenId: user?.id || 'CIT-001', // Use authenticated user ID or fallback
+      citizenId: user?.id || '', // Use authenticated user ID
       schemeId: '',
       schemeName: '',
       applicantName: '',

@@ -484,6 +484,8 @@ export const downloadLandRecordCertificate = async (req: Request, res: Response)
     const { id } = req.params;
     const { format } = req.query; // 'pdf' or 'jpg'
     
+    console.log('Downloading land record certificate:', { id, format }); // Debug log
+    
     // Try to get from MongoDB first, then from in-memory storage
     let landRecord = null;
     
@@ -529,6 +531,14 @@ export const downloadLandRecordCertificate = async (req: Request, res: Response)
       }
       
       // Emit real-time update (assuming owner is the citizenId)
+      console.log('Emitting application update for PDF download:', {
+        citizenId: landRecord.owner,
+        landRecordId: id,
+        serviceType: 'Land Records',
+        status: landRecord.status,
+        message: `Land record certificate downloaded in PDF format`
+      });
+      
       emitApplicationUpdate(
         landRecord.owner, // Using owner as citizenId for demo purposes
         id,
@@ -565,6 +575,14 @@ export const downloadLandRecordCertificate = async (req: Request, res: Response)
         }
         
         // Emit real-time update (assuming owner is the citizenId)
+        console.log('Emitting application update for JPG download:', {
+          citizenId: landRecord.owner,
+          landRecordId: id,
+          serviceType: 'Land Records',
+          status: landRecord.status,
+          message: `Land record certificate downloaded in JPG format`
+        });
+        
         emitApplicationUpdate(
           landRecord.owner, // Using owner as citizenId for demo purposes
           id,

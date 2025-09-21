@@ -8,7 +8,7 @@
     "dev": "ts-node-dev src/server.ts",
     "build": "tsc",
     "test": "jest",
-    "seed": "ts-node src/seedSchemes.ts",
+    "seed": "node -r ts-node/register src/seedSchemes.ts",
     "postinstall": "node scripts/rebuild-bcrypt.js && npm rebuild sharp --update-binary"
   },
   "dependencies": {

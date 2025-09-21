@@ -5,6 +5,7 @@ import fs from 'fs';
 import PDFDocument from 'pdfkit';
 import sharp from 'sharp';
 import mongoose from 'mongoose';
+import { emitApplicationUpdate } from '../utils/socket'; // Import socket utility
 
 // In-memory storage for demo purposes when MongoDB is not available
 const inMemoryLandRecords = new Map<string, any>();
@@ -513,6 +514,23 @@ export const downloadLandRecordCertificatePDF = async (req: Request, res: Respon
       console.log('Created and stored minimal land record data');
     }
     
+    // Emit real-time update
+    console.log('Emitting application update for PDF download:', {
+      citizenId: landRecord.owner,
+      landRecordId: id,
+      serviceType: 'Land Records',
+      status: 'Completed',
+      message: `Land record certificate downloaded in PDF format`
+    });
+    
+    emitApplicationUpdate(
+      landRecord.owner, // Using owner as citizenId for demo purposes
+      id,
+      'Land Records',
+      'Completed',
+      `Land record certificate downloaded in PDF format`
+    );
+    
     // Generate PDF (following the same pattern as Birth/Death certificates)
     console.log('Generating PDF for land record:', landRecord._id);
     const fileName = await generateLandRecordCertificatePDF(landRecord);
@@ -589,6 +607,23 @@ export const downloadLandRecordCertificateJPG = async (req: Request, res: Respon
       inMemoryLandRecords.set(id, landRecord);
       console.log('Created and stored minimal land record data');
     }
+    
+    // Emit real-time update
+    console.log('Emitting application update for JPG download:', {
+      citizenId: landRecord.owner,
+      landRecordId: id,
+      serviceType: 'Land Records',
+      status: 'Completed',
+      message: `Land record certificate downloaded in JPG format`
+    });
+    
+    emitApplicationUpdate(
+      landRecord.owner, // Using owner as citizenId for demo purposes
+      id,
+      'Land Records',
+      'Completed',
+      `Land record certificate downloaded in JPG format`
+    );
     
     // Generate JPG (following the same pattern as Birth/Death certificates)
     console.log('Generating JPG for land record:', landRecord._id);

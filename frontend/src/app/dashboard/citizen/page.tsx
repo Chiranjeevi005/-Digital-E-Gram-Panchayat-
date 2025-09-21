@@ -25,6 +25,15 @@ interface Grievance {
   remarks?: string;
 }
 
+interface Scheme {
+  _id: string;
+  name: string;
+  description: string;
+  eligibility: string;
+  benefits: string;
+  createdAt: string;
+}
+
 // Add this interface for SchemeApplication to match the backend model
 interface CitizenSchemeApplication {
   _id: string;
@@ -195,6 +204,7 @@ export default function CitizenDashboard() {
     notifications: 0,
     completed: 0
   });
+  const [availableSchemes, setAvailableSchemes] = useState<Scheme[]>([]);
 
   // Function to fetch data from the backend
   const fetchData = async () => {
@@ -203,8 +213,11 @@ export default function CitizenDashboard() {
       const startTime = Date.now();
       
       if (user?.id) {
+        console.log('Fetching data for user:', user.id); // Debug log
+        
         // Fetch recent activity from the new tracking API
         const activityData: RecentActivity[] = await apiClient.getRecentActivity(user.id);
+        console.log('Fetched activity data:', activityData); // Debug log
         
         // Transform activity data to match existing format
         const transformedActivities = activityData.map((activity, index) => ({
@@ -220,6 +233,7 @@ export default function CitizenDashboard() {
         
         // Fetch application stats
         const statsData: ApplicationStats = await apiClient.getApplicationStats(user.id);
+        console.log('Fetched stats data:', statsData); // Debug log
         
         // Update stats
         setStats({
@@ -231,6 +245,11 @@ export default function CitizenDashboard() {
             return total + (counts['Approved'] || 0) + (counts['Resolved'] || 0) + (counts['Completed'] || 0);
           }, 0)
         });
+        
+        // Fetch available schemes
+        const schemesData: Scheme[] = await apiClient.getSchemes();
+        console.log('Fetched schemes data:', schemesData); // Debug log
+        setAvailableSchemes(schemesData);
       }
       
       // Set notifications (in a real app, these would come from the backend)
@@ -255,9 +274,11 @@ export default function CitizenDashboard() {
   useEffect(() => {
     // Fetch initial data
     if (user?.userType === 'Citizen' && user?.id) {
+      console.log('Initializing dashboard for user:', user.id); // Debug log
       fetchData();
       
       // Connect to WebSocket
+      console.log('Connecting to socket service'); // Debug log
       socketService.connect(user.id);
       
       // Listen for dashboard updates
@@ -315,6 +336,7 @@ export default function CitizenDashboard() {
       
       // Cleanup function
       return () => {
+        console.log('Cleaning up socket listeners'); // Debug log
         socketService.offDashboardUpdate(handleDashboardUpdate);
         socketService.offApplicationUpdate(handleApplicationUpdate);
       };
@@ -429,128 +451,89 @@ export default function CitizenDashboard() {
                           <span className="text-xs font-medium text-gray-700">Track Applications</span>
                         </div>
                       </Link>
-
+                      <Link href="/services/certificates" className="bg-white rounded-lg shadow p-3 border border-gray-100 hover:shadow-md transition-shadow text-center">
+                        <div className="flex flex-col items-center justify-center h-full">
+                          <div className="bg-green-100 p-2 rounded-full mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                            </svg>
+                          </div>
+                          <span className="text-xs font-medium text-gray-700">Certificates</span>
+                        </div>
+                      </Link>
+                      <Link href="/services/schemes" className="bg-white rounded-lg shadow p-3 border border-gray-100 hover:shadow-md transition-shadow text-center">
+                        <div className="flex flex-col items-center justify-center h-full">
+                          <div className="bg-purple-100 p-2 rounded-full mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          </div>
+                          <span className="text-xs font-medium text-gray-700">Schemes</span>
+                        </div>
+                      </Link>
                       <Link href="/services/grievances" className="bg-white rounded-lg shadow p-3 border border-gray-100 hover:shadow-md transition-shadow text-center">
                         <div className="flex flex-col items-center justify-center h-full">
                           <div className="bg-red-100 p-2 rounded-full mb-2">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                             </svg>
                           </div>
-                          <span className="text-xs font-medium text-gray-700">File Grievance</span>
-                        </div>
-                      </Link>
-
-                      <Link href="/services/schemes" className="bg-white rounded-lg shadow p-3 border border-gray-100 hover:shadow-md transition-shadow text-center">
-                        <div className="flex flex-col items-center justify-center h-full">
-                          <div className="bg-green-100 p-2 rounded-full mb-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                          </div>
-                          <span className="text-xs font-medium text-gray-700">View Schemes</span>
-                        </div>
-                      </Link>
-
-                      <Link href="/profile" className="bg-white rounded-lg shadow p-3 border border-gray-100 hover:shadow-md transition-shadow text-center">
-                        <div className="flex flex-col items-center justify-center h-full">
-                          <div className="bg-purple-100 p-2 rounded-full mb-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                          </div>
-                          <span className="text-xs font-medium text-gray-700">View Profile</span>
+                          <span className="text-xs font-medium text-gray-700">Grievances</span>
                         </div>
                       </Link>
                     </div>
                   </div>
 
-                  {/* Quick Access Cards - Updated links to track application status */}
+                  {/* Available Schemes Section */}
                   <div className="mb-6">
-                    <h2 className="text-base md:text-lg font-semibold text-gray-800 mb-3">Services</h2>
-                    <div className="grid grid-cols-1 gap-3">
-                      <Link href="/services/tracking?service=certificates" className="bg-white rounded-lg shadow p-3 md:p-4 border border-gray-100 hover:shadow-md transition-shadow">
-                        <div className="flex items-center">
-                          <div className="flex-shrink-0 bg-blue-100 p-2 rounded-full">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                          </div>
-                          <div className="ml-3">
-                            <h3 className="text-sm md:text-base font-medium text-gray-900">Certificates</h3>
-                            <p className="text-xs text-gray-500">Track applications</p>
-                          </div>
-                        </div>
-                      </Link>
-
-                      <Link href="/services/tracking?service=grievances" className="bg-white rounded-lg shadow p-3 md:p-4 border border-gray-100 hover:shadow-md transition-shadow">
-                        <div className="flex items-center">
-                          <div className="flex-shrink-0 bg-red-100 p-2 rounded-full">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                            </svg>
-                          </div>
-                          <div className="ml-3">
-                            <h3 className="text-sm md:text-base font-medium text-gray-900">Grievances</h3>
-                            <p className="text-xs text-gray-500">Track complaints</p>
-                          </div>
-                        </div>
-                      </Link>
-
-                      <Link href="/services/tracking?service=schemes" className="bg-white rounded-lg shadow p-3 md:p-4 border border-gray-100 hover:shadow-md transition-shadow">
-                        <div className="flex items-center">
-                          <div className="flex-shrink-0 bg-green-100 p-2 rounded-full">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                          </div>
-                          <div className="ml-3">
-                            <h3 className="text-sm md:text-base font-medium text-gray-900">Schemes</h3>
-                            <p className="text-xs text-gray-500">Track applications</p>
-                          </div>
-                        </div>
-                      </Link>
-
-                      <Link href="/services/tracking?service=property" className="bg-white rounded-lg shadow p-3 md:p-4 border border-gray-100 hover:shadow-md transition-shadow">
-                        <div className="flex items-center">
-                          <div className="flex-shrink-0 bg-purple-100 p-2 rounded-full">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2 2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                            </svg>
-                          </div>
-                          <div className="ml-3">
-                            <h3 className="text-sm md:text-base font-medium text-gray-900">Property & Land</h3>
-                            <p className="text-xs text-gray-500">Track services</p>
-                          </div>
-                        </div>
+                    <div className="flex justify-between items-center mb-3">
+                      <h2 className="text-base md:text-lg font-semibold text-gray-800">Available Schemes</h2>
+                      <Link href="/services/schemes" className="text-xs text-emerald-600 hover:text-emerald-800 font-medium">
+                        View All
                       </Link>
                     </div>
+                    {availableSchemes.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {availableSchemes.slice(0, 3).map((scheme) => (
+                          <div key={scheme._id} className="bg-white rounded-lg shadow p-4 border border-gray-100 hover:shadow-md transition-shadow">
+                            <h3 className="font-semibold text-gray-800 mb-2">{scheme.name}</h3>
+                            <p className="text-sm text-gray-600 mb-3 line-clamp-2">{scheme.description}</p>
+                            <div className="flex justify-between items-center">
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                                {scheme.eligibility}
+                              </span>
+                              <Link 
+                                href={`/services/schemes/apply/${scheme._id}`}
+                                className="text-xs text-emerald-600 hover:text-emerald-800 font-medium"
+                              >
+                                Apply
+                              </Link>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="bg-white rounded-lg shadow p-6 border border-gray-100 text-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <h3 className="mt-2 text-sm font-medium text-gray-900">No schemes available</h3>
+                        <p className="mt-1 text-sm text-gray-500">Check back later for new schemes.</p>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Recent Activity and Notifications */}
-                  <div className="grid grid-cols-1 gap-5">
+                  {/* Recent Activity and Notifications Section */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
                     {/* Recent Activity */}
                     <div className="bg-white rounded-lg shadow p-4">
                       <div className="flex justify-between items-center mb-3">
-                        <h2 className="text-base md:text-lg font-semibold text-gray-800">Activity Timeline</h2>
-                        {/* Updated link to track all applications */}
-                        <Link href="/services/tracking" className="text-emerald-600 hover:text-emerald-800 text-xs font-medium">
+                        <h2 className="text-base md:text-lg font-semibold text-gray-800">Recent Activity</h2>
+                        <Link href="/services/tracking" className="text-xs text-emerald-600 hover:text-emerald-800 font-medium">
                           View All
                         </Link>
                       </div>
-                      
-                      {loading ? (
-                        <div className="space-y-3">
-                          {[1, 2, 3].map((i) => (
-                            <div key={i} className="animate-pulse flex space-x-3">
-                              <div className="flex-1 space-y-2">
-                                <div className="h-3 bg-gray-200 rounded w-3/4"></div>
-                                <div className="h-2 bg-gray-200 rounded w-1/2"></div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : recentActivity.length > 0 ? (
+                      {recentActivity.length > 0 ? (
                         <div className="space-y-3">
                           {recentActivity.map((activity) => (
                             <div key={activity.id} className="flex">
@@ -559,38 +542,43 @@ export default function CitizenDashboard() {
                                 <div className="w-0.5 h-full bg-emerald-200"></div>
                               </div>
                               <div className="flex-1 pb-3">
-                                <div className="flex justify-between flex-wrap">
-                                  <h3 className="font-medium text-gray-900 text-sm">{activity.title}</h3>
-                                  <span className={`px-1.5 py-0.5 text-xs rounded-full ${
-                                    activity.status === 'Approved' || activity.status === 'Completed' ? 'bg-green-100 text-green-800' :
-                                    activity.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                                    activity.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
-                                    'bg-gray-100 text-gray-800'
+                                <div className="flex justify-between">
+                                  <h3 className="text-sm font-medium text-gray-900">{activity.title}</h3>
+                                  <span className="text-xs text-gray-500">{activity.date}</span>
+                                </div>
+                                <p className="text-xs text-gray-600 mt-1">{activity.details}</p>
+                                <div className="flex justify-between items-center mt-2">
+                                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                                    activity.status === 'Approved' || activity.status === 'Completed' || activity.status === 'Resolved' 
+                                      ? 'bg-green-100 text-green-800' 
+                                      : activity.status === 'Rejected' 
+                                        ? 'bg-red-100 text-red-800' 
+                                        : 'bg-yellow-100 text-yellow-800'
                                   }`}>
                                     {activity.status}
                                   </span>
-                                </div>
-                                <p className="text-xs text-gray-600 mt-1">{activity.details}</p>
-                                <div className="flex justify-between items-center mt-1 flex-wrap">
-                                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
-                                    {activity.type}
-                                  </span>
-                                  <p className="text-xs text-gray-500">{activity.date}</p>
+                                  <span className="text-xs text-gray-500">{activity.type}</span>
                                 </div>
                               </div>
                             </div>
                           ))}
                           <div className="flex">
                             <div className="flex flex-col items-center mr-3">
-                              <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                              <div className="w-2 h-2 rounded-full bg-gray-300"></div>
                             </div>
                             <div className="flex-1">
-                              <p className="text-xs text-gray-500">Account created</p>
+                              <p className="text-xs text-gray-500">End of activity history</p>
                             </div>
                           </div>
                         </div>
                       ) : (
-                        <p className="text-gray-500 text-sm">No recent activity to display.</p>
+                        <div className="text-center py-6">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <h3 className="mt-2 text-sm font-medium text-gray-900">No recent activity</h3>
+                          <p className="mt-1 text-sm text-gray-500">Your recent actions will appear here.</p>
+                        </div>
                       )}
                     </div>
 
@@ -598,58 +586,59 @@ export default function CitizenDashboard() {
                     <div className="bg-white rounded-lg shadow p-4">
                       <div className="flex justify-between items-center mb-3">
                         <h2 className="text-base md:text-lg font-semibold text-gray-800">Notifications</h2>
-                        <div className="flex space-x-1">
-                          {/* Using dark text colors for better visibility */}
-                          <select 
-                            value={notificationFilter}
-                            onChange={(e) => setNotificationFilter(e.target.value)}
-                            className="text-xs border border-gray-400 rounded px-1.5 py-0.5 bg-white text-gray-800 focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 notification-filter-select"
+                        <div className="flex space-x-2">
+                          <button 
+                            onClick={() => setNotificationFilter('all')}
+                            className={`text-xs px-2 py-1 rounded ${
+                              notificationFilter === 'all' 
+                                ? 'bg-emerald-100 text-emerald-800 font-medium' 
+                                : 'text-gray-600 hover:bg-gray-100'
+                            }`}
                           >
-                            <option value="all" className="text-gray-800 bg-white">All</option>
-                            <option value="Services" className="text-gray-800 bg-white">Services</option>
-                            <option value="Schemes" className="text-gray-800 bg-white">Schemes</option>
-                            <option value="Grievances" className="text-gray-800 bg-white">Grievances</option>
-                            <option value="Property" className="text-gray-800 bg-white">Property</option>
-                          </select>
-                          <button className="text-emerald-700 hover:text-emerald-900 text-xs font-medium bg-white hover:bg-gray-50 px-1.5 py-0.5 rounded border border-gray-300 transition-colors notification-filter-button">
-                            Mark All
+                            All
+                          </button>
+                          <button 
+                            onClick={() => setNotificationFilter('unread')}
+                            className={`text-xs px-2 py-1 rounded ${
+                              notificationFilter === 'unread' 
+                                ? 'bg-emerald-100 text-emerald-800 font-medium' 
+                                : 'text-gray-600 hover:bg-gray-100'
+                            }`}
+                          >
+                            Unread
                           </button>
                         </div>
                       </div>
-                      
-                      {loading ? (
+                      {notifications.length > 0 ? (
                         <div className="space-y-3">
-                          {[1, 2].map((i) => (
-                            <div key={i} className="animate-pulse flex space-x-3">
-                              <div className="flex-1 space-y-2">
-                                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                                <div className="h-2 bg-gray-200 rounded"></div>
+                          {notifications.map((notification) => (
+                            <div key={notification.id} className="border border-gray-200 rounded p-3">
+                              <div className="flex justify-between items-start">
+                                <div className="flex-1">
+                                  <h3 className="text-sm font-medium text-gray-900">{notification.title}</h3>
+                                  <p className="text-xs text-gray-600 mt-1">{notification.message}</p>
+                                </div>
+                                <span className="text-xs text-gray-500 ml-2">{notification.date}</span>
+                              </div>
+                              <div className="flex justify-between items-center mt-2">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                  {notification.type}
+                                </span>
+                                <button className="text-xs text-emerald-600 hover:text-emerald-800 font-medium">
+                                  Mark as read
+                                </button>
                               </div>
                             </div>
                           ))}
                         </div>
-                      ) : notifications.length > 0 ? (
-                        <ul className="space-y-3">
-                          {notifications
-                            .filter(notification => notificationFilter === 'all' || notification.type === notificationFilter)
-                            .map((notification) => (
-                            <li key={notification.id} className="border border-gray-300 rounded p-3 hover:bg-gray-50 relative transition-colors">
-                              <div className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-                              <div className="flex justify-between items-start flex-wrap">
-                                <div>
-                                  <h3 className="font-medium text-gray-900 text-sm">{notification.title}</h3>
-                                  <p className="text-xs text-gray-700 mt-1">{notification.message}</p>
-                                </div>
-                                <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-900">
-                                  {notification.type}
-                                </span>
-                              </div>
-                              <p className="text-xs text-gray-600 mt-1">{notification.date}</p>
-                            </li>
-                          ))}
-                        </ul>
                       ) : (
-                        <p className="text-gray-600 text-sm">No notifications to display.</p>
+                        <div className="text-center py-6">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                          </svg>
+                          <h3 className="mt-2 text-sm font-medium text-gray-900">No notifications</h3>
+                          <p className="mt-1 text-sm text-gray-500">You're all caught up!</p>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -657,19 +646,19 @@ export default function CitizenDashboard() {
                   {/* Help & Support Section */}
                   <div className="mt-6 bg-white rounded-lg shadow p-4">
                     <h2 className="text-base md:text-lg font-semibold text-gray-800 mb-3">Help & Support</h2>
-                    <div className="grid grid-cols-1 gap-3">
-                      <div className="border border-gray-200 rounded p-3 hover:shadow-sm transition-shadow">
+                    <div className="space-y-3">
+                      <div className="border border-gray-200 rounded p-3">
                         <div className="flex items-center mb-2">
                           <div className="bg-blue-100 p-1.5 rounded-full mr-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
-                              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                             </svg>
                           </div>
-                          <h3 className="font-medium text-gray-800 text-sm">FAQs</h3>
+                          <h3 className="text-sm font-medium text-gray-900">Contact Support</h3>
                         </div>
-                        <p className="text-xs text-gray-600 mb-2">Find answers to commonly asked questions about our services.</p>
-                        <Link href="/help#faqs" className="text-emerald-600 hover:text-emerald-800 text-xs font-medium">
-                          Browse FAQs
+                        <p className="text-xs text-gray-600 mb-2">Need help with your applications or services?</p>
+                        <Link href="/support" className="text-xs text-emerald-600 hover:text-emerald-800 font-medium">
+                          Get Support
                         </Link>
                       </div>
                     </div>
@@ -678,10 +667,10 @@ export default function CitizenDashboard() {
               )}
             </div>
           </main>
+
+          {/* Footer */}
+          <Footer />
         </div>
-        
-        {/* Footer moved outside the main content area to occupy full width */}
-        <Footer />
       </div>
     </ProtectedRoute>
   );

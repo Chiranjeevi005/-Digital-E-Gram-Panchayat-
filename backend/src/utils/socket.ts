@@ -41,11 +41,20 @@ declare global {
  * @param data - The data to send
  */
 export const emitToUser = (userId: string, event: string, data: any) => {
+  console.log('Emitting to user:', { userId, event, data }); // Debug log
+  
   if (global.io && global.userSockets) {
     const socketId = global.userSockets.get(userId);
+    console.log('Found socket ID:', socketId); // Debug log
+    
     if (socketId) {
       global.io.to(socketId).emit(event, data);
+      console.log(`Emitted ${event} to user ${userId}`); // Debug log
+    } else {
+      console.log(`No socket found for user ${userId}`); // Debug log
     }
+  } else {
+    console.log('Socket.io or userSockets not initialized'); // Debug log
   }
 };
 
@@ -56,6 +65,8 @@ export const emitToUser = (userId: string, event: string, data: any) => {
  * @param recentActivity - Updated recent activity
  */
 export const emitDashboardUpdate = (userId: string, stats: ApplicationStats, recentActivity: RecentActivity[]) => {
+  console.log('Emitting dashboard update:', { userId, stats, recentActivity }); // Debug log
+  
   emitToUser(userId, 'dashboardUpdate', {
     stats,
     recentActivity
@@ -71,6 +82,8 @@ export const emitDashboardUpdate = (userId: string, stats: ApplicationStats, rec
  * @param message - Additional message
  */
 export const emitApplicationUpdate = (userId: string, applicationId: string, serviceType: string, status: string, message: string) => {
+  console.log('Emitting application update:', { userId, applicationId, serviceType, status, message }); // Debug log
+  
   emitToUser(userId, 'applicationUpdate', {
     applicationId,
     serviceType,

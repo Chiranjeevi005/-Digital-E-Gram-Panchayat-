@@ -10,7 +10,9 @@ import propertyRoutes from './routes/property.routes';
 import landRecordRoutes from './routes/landrecord.routes';
 import landRecordsRoutes from './routes/landrecords.routes';
 import trackingRoutes from './routes/tracking.routes';
-import Scheme from './models/Scheme'; // Add this import
+import Scheme from './models/Scheme';
+import path from 'path';
+import mongoose from 'mongoose';
 
 // Load environment variables
 dotenv.config();
@@ -37,6 +39,15 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// Serve static files
+app.use('/public', express.static(path.join(__dirname, 'public')));
+
+// Add logging middleware
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path}`); // Debug log
+  next();
+});
+
 // Health check endpoint
 app.get('/', (req: Request, res: Response) => {
   res.json({ 
@@ -55,14 +66,63 @@ app.get('/health', (req: Request, res: Response) => {
   });
 });
 
-// Add a direct test route for schemes
+// Add a direct test route for schemes with seeding capability
 app.get('/api/schemes/test', async (req: Request, res: Response) => {
   try {
+    // Check if we should seed schemes (special parameter for testing)
+    const shouldSeed = req.query.seed === 'true';
+    if (shouldSeed) {
+      console.log('Seeding schemes requested via test endpoint');
+      // Sample schemes data
+      const sampleSchemes = [
+        {
+          name: 'Agricultural Subsidy Program',
+          description: 'Financial assistance for farmers to purchase seeds, fertilizers, and farming equipment.',
+          eligibility: 'All registered farmers with valid land ownership documents',
+          benefits: 'Up to ₹50,000 subsidy for crop cultivation and farm equipment'
+        },
+        {
+          name: 'Educational Scholarship Scheme',
+          description: 'Merit-based scholarships for students from economically weaker sections.',
+          eligibility: 'Students with family income below ₹2.5 lakh per annum',
+          benefits: 'Tuition fees coverage and monthly stipend of ₹2,000'
+        },
+        {
+          name: 'Healthcare Support Initiative',
+          description: 'Free medical checkups and subsidized treatment for senior citizens.',
+          eligibility: 'Citizens above 60 years of age',
+          benefits: 'Annual health checkup packages and 70% discount on medicines'
+        },
+        {
+          name: 'Women Empowerment Grant',
+          description: 'Financial support for women entrepreneurs to start small businesses.',
+          eligibility: 'Women above 18 years with valid Aadhaar and bank account',
+          benefits: 'Interest-free loan up to ₹5 lakh and business mentoring'
+        },
+        {
+          name: 'Rural Infrastructure Development',
+          description: 'Funding for village infrastructure projects like roads, water supply, and sanitation.',
+          eligibility: 'Community groups and local bodies',
+          benefits: 'Up to 80% funding for approved infrastructure projects'
+        }
+      ];
+      
+      console.log('Clearing existing schemes');
+      // Clear existing schemes
+      await Scheme.deleteMany({});
+      console.log('🧹 Cleared existing schemes');
+      
+      console.log('Inserting sample schemes');
+      // Insert sample schemes
+      await Scheme.insertMany(sampleSchemes);
+      console.log('✅ Sample schemes seeded successfully');
+    }
+    
     const schemes = await Scheme.find().sort({ createdAt: -1 });
     res.json(schemes);
-  } catch (error) {
-    console.error('Error fetching schemes:', error);
-    res.status(500).json({ message: 'Server error' });
+  } catch (error: any) {
+    console.error('Error fetching/creating schemes:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 

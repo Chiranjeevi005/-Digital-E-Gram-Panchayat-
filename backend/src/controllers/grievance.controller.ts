@@ -9,6 +9,8 @@ export const createGrievance = async (req: Request, res: Response) => {
   try {
     const { citizenId, title, description, category, name, email, phone } = req.body;
     
+    console.log('Creating grievance with data:', { citizenId, title, description, category, name, email, phone }); // Debug log
+    
     // Validate required fields
     if (!citizenId || !title || !description || !category) {
       return res.status(400).json({ message: 'Required fields are missing' });
@@ -25,6 +27,7 @@ export const createGrievance = async (req: Request, res: Response) => {
     });
     
     await grievance.save();
+    console.log('Saved grievance:', grievance._id); // Debug log
     
     // Generate acknowledgment PDF
     try {
@@ -34,6 +37,14 @@ export const createGrievance = async (req: Request, res: Response) => {
     }
     
     // Emit real-time update to the citizen who filed the grievance
+    console.log('Emitting application update for grievance creation:', {
+      citizenId,
+      grievanceId: grievance._id.toString(),
+      serviceType: 'Grievances',
+      status: grievance.status,
+      message: `Grievance "${title}" filed successfully`
+    });
+    
     emitApplicationUpdate(
       citizenId,
       grievance._id.toString(),
@@ -286,11 +297,15 @@ export const downloadGrievanceAcknowledgment = async (req: Request, res: Respons
     const { grievanceId } = req.params;
     const { format } = req.query; // 'pdf' or 'jpg'
     
+    console.log('Downloading grievance acknowledgment:', { grievanceId, format }); // Debug log
+    
     // Find the grievance
     const grievance = await Grievance.findById(grievanceId);
     if (!grievance) {
       return res.status(404).json({ message: 'Grievance not found' });
     }
+    
+    console.log('Found grievance:', grievance._id); // Debug log
     
     // Generate filename
     const fileNameBase = `grievance-acknowledgement-${grievanceId}`;
@@ -319,6 +334,14 @@ export const downloadGrievanceAcknowledgment = async (req: Request, res: Respons
         }
         
         // Emit real-time update to the citizen who filed the grievance
+        console.log('Emitting application update for JPG download:', {
+          citizenId: grievance.citizenId,
+          grievanceId: grievance._id.toString(),
+          serviceType: 'Grievances',
+          status: grievance.status,
+          message: `Grievance acknowledgment downloaded in JPG format`
+        });
+        
         emitApplicationUpdate(
           grievance.citizenId,
           grievance._id.toString(),
@@ -345,6 +368,14 @@ export const downloadGrievanceAcknowledgment = async (req: Request, res: Respons
       }
       
       // Emit real-time update to the citizen who filed the grievance
+      console.log('Emitting application update for PDF download:', {
+        citizenId: grievance.citizenId,
+        grievanceId: grievance._id.toString(),
+        serviceType: 'Grievances',
+        status: grievance.status,
+        message: `Grievance acknowledgment downloaded in PDF format`
+      });
+      
       emitApplicationUpdate(
         grievance.citizenId,
         grievance._id.toString(),
@@ -370,11 +401,15 @@ export const downloadGrievanceResolution = async (req: Request, res: Response) =
     const { grievanceId } = req.params;
     const { format } = req.query; // 'pdf' or 'jpg'
     
+    console.log('Downloading grievance resolution:', { grievanceId, format }); // Debug log
+    
     // Find the grievance
     const grievance = await Grievance.findById(grievanceId);
     if (!grievance) {
       return res.status(404).json({ message: 'Grievance not found' });
     }
+    
+    console.log('Found grievance:', grievance._id); // Debug log
     
     // Check if grievance is resolved
     if (grievance.status !== 'resolved') {
@@ -408,6 +443,14 @@ export const downloadGrievanceResolution = async (req: Request, res: Response) =
         }
         
         // Emit real-time update to the citizen who filed the grievance
+        console.log('Emitting application update for JPG resolution download:', {
+          citizenId: grievance.citizenId,
+          grievanceId: grievance._id.toString(),
+          serviceType: 'Grievances',
+          status: 'Resolved',
+          message: `Grievance resolution downloaded in JPG format`
+        });
+        
         emitApplicationUpdate(
           grievance.citizenId,
           grievance._id.toString(),
@@ -434,6 +477,14 @@ export const downloadGrievanceResolution = async (req: Request, res: Response) =
       }
       
       // Emit real-time update to the citizen who filed the grievance
+      console.log('Emitting application update for PDF resolution download:', {
+        citizenId: grievance.citizenId,
+        grievanceId: grievance._id.toString(),
+        serviceType: 'Grievances',
+        status: 'Resolved',
+        message: `Grievance resolution downloaded in PDF format`
+      });
+      
       emitApplicationUpdate(
         grievance.citizenId,
         grievance._id.toString(),

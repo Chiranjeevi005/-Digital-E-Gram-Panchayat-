@@ -85,10 +85,14 @@ export const getApplicationStats = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'User ID is required' });
     }
     
+    console.log('Fetching application stats for user:', userId); // Debug log
+    
     // Fetch counts for each application type
     const certificateCount = await CertificateApplication.countDocuments({ userId: userId });
     const schemeCount = await SchemeApplication.countDocuments({ citizenId: userId });
     const grievanceCount = await Grievance.countDocuments({ citizenId: userId });
+    
+    console.log('Counts - Certificates:', certificateCount, 'Schemes:', schemeCount, 'Grievances:', grievanceCount); // Debug log
     
     // Fetch status counts for certificates
     const certificateStatuses = await CertificateApplication.aggregate([
@@ -108,7 +112,7 @@ export const getApplicationStats = async (req: Request, res: Response) => {
       { $group: { _id: "$status", count: { $sum: 1 } } }
     ]);
     
-    res.json({
+    const result = {
       totals: {
         certificates: certificateCount,
         schemes: schemeCount,
@@ -129,7 +133,10 @@ export const getApplicationStats = async (req: Request, res: Response) => {
           return acc;
         }, {} as Record<string, number>)
       }
-    });
+    };
+    
+    console.log('Returning stats:', result); // Debug log
+    res.json(result);
   } catch (error) {
     console.error('Error fetching application statistics:', error);
     res.status(500).json({ message: 'Server error' });
@@ -145,20 +152,25 @@ export const getRecentActivity = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'User ID is required' });
     }
     
+    console.log('Fetching recent activity for user:', userId); // Debug log
+    
     // Fetch recent certificates
     const recentCertificates = await CertificateApplication.find({ userId: userId })
       .sort({ createdAt: -1 })
       .limit(5);
+    console.log('Found certificates:', recentCertificates.length); // Debug log
     
     // Fetch recent schemes
     const recentSchemes = await SchemeApplication.find({ citizenId: userId })
       .sort({ submittedAt: -1 })
       .limit(5);
+    console.log('Found schemes:', recentSchemes.length); // Debug log
     
     // Fetch recent grievances
     const recentGrievances = await Grievance.find({ citizenId: userId })
       .sort({ createdAt: -1 })
       .limit(5);
+    console.log('Found grievances:', recentGrievances.length); // Debug log
     
     // Transform to activity format
     const certificateActivities = recentCertificates.map(cert => ({
@@ -193,6 +205,7 @@ export const getRecentActivity = async (req: Request, res: Response) => {
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       .slice(0, 5); // Limit to 5 most recent activities
     
+    console.log('Returning activities:', allActivities.length); // Debug log
     res.json(allActivities);
   } catch (error) {
     console.error('Error fetching recent activity:', error);

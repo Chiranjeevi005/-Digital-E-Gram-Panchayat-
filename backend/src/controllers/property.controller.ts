@@ -554,6 +554,8 @@ export const downloadPropertyTaxReceipt = async (req: Request, res: Response) =>
     const { id } = req.params;
     const { format } = req.query; // 'pdf' or 'jpg'
     
+    console.log('Downloading property tax receipt:', { id, format }); // Debug log
+    
     // Try to get from in-memory storage
     let propertyData = inMemoryProperties.get(id);
     
@@ -589,6 +591,14 @@ export const downloadPropertyTaxReceipt = async (req: Request, res: Response) =>
       }
       
       // Emit real-time update (assuming ownerName is the citizenId)
+      console.log('Emitting application update for PDF download:', {
+        citizenId: propertyData.ownerName,
+        propertyId: id,
+        serviceType: 'Property Tax',
+        status: propertyData.status,
+        message: `Property tax receipt downloaded in PDF format`
+      });
+      
       emitApplicationUpdate(
         propertyData.ownerName, // Using ownerName as citizenId for demo purposes
         id,
@@ -729,6 +739,14 @@ export const downloadMutationAcknowledgement = async (req: Request, res: Respons
       }
       
       // Emit real-time update (assuming applicationId contains citizen info)
+      console.log('Emitting application update for PDF download:', {
+        citizenId: mutationData.applicationId,
+        applicationId: id,
+        serviceType: 'Mutation',
+        status: 'Completed',
+        message: `Mutation acknowledgement downloaded in PDF format`
+      });
+      
       emitApplicationUpdate(
         mutationData.applicationId, // Using applicationId as citizenId for demo purposes
         id,

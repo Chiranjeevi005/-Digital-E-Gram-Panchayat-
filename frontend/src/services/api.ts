@@ -1,8 +1,8 @@
 // API client for making requests to the backend
 // Use NEXT_PUBLIC_API_BASE_URL from environment or fallback to localhost
 const API_BASE_URL = typeof window !== 'undefined' 
-  ? (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3002/api')
-  : (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3002/api');
+  ? (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://digital-e-gram-panchayat-rjkb.onrender.com/api')
+  : (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://digital-e-gram-panchayat-rjkb.onrender.com/api');
 
 console.log('API Base URL (determined at runtime):', API_BASE_URL); // Debug log
 
@@ -225,8 +225,9 @@ const handleFetchError = async (response: Response) => {
 
 export const apiClient = {
   // Generic GET request
-  get: async <T = unknown>(endpoint: string): ApiResponse<T> => {
+  get: async <T = unknown>(endpoint: string): Promise<T> => {
     try {
+      console.log('Making GET request to:', `${API_BASE_URL}${endpoint}`); // Debug log
       const token = getToken();
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: 'GET',
@@ -238,8 +239,12 @@ export const apiClient = {
         credentials: 'include',
       });
       
+      console.log('GET response status:', response.status); // Debug log
+      
       await handleFetchError(response);
-      return response.json();
+      const data = await response.json();
+      console.log('GET response data:', data); // Debug log
+      return data;
     } catch (error) {
       console.error('API GET request failed:', error);
       // Provide more specific error messages

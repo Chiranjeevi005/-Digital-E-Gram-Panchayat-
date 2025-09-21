@@ -1,7 +1,7 @@
 import { io, Socket } from 'socket.io-client';
 
 // Use NEXT_PUBLIC_API_BASE_URL from environment or fallback to localhost
-// Remove /api from the end since we need the base URL for socket connection
+// For socket connections, we need the base URL without /api
 const SOCKET_BASE_URL = typeof window !== 'undefined' 
   ? (process.env.NEXT_PUBLIC_API_BASE_URL?.replace('/api', '') || 'http://localhost:3002')
   : (process.env.NEXT_PUBLIC_API_BASE_URL?.replace('/api', '') || 'http://localhost:3002');
@@ -13,12 +13,16 @@ class SocketService {
   private userId: string | null = null;
 
   connect(userId: string) {
+    console.log('Attempting to connect to socket with userId:', userId); // Debug log
+    
     if (this.socket?.connected && this.userId === userId) {
+      console.log('Socket already connected with same userId'); // Debug log
       return;
     }
 
     // Disconnect existing socket if userId changed
     if (this.socket && this.userId !== userId) {
+      console.log('Disconnecting existing socket due to userId change'); // Debug log
       this.disconnect();
     }
 
@@ -46,6 +50,7 @@ class SocketService {
   }
 
   disconnect() {
+    console.log('Disconnecting socket'); // Debug log
     if (this.socket) {
       this.socket.disconnect();
       this.socket = null;
@@ -54,18 +59,28 @@ class SocketService {
   }
 
   onDashboardUpdate(callback: (data: any) => void) {
-    this.socket?.on('dashboardUpdate', callback);
+    console.log('Setting up dashboard update listener'); // Debug log
+    this.socket?.on('dashboardUpdate', (data) => {
+      console.log('Received dashboard update:', data); // Debug log
+      callback(data);
+    });
   }
 
   offDashboardUpdate(callback: (data: any) => void) {
+    console.log('Removing dashboard update listener'); // Debug log
     this.socket?.off('dashboardUpdate', callback);
   }
 
   onApplicationUpdate(callback: (data: any) => void) {
-    this.socket?.on('applicationUpdate', callback);
+    console.log('Setting up application update listener'); // Debug log
+    this.socket?.on('applicationUpdate', (data) => {
+      console.log('Received application update:', data); // Debug log
+      callback(data);
+    });
   }
 
   offApplicationUpdate(callback: (data: any) => void) {
+    console.log('Removing application update listener'); // Debug log
     this.socket?.off('applicationUpdate', callback);
   }
 
