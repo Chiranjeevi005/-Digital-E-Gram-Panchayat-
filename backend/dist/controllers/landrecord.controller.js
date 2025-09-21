@@ -9,6 +9,7 @@ const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const pdfkit_1 = __importDefault(require("pdfkit"));
 const sharp_1 = __importDefault(require("sharp"));
+const socket_1 = require("../utils/socket"); // Import socket utility
 // In-memory storage for demo purposes when MongoDB is not available
 const inMemoryLandRecords = new Map();
 // In-memory storage for demo purposes
@@ -282,6 +283,9 @@ const applyForLandRecordCertificate = async (req, res) => {
         };
         // Save to in-memory storage
         inMemoryLandRecords.set(newLandRecord._id, newLandRecord);
+        // Emit real-time update (assuming owner is the citizenId)
+        (0, socket_1.emitApplicationUpdate)(owner, // Using owner as citizenId for demo purposes
+        newLandRecord._id, 'Land Records', newLandRecord.status, `Land record certificate application submitted successfully`);
         res.status(201).json({
             success: true,
             message: 'Land record certificate application submitted successfully',
@@ -455,6 +459,9 @@ const downloadLandRecordCertificate = async (req, res) => {
                     message: 'Land record certificate file not found'
                 });
             }
+            // Emit real-time update (assuming owner is the citizenId)
+            (0, socket_1.emitApplicationUpdate)(landRecord.owner, // Using owner as citizenId for demo purposes
+            id, 'Land Records', landRecord.status, `Land record certificate downloaded in PDF format`);
             // Set appropriate headers for PDF download with proper filename
             res.setHeader('Content-Disposition', `attachment; filename="${fileNameBase}.pdf"`);
             res.setHeader('Content-Type', 'application/pdf');
@@ -477,6 +484,9 @@ const downloadLandRecordCertificate = async (req, res) => {
                         message: 'Land record certificate file not found'
                     });
                 }
+                // Emit real-time update (assuming owner is the citizenId)
+                (0, socket_1.emitApplicationUpdate)(landRecord.owner, // Using owner as citizenId for demo purposes
+                id, 'Land Records', landRecord.status, `Land record certificate downloaded in JPG format`);
                 // Set appropriate headers for JPG download with proper filename
                 res.setHeader('Content-Disposition', `attachment; filename="${fileNameBase}.jpg"`);
                 res.setHeader('Content-Type', 'image/jpeg');

@@ -3,11 +3,14 @@ import path from 'path';
 import fs from 'fs';
 import PDFDocument from 'pdfkit';
 import { generateCertificatePDF, convertPDFToJPG } from '../utils/documentGenerator';
+import { emitApplicationUpdate } from '../utils/socket';
+import CertificateApplication, { ICertificateApplication } from '../models/CertificateApplication';
 
 // Mock data for certificates
 interface Certificate {
   _id: string;
   id: string;
+  userId?: string; // Add userId field
   type: string;
   certificateType: string;
   applicantName: string;
@@ -33,11 +36,12 @@ interface Certificate {
   district?: string;
 }
 
-// Mock database
+// Mock database - for demo purposes
 let certificates: Certificate[] = [
   {
     _id: '1',
     id: '1',
+    userId: 'user1', // Add userId
     type: 'Birth Certificate',
     certificateType: 'Birth',
     applicantName: 'John Doe',
@@ -52,6 +56,7 @@ let certificates: Certificate[] = [
   {
     _id: '2',
     id: '2',
+    userId: 'user2', // Add userId
     type: 'Income Certificate',
     certificateType: 'Income',
     applicantName: 'Jane Smith',
@@ -79,6 +84,7 @@ export const applyForCertificate = async (req: Request, res: Response) => {
   try {
     // Extract all possible fields from request body
     const {
+      userId, // Extract userId from request
       type,
       applicantName,
       fatherName,
@@ -102,9 +108,12 @@ export const applyForCertificate = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Type and applicant name are required' });
     }
     
+    // In production, you would save to MongoDB
+    // For now, we'll use the mock data
     const newCertificate: Certificate = {
       _id: (certificates.length + 1).toString(),
       id: (certificates.length + 1).toString(),
+      userId, // Add userId
       type,
       certificateType: type,
       applicantName,
@@ -222,6 +231,17 @@ export const downloadCertificate = async (req: Request, res: Response) => {
     // if (certificate.status !== 'Approved') {
     //   return res.status(400).json({ message: 'Certificate not approved yet' });
     // }
+    
+    // Emit event for real-time dashboard update if userId exists
+    if (certificate.userId) {
+      emitApplicationUpdate(
+        certificate.userId, 
+        certificate.id, 
+        'Certificates', 
+        certificate.status, 
+        `Certificate downloaded in ${format || 'PDF'} format`
+      );
+    }
     
     // Generate certificate filename
     const fileName = `${certificate.type.replace(/\s+/g, '_')}_${certificate.id}`;

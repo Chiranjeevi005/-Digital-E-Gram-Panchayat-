@@ -8,6 +8,7 @@ import Link from 'next/link';
 import Navbar from '../../../components/Navbar';
 import Footer from '../../../components/Footer';
 import { apiClient, SchemeApplication, ApplicationStats, RecentActivity } from '../../../services/api';
+import { socketService } from '../../../services/socket'; // Import socket service
 
 // Define types for our data
 interface Grievance {
@@ -195,19 +196,87 @@ export default function CitizenDashboard() {
     completed: 0
   });
 
-  useEffect(() => {
-    // Fetch real-time data from the backend
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const startTime = Date.now();
+  // Function to fetch data from the backend
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const startTime = Date.now();
+      
+      if (user?.id) {
+        // Fetch recent activity from the new tracking API
+        const activityData: RecentActivity[] = await apiClient.getRecentActivity(user.id);
         
-        if (user?.id) {
-          // Fetch recent activity from the new tracking API
-          const activityData: RecentActivity[] = await apiClient.getRecentActivity(user.id);
-          
-          // Transform activity data to match existing format
-          const transformedActivities = activityData.map((activity, index) => ({
+        // Transform activity data to match existing format
+        const transformedActivities = activityData.map((activity, index) => ({
+          id: index + 1,
+          title: activity.title,
+          date: new Date(activity.date).toLocaleDateString(),
+          status: activity.status,
+          type: activity.type,
+          details: activity.details
+        }));
+        
+        setRecentActivity(transformedActivities);
+        
+        // Fetch application stats
+        const statsData: ApplicationStats = await apiClient.getApplicationStats(user.id);
+        
+        // Update stats
+        setStats({
+          applications: statsData.totals.total,
+          notifications: 0, // Would come from notifications API
+          completed: Object.values(statsData.statuses).reduce((total: number, statusCounts) => {
+            // Count completed/approved/resolved applications
+            const counts = statusCounts as Record<string, number>;
+            return total + (counts['Approved'] || 0) + (counts['Resolved'] || 0) + (counts['Completed'] || 0);
+          }, 0)
+        });
+      }
+      
+      // Set notifications (in a real app, these would come from the backend)
+      setNotifications([
+        // These would typically come from a notifications API endpoint
+      ]);
+      
+      // Ensure minimum loading time of 1-2 seconds for better UX
+      const elapsedTime = Date.now() - startTime;
+      const minLoadingTime = 1000; // 1 second minimum
+      if (elapsedTime < minLoadingTime) {
+        await new Promise(resolve => setTimeout(resolve, minLoadingTime - elapsedTime));
+      }
+      
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching real-time data:', error);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    // Fetch initial data
+    if (user?.userType === 'Citizen' && user?.id) {
+      fetchData();
+      
+      // Connect to WebSocket
+      socketService.connect(user.id);
+      
+      // Listen for dashboard updates
+      const handleDashboardUpdate = (data: any) => {
+        console.log('Received dashboard update:', data);
+        // Update stats and recent activity
+        if (data.stats) {
+          setStats({
+            applications: data.stats.totals.total,
+            notifications: 0,
+            completed: Object.values(data.stats.statuses).reduce((total: number, statusCounts) => {
+              const counts = statusCounts as Record<string, number>;
+              return total + (counts['Approved'] || 0) + (counts['Resolved'] || 0) + (counts['Completed'] || 0);
+            }, 0)
+          });
+        }
+        
+        if (data.recentActivity) {
+          const transformedActivities = data.recentActivity.map((activity: any, index: number) => ({
             id: index + 1,
             title: activity.title,
             date: new Date(activity.date).toLocaleDateString(),
@@ -215,44 +284,40 @@ export default function CitizenDashboard() {
             type: activity.type,
             details: activity.details
           }));
-          
           setRecentActivity(transformedActivities);
-          
-          // Fetch application stats
-          const statsData: ApplicationStats = await apiClient.getApplicationStats(user.id);
-          
-          // Update stats
-          setStats({
-            applications: statsData.totals.total,
-            notifications: 0, // Would come from notifications API
-            completed: Object.values(statsData.statuses).reduce((total, statusCounts) => {
-              // Count completed/approved/resolved applications
-              return total + (statusCounts['Approved'] || 0) + (statusCounts['Resolved'] || 0) + (statusCounts['Completed'] || 0);
-            }, 0)
-          });
         }
+      };
+      
+      // Listen for application updates
+      const handleApplicationUpdate = (data: any) => {
+        console.log('Received application update:', data);
+        // Add to recent activity or update existing activity
+        const newActivity = {
+          id: Date.now(), // Use timestamp as ID
+          title: `${data.serviceType} Update`,
+          date: new Date().toLocaleDateString(),
+          status: data.status,
+          type: data.serviceType,
+          details: data.message
+        };
         
-        // Set notifications (in a real app, these would come from the backend)
-        setNotifications([
-          // These would typically come from a notifications API endpoint
-        ]);
+        setRecentActivity(prev => [newActivity, ...prev.slice(0, 9)]); // Keep only last 10 activities
         
-        // Ensure minimum loading time of 1-2 seconds for better UX
-        const elapsedTime = Date.now() - startTime;
-        const minLoadingTime = 1000; // 1 second minimum
-        if (elapsedTime < minLoadingTime) {
-          await new Promise(resolve => setTimeout(resolve, minLoadingTime - elapsedTime));
-        }
-        
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching real-time data:', error);
-        setLoading(false);
-      }
-    };
-
-    if (user?.userType === 'Citizen' && user?.id) {
-      fetchData();
+        // Update stats
+        setStats(prev => ({
+          ...prev,
+          applications: prev.applications + 1
+        }));
+      };
+      
+      socketService.onDashboardUpdate(handleDashboardUpdate);
+      socketService.onApplicationUpdate(handleApplicationUpdate);
+      
+      // Cleanup function
+      return () => {
+        socketService.offDashboardUpdate(handleDashboardUpdate);
+        socketService.offApplicationUpdate(handleApplicationUpdate);
+      };
     }
   }, [user]);
 

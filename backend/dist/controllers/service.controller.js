@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateServiceRequest = exports.getServiceRequestById = exports.getServiceRequests = exports.createServiceRequest = void 0;
 const ServiceRequest_1 = __importDefault(require("../models/ServiceRequest"));
+const socket_1 = require("../utils/socket"); // Import socket utility
 const createServiceRequest = async (req, res) => {
     try {
         const { citizenId, serviceType, description } = req.body;
@@ -14,6 +15,8 @@ const createServiceRequest = async (req, res) => {
             description,
         });
         await serviceRequest.save();
+        // Emit real-time update to the citizen who created the service request
+        (0, socket_1.emitApplicationUpdate)(citizenId, serviceRequest._id.toString(), 'Services', serviceRequest.status, `Service request for ${serviceType} created successfully`);
         res.status(201).json(serviceRequest);
     }
     catch (error) {
@@ -51,6 +54,8 @@ const updateServiceRequest = async (req, res) => {
         if (!serviceRequest) {
             return res.status(404).json({ message: 'Service request not found' });
         }
+        // Emit real-time update to the citizen who created the service request
+        (0, socket_1.emitApplicationUpdate)(serviceRequest.citizenId, serviceRequest._id.toString(), 'Services', serviceRequest.status, `Service request status updated to ${status}`);
         res.json(serviceRequest);
     }
     catch (error) {

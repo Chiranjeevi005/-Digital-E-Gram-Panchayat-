@@ -35,6 +35,7 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const CertificateApplicationSchema = new mongoose_1.Schema({
+    userId: { type: String, required: true }, // Add userId field
     applicantName: { type: String, required: true },
     fatherName: { type: String },
     motherName: { type: String },

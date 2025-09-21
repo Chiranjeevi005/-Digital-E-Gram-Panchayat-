@@ -8,8 +8,7 @@ import StaffDashboard from '../../../components/staff/StaffDashboard';
 import { apiClient, CertificateApplication, Grievance, ApplicationStats } from '../../../services/api';
 import Navbar from '../../../components/Navbar';
 import Footer from '../../../components/Footer';
-
-
+import { socketService } from '../../../services/socket'; // Import socket service
 
 // Skeleton Loader Component for Staff Dashboard
 const StaffDashboardSkeleton = () => (
@@ -172,6 +171,49 @@ export default function StaffDashboardPage() {
 
     if (user?.userType === 'Staff') {
       fetchData();
+      
+      // Connect to WebSocket
+      socketService.connect(user.id);
+      
+      // Listen for dashboard updates
+      const handleDashboardUpdate = (data: any) => {
+        console.log('Received dashboard update:', data);
+        // Update stats and recent activity
+        if (data.stats) {
+          setStats({
+            pendingCertificates: data.stats.totals.certificates,
+            assignedGrievances: data.stats.totals.grievances,
+            citizenRecords: 0,
+            pendingSchemes: 0
+          });
+        }
+      };
+      
+      // Listen for application updates
+      const handleApplicationUpdate = (data: any) => {
+        console.log('Received application update:', data);
+        // Update stats based on the service type
+        if (data.serviceType === 'Certificates') {
+          setStats(prev => ({
+            ...prev,
+            pendingCertificates: prev.pendingCertificates + 1
+          }));
+        } else if (data.serviceType === 'Grievances') {
+          setStats(prev => ({
+            ...prev,
+            assignedGrievances: prev.assignedGrievances + 1
+          }));
+        }
+      };
+      
+      socketService.onDashboardUpdate(handleDashboardUpdate);
+      socketService.onApplicationUpdate(handleApplicationUpdate);
+      
+      // Cleanup function
+      return () => {
+        socketService.offDashboardUpdate(handleDashboardUpdate);
+        socketService.offApplicationUpdate(handleApplicationUpdate);
+      };
     }
   }, [user]);
 
@@ -230,7 +272,7 @@ export default function StaffDashboardPage() {
                         <div className="flex items-center">
                           <div className="bg-emerald-600 p-1.5 md:p-2 rounded-full mr-2 md:mr-3">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 md:h-4 md:w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2h-5l-5 5v-5z" />
                             </svg>
                           </div>
                           <div>

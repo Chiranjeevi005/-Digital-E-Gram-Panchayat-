@@ -3,6 +3,7 @@ import Grievance from '../models/Grievance';
 import { generateGrievanceAcknowledgmentPDF, convertPDFToJPG, generateGrievanceResolutionPDF } from '../utils/documentGenerator';
 import fs from 'fs';
 import path from 'path';
+import { emitApplicationUpdate } from '../utils/socket';
 
 export const createGrievance = async (req: Request, res: Response) => {
   try {
@@ -31,6 +32,15 @@ export const createGrievance = async (req: Request, res: Response) => {
     } catch (pdfError) {
       console.error('Error generating PDF:', pdfError);
     }
+    
+    // Emit real-time update to the citizen who filed the grievance
+    emitApplicationUpdate(
+      citizenId,
+      grievance._id.toString(),
+      'Grievances',
+      grievance.status,
+      `Grievance "${title}" filed successfully`
+    );
     
     res.status(201).json({
       success: true,
@@ -88,6 +98,15 @@ export const updateGrievance = async (req: Request, res: Response) => {
         console.error('Error generating resolution PDF:', pdfError);
       }
     }
+    
+    // Emit real-time update to the citizen who filed the grievance
+    emitApplicationUpdate(
+      grievance.citizenId,
+      grievance._id.toString(),
+      'Grievances',
+      grievance.status,
+      `Grievance status updated to ${status}`
+    );
     
     res.json(grievance);
   } catch (error) {
@@ -154,6 +173,15 @@ export const deleteGrievance = async (req: Request, res: Response) => {
       fs.unlinkSync(resJpgPath);
     }
     
+    // Emit real-time update to the citizen who filed the grievance
+    emitApplicationUpdate(
+      grievance.citizenId,
+      grievanceId,
+      'Grievances',
+      'Deleted',
+      `Grievance "${grievance.title}" deleted`
+    );
+    
     res.json({ 
       success: true, 
       message: 'Grievance deleted successfully' 
@@ -184,6 +212,15 @@ export const editGrievance = async (req: Request, res: Response) => {
     if (!grievance) {
       return res.status(404).json({ message: 'Grievance not found' });
     }
+    
+    // Emit real-time update to the citizen who filed the grievance
+    emitApplicationUpdate(
+      grievance.citizenId,
+      grievance._id.toString(),
+      'Grievances',
+      grievance.status,
+      `Grievance "${grievance.title}" updated`
+    );
     
     res.json({
       success: true,
@@ -222,6 +259,15 @@ export const resolveGrievance = async (req: Request, res: Response) => {
     } catch (pdfError) {
       console.error('Error generating resolution PDF:', pdfError);
     }
+    
+    // Emit real-time update to the citizen who filed the grievance
+    emitApplicationUpdate(
+      grievance.citizenId,
+      grievance._id.toString(),
+      'Grievances',
+      'Resolved',
+      `Grievance "${grievance.title}" resolved`
+    );
     
     res.json({
       success: true,
@@ -272,6 +318,15 @@ export const downloadGrievanceAcknowledgment = async (req: Request, res: Respons
           throw new Error('JPG file was not generated successfully');
         }
         
+        // Emit real-time update to the citizen who filed the grievance
+        emitApplicationUpdate(
+          grievance.citizenId,
+          grievance._id.toString(),
+          'Grievances',
+          grievance.status,
+          `Grievance acknowledgment downloaded in JPG format`
+        );
+        
         // Send the JPG file
         res.setHeader('Content-Disposition', `attachment; filename="${fileNameBase}.jpg"`);
         res.setHeader('Content-Type', 'image/jpeg');
@@ -288,6 +343,15 @@ export const downloadGrievanceAcknowledgment = async (req: Request, res: Respons
       if (!fs.existsSync(pdfPath)) {
         await generateGrievanceAcknowledgmentPDF(grievance);
       }
+      
+      // Emit real-time update to the citizen who filed the grievance
+      emitApplicationUpdate(
+        grievance.citizenId,
+        grievance._id.toString(),
+        'Grievances',
+        grievance.status,
+        `Grievance acknowledgment downloaded in PDF format`
+      );
       
       // Send the PDF file
       res.setHeader('Content-Disposition', `attachment; filename="${fileNameBase}.pdf"`);
@@ -343,6 +407,15 @@ export const downloadGrievanceResolution = async (req: Request, res: Response) =
           throw new Error('JPG file was not generated successfully');
         }
         
+        // Emit real-time update to the citizen who filed the grievance
+        emitApplicationUpdate(
+          grievance.citizenId,
+          grievance._id.toString(),
+          'Grievances',
+          'Resolved',
+          `Grievance resolution downloaded in JPG format`
+        );
+        
         // Send the JPG file
         res.setHeader('Content-Disposition', `attachment; filename="${fileNameBase}.jpg"`);
         res.setHeader('Content-Type', 'image/jpeg');
@@ -359,6 +432,15 @@ export const downloadGrievanceResolution = async (req: Request, res: Response) =
       if (!fs.existsSync(pdfPath)) {
         await generateGrievanceResolutionPDF(grievance);
       }
+      
+      // Emit real-time update to the citizen who filed the grievance
+      emitApplicationUpdate(
+        grievance.citizenId,
+        grievance._id.toString(),
+        'Grievances',
+        'Resolved',
+        `Grievance resolution downloaded in PDF format`
+      );
       
       // Send the PDF file
       res.setHeader('Content-Disposition', `attachment; filename="${fileNameBase}.pdf"`);

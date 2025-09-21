@@ -4,6 +4,7 @@ import SchemeApplication from '../models/SchemeApplication';
 import { generateSchemeAcknowledgmentPDF, convertPDFToJPG } from '../utils/documentGenerator';
 import fs from 'fs';
 import path from 'path';
+import { emitApplicationUpdate } from '../utils/socket';
 
 export const createScheme = async (req: Request, res: Response) => {
   try {
@@ -111,6 +112,15 @@ export const applyForScheme = async (req: Request, res: Response) => {
       console.error('Error generating PDF:', pdfError);
     }
     
+    // Emit real-time update to the citizen who applied for the scheme
+    emitApplicationUpdate(
+      citizenId,
+      application._id.toString(),
+      'Schemes',
+      application.status,
+      `Scheme application for ${schemeName} submitted successfully`
+    );
+    
     res.status(201).json({
       success: true,
       message: 'Scheme application submitted successfully',
@@ -176,6 +186,15 @@ export const deleteSchemeApplication = async (req: Request, res: Response) => {
       fs.unlinkSync(jpgPath);
     }
     
+    // Emit real-time update to the citizen who applied for the scheme
+    emitApplicationUpdate(
+      application.citizenId,
+      applicationId,
+      'Schemes',
+      'Deleted',
+      `Scheme application for ${application.schemeName} deleted`
+    );
+    
     res.json({ 
       success: true, 
       message: 'Application deleted successfully' 
@@ -235,6 +254,15 @@ export const downloadSchemeAcknowledgment = async (req: Request, res: Response) 
       // Convert PDF to JPG
       const jpgPath = await convertPDFToJPG(pdfPath, `${fileNameBase}.jpg`);
       
+      // Emit real-time update to the citizen who applied for the scheme
+      emitApplicationUpdate(
+        application.citizenId,
+        applicationId,
+        'Schemes',
+        application.status,
+        `Scheme acknowledgment downloaded in JPG format`
+      );
+      
       // Send the JPG file
       res.setHeader('Content-Disposition', `attachment; filename="${fileNameBase}.jpg"`);
       res.setHeader('Content-Type', 'image/jpeg');
@@ -247,6 +275,15 @@ export const downloadSchemeAcknowledgment = async (req: Request, res: Response) 
       if (!fs.existsSync(pdfPath)) {
         await generateSchemeAcknowledgmentPDF(application);
       }
+      
+      // Emit real-time update to the citizen who applied for the scheme
+      emitApplicationUpdate(
+        application.citizenId,
+        applicationId,
+        'Schemes',
+        application.status,
+        `Scheme acknowledgment downloaded in PDF format`
+      );
       
       // Send the PDF file
       res.setHeader('Content-Disposition', `attachment; filename="${fileNameBase}.pdf"`);

@@ -8,6 +8,7 @@ const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const pdfkit_1 = __importDefault(require("pdfkit"));
 const sharp_1 = __importDefault(require("sharp"));
+const socket_1 = require("../utils/socket"); // Import socket utility
 // In-memory storage for demo purposes when MongoDB is not available
 const inMemoryProperties = new Map();
 const inMemoryMutations = new Map();
@@ -453,6 +454,9 @@ const getPropertyTax = async (req, res) => {
         };
         // Save to in-memory storage
         inMemoryProperties.set(propertyId, propertyTaxData);
+        // Emit real-time update (assuming ownerName is the citizenId)
+        (0, socket_1.emitApplicationUpdate)(ownerName, // Using ownerName as citizenId for demo purposes
+        propertyId, 'Property Tax', propertyTaxData.status, `Property tax receipt generated for ${propertyId}`);
         res.status(200).json({
             success: true,
             ...propertyTaxData
@@ -501,6 +505,9 @@ const downloadPropertyTaxReceipt = async (req, res) => {
                     message: 'Property tax receipt not found'
                 });
             }
+            // Emit real-time update (assuming ownerName is the citizenId)
+            (0, socket_1.emitApplicationUpdate)(propertyData.ownerName, // Using ownerName as citizenId for demo purposes
+            id, 'Property Tax', propertyData.status, `Property tax receipt downloaded in PDF format`);
             // Set appropriate headers for PDF download
             res.setHeader('Content-Disposition', `inline; filename="property-tax-receipt.pdf"`);
             res.setHeader('Content-Type', 'application/pdf');
@@ -556,6 +563,9 @@ const getMutationStatus = async (req, res) => {
         };
         // Save to in-memory storage
         inMemoryMutations.set(applicationId, mutationStatusData);
+        // Emit real-time update (assuming applicationId contains citizen info)
+        (0, socket_1.emitApplicationUpdate)(applicationId, // Using applicationId as citizenId for demo purposes
+        applicationId, 'Mutation', 'In Progress', `Mutation application status updated`);
         res.status(200).json({
             success: true,
             ...mutationStatusData
@@ -610,6 +620,9 @@ const downloadMutationAcknowledgement = async (req, res) => {
                     message: 'Mutation acknowledgement not found'
                 });
             }
+            // Emit real-time update (assuming applicationId contains citizen info)
+            (0, socket_1.emitApplicationUpdate)(mutationData.applicationId, // Using applicationId as citizenId for demo purposes
+            id, 'Mutation', 'Completed', `Mutation acknowledgement downloaded in PDF format`);
             // Set appropriate headers for PDF download
             res.setHeader('Content-Disposition', `inline; filename="mutation-status.pdf"`);
             res.setHeader('Content-Type', 'application/pdf');

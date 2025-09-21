@@ -1,6 +1,7 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface ICertificateApplication extends Document {
+  userId: string; // Add userId field
   applicantName: string;
   fatherName?: string;
   motherName?: string;
@@ -28,6 +29,7 @@ export interface ICertificateApplication extends Document {
 }
 
 const CertificateApplicationSchema: Schema = new Schema({
+  userId: { type: String, required: true }, // Add userId field
   applicantName: { type: String, required: true },
   fatherName: { type: String },
   motherName: { type: String },

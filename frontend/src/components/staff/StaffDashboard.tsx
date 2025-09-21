@@ -11,6 +11,7 @@ import ProfileAndSettings from './ProfileAndSettings';
 import NotificationsCenter from './NotificationsCenter';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { apiClient, ApplicationStats, RecentActivity } from '../../services/api';
+import { socketService } from '../../services/socket'; // Import socket service
 
 // Skeleton Loader Component for Staff Dashboard
 const StaffDashboardSkeleton = () => (
@@ -148,6 +149,50 @@ export default function StaffDashboard() {
     };
 
     fetchTrackingData();
+    
+    // Add WebSocket listeners for real-time updates
+    if (user?.id) {
+      // Connect to WebSocket
+      socketService.connect(user.id);
+      
+      // Listen for dashboard updates
+      const handleDashboardUpdate = (data: any) => {
+        console.log('Received dashboard update:', data);
+        // Update stats and recent activity
+        if (data.stats) {
+          setStats(data.stats);
+        }
+        
+        if (data.recentActivity) {
+          setRecentActivity(data.recentActivity);
+        }
+      };
+      
+      // Listen for application updates
+      const handleApplicationUpdate = (data: any) => {
+        console.log('Received application update:', data);
+        // Add to recent activity or update existing activity
+        const newActivity: RecentActivity = {
+          id: Date.now().toString(),
+          title: `${data.serviceType} Update`,
+          date: new Date().toISOString(),
+          status: data.status,
+          type: data.serviceType,
+          details: data.message
+        };
+        
+        setRecentActivity(prev => [newActivity, ...prev.slice(0, 9)]); // Keep only last 10 activities
+      };
+      
+      socketService.onDashboardUpdate(handleDashboardUpdate);
+      socketService.onApplicationUpdate(handleApplicationUpdate);
+      
+      // Cleanup function
+      return () => {
+        socketService.offDashboardUpdate(handleDashboardUpdate);
+        socketService.offApplicationUpdate(handleApplicationUpdate);
+      };
+    }
   }, [user]);
 
   // Mock data for summary statistics (fallback if API fails)

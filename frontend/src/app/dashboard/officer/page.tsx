@@ -8,6 +8,7 @@ import Navbar from '../../../components/Navbar';
 import Footer from '../../../components/Footer';
 import OfficerDashboard from '../../../components/officer/OfficerDashboard';
 import { apiClient } from '../../../services/api';
+import { socketService } from '../../../services/socket'; // Import socket service
 
 // Skeleton Loader Component for Officer Dashboard Page
 const OfficerDashboardSkeleton = () => (
@@ -79,6 +80,35 @@ export default function OfficerDashboardPage() {
 
     return () => clearTimeout(timer);
   }, []);
+
+  // Add WebSocket connection for real-time updates
+  useEffect(() => {
+    if (user?.userType === 'Officer' && user?.id) {
+      // Connect to WebSocket
+      socketService.connect(user.id);
+      
+      // Listen for dashboard updates
+      const handleDashboardUpdate = (data: any) => {
+        console.log('Received dashboard update:', data);
+        // Update dashboard data
+      };
+      
+      // Listen for application updates
+      const handleApplicationUpdate = (data: any) => {
+        console.log('Received application update:', data);
+        // Handle application updates
+      };
+      
+      socketService.onDashboardUpdate(handleDashboardUpdate);
+      socketService.onApplicationUpdate(handleApplicationUpdate);
+      
+      // Cleanup function
+      return () => {
+        socketService.offDashboardUpdate(handleDashboardUpdate);
+        socketService.offApplicationUpdate(handleApplicationUpdate);
+      };
+    }
+  }, [user]);
 
   const handleLogout = () => {
     logout();
