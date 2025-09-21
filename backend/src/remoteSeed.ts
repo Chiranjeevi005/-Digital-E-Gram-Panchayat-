@@ -1,7 +1,8 @@
 // Script to remotely seed the database with sample schemes
 // This script should be run locally to seed the deployed database
 
-import fetch from 'node-fetch';
+// Use built-in fetch instead of node-fetch for Node.js 22+
+// import fetch from 'node-fetch';
 
 const API_BASE_URL = 'https://digital-e-gram-panchayat-rjkb.onrender.com/api';
 
@@ -16,7 +17,7 @@ async function seedSchemes() {
     console.log('Seeding schemes to the deployed database...');
     
     // Make request to seed endpoint
-    const response = await fetch(`${API_BASE_URL}/seed/schemes`, {
+    const response = await fetch(`${API_BASE_URL}/schemes/seed`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
