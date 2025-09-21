@@ -15,7 +15,9 @@ const connectDB = async () => {
     if (process.env.NODE_ENV === 'development') {
       console.log("🔧 Development mode: proceeding without database");
     } else {
-      process.exit(1);
+      // In production, log the error but don't exit to prevent service crash
+      console.log("🔧 Production mode: continuing without database - some features may be limited");
+      // Don't exit the process - allow the service to run even without database
     }
   }
 };

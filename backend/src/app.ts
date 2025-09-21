@@ -72,6 +72,27 @@ app.use('/api/landrecord', landRecordRoutes);
 app.use('/api/landrecords', landRecordsRoutes);
 app.use('/api/tracking', trackingRoutes);
 
+// API root endpoint - provides information about available API endpoints
+// This needs to be AFTER all the specific API routes to avoid conflicts
+app.get('/api', (req: Request, res: Response) => {
+  res.json({ 
+    message: 'Digital E-Panchayat API',
+    version: '1.0.0',
+    endpoints: {
+      auth: '/api/auth',
+      certificates: '/api/certificates',
+      grievances: '/api/grievances',
+      landrecord: '/api/landrecord',
+      landrecords: '/api/landrecords',
+      property: '/api/property-tax, /api/property-tax/:id/download, /api/mutation-status, /api/mutation-status/:id/download',
+      schemes: '/api/schemes',
+      services: '/api/services',
+      tracking: '/api/tracking'
+    },
+    documentation: 'See API documentation for detailed endpoint information'
+  });
+});
+
 // 404 handler
 app.use('*', (req: Request, res: Response) => {
   res.status(404).json({ message: 'Route not found' });
