@@ -27,6 +27,11 @@ app.use((0, cors_1.default)({
         'http://127.0.0.1:3000',
         'http://127.0.0.1:3001',
         'http://localhost:3001',
+        // Add Vercel frontend domains
+        'https://digital-e-gram-panchayat-frontend.vercel.app',
+        'https://digital-e-gram-panchayat-frontend-pkb9qdcc0.vercel.app',
+        // Add Render frontend domain
+        'https://digital-e-gram-panchayat-rjkb.onrender.com',
         // Add Vercel frontend domain - will be set via environment variable in production
         ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : [])
     ],

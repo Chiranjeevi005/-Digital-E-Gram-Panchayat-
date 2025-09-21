@@ -2,10 +2,10 @@ services:
   - type: web
     name: digital-e-panchayat-backend
     env: node
-    buildCommand: cd backend && npm install --platform=linux --arch=x64 && npm run build
-    startCommand: cd backend && npm run start
+    buildCommand: npm install --platform=linux --arch=x64 && npm run build
+    startCommand: npm run start
     repo: https://github.com/Chiranjeevi005/-Digital-E-Gram-Panchayat-
-    rootDir: .
+    rootDir: backend
     envVars:
       - key: NODE_ENV
         value: production
@@ -14,7 +14,7 @@ services:
       - key: JWT_SECRET
         sync: false
       - key: FRONTEND_URL
-        value: https://digital-e-gram-panchayat-frontend.vercel.app
+        value: https://digital-e-gram-panchayat-frontend-pkb9qdcc0.vercel.app
       - key: PORT
         value: 10000
 
@@ -22,12 +22,14 @@ services:
   - type: web
     name: digital-e-panchayat-frontend
     env: node
-    buildCommand: cd frontend && npm install && npm run build
-    startCommand: cd frontend && npm run start
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
     repo: https://github.com/Chiranjeevi005/-Digital-E-Gram-Panchayat-
-    rootDir: .
+    rootDir: frontend
     envVars:
       - key: NODE_ENV
         value: production
+      - key: NEXT_PUBLIC_API_BASE_URL
+        value: https://digital-e-gram-panchayat-rjkb.onrender.com/api
       - key: PORT
         value: 3001

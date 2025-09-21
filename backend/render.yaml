@@ -3,8 +3,8 @@ services:
   - type: web
     name: digital-e-panchayat-backend
     env: node
-    buildCommand: cd backend && npm install && npm run build
-    startCommand: cd backend && npm run start
+    buildCommand: npm install --platform=linux --arch=x64 && npm run build
+    startCommand: npm run start
     repo: https://github.com/Chiranjeevi005/-Digital-E-Gram-Panchayat-
     rootDir: .
     envVars:
@@ -15,6 +15,6 @@ services:
       - key: JWT_SECRET
         sync: false
       - key: FRONTEND_URL
-        sync: false
+        value: https://digital-e-gram-panchayat-frontend-pkb9qdcc0.vercel.app
       - key: PORT
-        value: 3002
+        value: 10000
