@@ -291,6 +291,7 @@ const CertificateApplicationContent = () => {
       
       // Prepare form data for submission - Fix field names to match backend expectations
       const submissionData: Record<string, string | string[] | boolean> = {
+        userId: user?.id || '', // Add userId from authenticated user
         certificateType: formData.certificateType, // Keep as certificateType to match backend expectations
         type: formData.certificateType, // Also include type for compatibility
         applicantName: formData.applicantName,

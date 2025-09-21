@@ -1,29 +1,31 @@
 import { Request, Response } from 'express';
-import path from 'path';
-import fs from 'fs';
-import PDFDocument from 'pdfkit';
+import CertificateApplication from '../models/CertificateApplication';
 import { generateCertificatePDF, convertPDFToJPG } from '../utils/documentGenerator';
+import fs from 'fs';
+import path from 'path';
 import { emitApplicationUpdate } from '../utils/socket';
-import CertificateApplication, { ICertificateApplication } from '../models/CertificateApplication';
 
-// Get all certificates
-export const getAllCertificates = async (req: Request, res: Response) => {
-  try {
-    const certificates = await CertificateApplication.find().sort({ createdAt: -1 });
-    res.json(certificates);
-  } catch (error) {
-    console.error('Error fetching certificates:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-};
+interface AuthRequest extends Request {
+  user?: {
+    userId: string;
+    userType: string;
+  };
+}
 
 // Apply for a certificate
-export const applyForCertificate = async (req: Request, res: Response) => {
+export const applyForCertificate = async (req: AuthRequest, res: Response) => {
   try {
+    // Extract userId from authenticated user instead of request body for better security
+    const userId = req.user?.userId;
+    
+    if (!userId) {
+      return res.status(401).json({ message: 'Authentication required' });
+    }
+    
     // Extract all possible fields from request body
     const {
-      userId, // Extract userId from request
       type,
+      certificateType,
       applicantName,
       fatherName,
       motherName,
@@ -42,14 +44,17 @@ export const applyForCertificate = async (req: Request, res: Response) => {
       district
     } = req.body;
     
-    if (!type || !applicantName) {
+    // Use certificateType if provided, otherwise fallback to type
+    const certType = certificateType || type;
+    
+    if (!certType || !applicantName) {
       return res.status(400).json({ message: 'Type and applicant name are required' });
     }
     
     // Create new certificate application in database
     const newCertificate = new CertificateApplication({
-      userId, // Add userId
-      certificateType: type,
+      userId, // Use authenticated userId
+      certificateType: certType,
       applicantName,
       fatherName,
       motherName,
@@ -72,6 +77,15 @@ export const applyForCertificate = async (req: Request, res: Response) => {
     
     await newCertificate.save();
     
+    // Emit real-time update to the citizen who applied for the certificate
+    emitApplicationUpdate(
+      userId,
+      newCertificate._id.toString(),
+      'Certificates',
+      newCertificate.status,
+      `${certType} certificate application submitted successfully`
+    );
+    
     res.status(201).json({
       success: true,
       applicationId: newCertificate._id,
@@ -80,6 +94,17 @@ export const applyForCertificate = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Error applying for certificate:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Get all certificates
+export const getAllCertificates = async (req: Request, res: Response) => {
+  try {
+    const certificates = await CertificateApplication.find().sort({ createdAt: -1 });
+    res.json(certificates);
+  } catch (error) {
+    console.error('Error fetching certificates:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -223,116 +248,41 @@ export const downloadCertificate = async (req: Request, res: Response) => {
         }, 1000); // Wait a bit to ensure file is sent
       }
     } else {
-      // Generate PDF certificate
-      const doc = new PDFDocument({
-        size: 'A4',
-        margin: 50
-      });
-      
-      // Create buffer to store PDF
-      const chunks: Buffer[] = [];
-      doc.on('data', chunk => chunks.push(chunk));
-      doc.on('end', () => {
-        const pdfBuffer = Buffer.concat(chunks);
+      // Generate PDF certificate using the utility function
+      try {
+        const pdfPath = await generateCertificatePDF(certificate, fileName);
+        
+        // Emit event for real-time dashboard update if userId exists
+        if (certificate.userId) {
+          console.log('Emitting application update for PDF download:', {
+            userId: certificate.userId,
+            certificateId: certificate._id.toString(),
+            serviceType: 'Certificates',
+            status: certificate.status,
+            message: `Certificate downloaded in PDF format`
+          });
+          
+          emitApplicationUpdate(
+            certificate.userId, 
+            certificate._id.toString(), 
+            'Certificates', 
+            certificate.status, 
+            `Certificate downloaded in PDF format`
+          );
+        } else {
+          console.log('No userId found for certificate, skipping real-time update');
+        }
+        
+        // Send the PDF file
         res.setHeader('Content-Disposition', `attachment; filename="${fileName}.pdf"`);
         res.setHeader('Content-Type', 'application/pdf');
-        res.send(pdfBuffer);
-      });
-      
-      // Emit event for real-time dashboard update if userId exists
-      if (certificate.userId) {
-        console.log('Emitting application update for PDF download:', {
-          userId: certificate.userId,
-          certificateId: certificate._id.toString(),
-          serviceType: 'Certificates',
-          status: certificate.status,
-          message: `Certificate downloaded in PDF format`
+        res.sendFile(pdfPath);
+      } catch (generationError: any) {
+        console.error('Error generating PDF certificate:', generationError);
+        return res.status(500).json({ 
+          message: `Error generating PDF file: ${generationError.message}` 
         });
-        
-        emitApplicationUpdate(
-          certificate.userId, 
-          certificate._id.toString(), 
-          'Certificates', 
-          certificate.status, 
-          `Certificate downloaded in PDF format`
-        );
-      } else {
-        console.log('No userId found for certificate, skipping real-time update');
       }
-      
-      // Add header with panchayat info
-      doc.fillColor('#000000');
-      doc.fontSize(20);
-      doc.text('Digital E-Panchayat', 50, 50, { align: 'center' });
-      doc.fontSize(16);
-      doc.text(`${certificate.certificateType} Certificate`, 50, 80, { align: 'center' });
-      doc.moveDown();
-      
-      // Add horizontal line
-      doc.moveTo(50, 110).lineTo(550, 110).stroke();
-      doc.moveDown();
-      
-      // Certificate details
-      doc.fontSize(12);
-      doc.text(`Certificate ID: ${certificate._id}`);
-      doc.text(`Applicant Name: ${certificate.applicantName}`);
-      
-      if (certificate.fatherName) {
-        doc.text(`Father/Husband Name: ${certificate.fatherName}`);
-      }
-      
-      if (certificate.motherName) {
-        doc.text(`Mother Name: ${certificate.motherName}`);
-      }
-      
-      if (certificate.date) {
-        doc.text(`Date: ${new Date(certificate.date).toLocaleDateString()}`);
-      }
-      
-      if (certificate.place) {
-        doc.text(`Place: ${certificate.place}`);
-      }
-      
-      if (certificate.address) {
-        doc.text(`Address: ${certificate.address}`);
-      }
-      
-      if (certificate.income) {
-        doc.text(`Income: ${certificate.income}`);
-      }
-      
-      if (certificate.caste) {
-        doc.text(`Caste: ${certificate.caste}`);
-        if (certificate.subCaste) {
-          doc.text(`Sub-Caste: ${certificate.subCaste}`);
-        }
-      }
-      
-      if (certificate.ward) {
-        doc.text(`Ward: ${certificate.ward}`);
-      }
-      
-      if (certificate.village) {
-        doc.text(`Village: ${certificate.village}`);
-      }
-      
-      if (certificate.district) {
-        doc.text(`District: ${certificate.district}`);
-      }
-      
-      doc.text(`Certificate Number: ${certificate._id || 'N/A'}`);
-      doc.text(`Issued Date: ${certificate.createdAt ? new Date(certificate.createdAt).toLocaleDateString() : new Date().toLocaleDateString()}`);
-      doc.text(`Status: ${certificate.status}`);
-      doc.moveDown();
-      
-      // Add footer with disclaimer
-      const footerY = 750;
-      doc.moveTo(50, footerY - 20).lineTo(550, footerY - 20).stroke();
-      doc.fontSize(8);
-      doc.text('This is a computer-generated document. No signature required.', 50, footerY);
-      doc.text('Valid digitally as per the provisions of the Digital Signature Act, 2000.', 50, footerY + 15);
-      
-      doc.end();
     }
   } catch (error) {
     console.error('Error downloading certificate:', error);

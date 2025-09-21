@@ -87,6 +87,7 @@ describe('Certificate Service End-to-End Flow', () => {
 
     // Step 1: Submit certificate application
     const applicationData = {
+      userId: 'test-user-id', // Add userId for authentication
       applicantName: 'John Doe',
       fatherName: 'Richard Doe',
       motherName: 'Jane Doe',

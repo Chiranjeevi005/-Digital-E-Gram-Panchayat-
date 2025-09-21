@@ -7,14 +7,15 @@ import {
   updateCertificate,
   getAllCertificates
 } from '../controllers/certificate.controller';
+import { authenticate } from '../middleware/auth.middleware';
 
 const router = Router();
 
 // Get all certificates
 router.get('/', getAllCertificates);
 
-// Apply for a certificate
-router.post('/apply', applyForCertificate);
+// Apply for a certificate - requires authentication
+router.post('/apply', authenticate, applyForCertificate);
 
 // Get certificate preview data
 router.get('/:id/preview', getCertificatePreview);

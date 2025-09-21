@@ -52,6 +52,7 @@ describe('Certificate Application Fix', () => {
 
     // Test data that matches what the frontend form would send
     const applicationData = {
+      userId: 'test-user-id', // Add userId for authentication
       type: 'Birth', // This is the correct field name that the backend expects
       applicantName: 'John Doe',
       fatherName: 'Richard Doe',
