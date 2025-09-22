@@ -277,47 +277,7 @@ export const applyForLandRecordCertificate = async (req: Request, res: Response)
       });
     }
     
-    // Validate that owner is a string
-    if (typeof owner !== 'string') {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Owner name must be a valid text' 
-      });
-    }
-    
-    // Validate that surveyNo is a string
-    if (typeof surveyNo !== 'string') {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Survey number must be a valid text' 
-      });
-    }
-    
-    // Validate that area is a string
-    if (typeof area !== 'string') {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Area must be a valid text' 
-      });
-    }
-    
-    // Validate that landType is a string
-    if (typeof landType !== 'string') {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Land type must be a valid text' 
-      });
-    }
-    
-    // Validate that encumbranceStatus is a string
-    if (typeof encumbranceStatus !== 'string') {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Encumbrance status must be a valid text' 
-      });
-    }
-    
-    // Create new land record
+    // Create new land record - allow any input values
     const newLandRecord = {
       _id: generateMockId(),
       owner,

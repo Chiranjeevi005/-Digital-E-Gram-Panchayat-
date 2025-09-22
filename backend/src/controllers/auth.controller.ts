@@ -77,6 +77,9 @@ export const register = async (req: Request, res: Response) => {
 export const login = async (req: Request, res: Response) => {
   try {
     const { email, password, userType } = req.body;
+    
+    // Log login attempt for debugging
+    console.log('Login attempt:', { email, userType, userAgent: req.get('User-Agent') });
 
     // Validate user type
     if (!userType || !['Citizen', 'Officer', 'Staff'].includes(userType)) {
@@ -131,6 +134,7 @@ export const login = async (req: Request, res: Response) => {
 
     // If user doesn't exist and it's not a predefined account
     if (!user) {
+      console.log('Login failed: User not found', { email, userType });
       return res.status(400).json({ message: 'Invalid credentials. Please check your email and password.' });
     }
 
@@ -151,6 +155,7 @@ export const login = async (req: Request, res: Response) => {
     }
     
     if (!isMatch) {
+      console.log('Login failed: Invalid password', { email, userType });
       return res.status(400).json({ message: 'Invalid credentials. Please check your email and password.' });
     }
 
@@ -161,6 +166,7 @@ export const login = async (req: Request, res: Response) => {
       // Filter out the current user to avoid counting them twice
       const otherStaffUsers = staffUsers.filter(u => u._id.toString() !== user!._id.toString());
       if (otherStaffUsers.length >= 2) {
+        console.log('Login failed: Staff limit exceeded', { email, userType });
         return res.status(400).json({ message: 'Staff account limit exceeded. Only 2 staff accounts are allowed.' });
       }
     }
@@ -177,6 +183,13 @@ export const login = async (req: Request, res: Response) => {
       { expiresIn: '7d' }
     );
 
+    console.log('Login successful:', { 
+      userId: user._id, 
+      email: user.email, 
+      userType: user.userType,
+      userAgent: req.get('User-Agent')
+    });
+
     res.json({ 
       token, 
       user: { 
@@ -186,8 +199,14 @@ export const login = async (req: Request, res: Response) => {
         userType: user.userType 
       } 
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Login error:', error);
+    // Log detailed error information
+    console.error('Login error details:', {
+      message: error.message,
+      stack: error.stack,
+      userAgent: req.get('User-Agent')
+    });
     res.status(500).json({ message: 'Server error during login. Please try again later.' });
   }
 };

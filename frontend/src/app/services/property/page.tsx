@@ -202,7 +202,7 @@ const PropertyLandServices = () => {
     setPreviewType(null);
   };
 
-  // Villages data for dropdown
+  // Villages data for dropdown - now allowing custom input
   const villages = [
     'Village A',
     'Village B',
@@ -306,18 +306,15 @@ const PropertyLandServices = () => {
                   <label htmlFor="village" className="block text-sm font-medium text-dark-label mb-1">
                     Village/Ward
                   </label>
-                  <select
+                  <input
+                    type="text"
                     id="village"
                     value={village}
                     onChange={(e) => setVillage(e.target.value)}
-                    className="select-field w-full"
+                    className="input-field w-full"
+                    placeholder="Enter Village/Ward"
                     required
-                  >
-                    <option value="">Select Village/Ward</option>
-                    {filteredVillages.map((village, index) => (
-                      <option key={index} value={village}>{village}</option>
-                    ))}
-                  </select>
+                  />
                 </div>
                 
                 <button
@@ -427,19 +424,15 @@ const PropertyLandServices = () => {
                   <label htmlFor="landType" className="block text-sm font-medium text-dark-label mb-1">
                     Land Type
                   </label>
-                  <select
+                  <input
+                    type="text"
                     id="landType"
                     value={landType}
                     onChange={(e) => setLandType(e.target.value)}
-                    className="select-field w-full"
+                    className="input-field w-full"
+                    placeholder="Enter Land Type"
                     required
-                  >
-                    <option value="">Select Land Type</option>
-                    <option value="Agricultural">Agricultural</option>
-                    <option value="Residential">Residential</option>
-                    <option value="Commercial">Commercial</option>
-                    <option value="Industrial">Industrial</option>
-                  </select>
+                  />
                 </div>
                 
                 <div>

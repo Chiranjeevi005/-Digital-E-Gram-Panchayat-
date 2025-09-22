@@ -90,9 +90,17 @@ const io = new Server(server, {
       // Add Render frontend domain
       'https://digital-e-gram-panchayat-rjkb.onrender.com',
       // Add Vercel frontend domain - will be set via environment variable in production
-      ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : [])
+      ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
+      // Add mobile-specific origins
+      'http://localhost:3003',
+      'http://127.0.0.1:3003'
     ],
-    credentials: true
+    credentials: true,
+    // Allow all headers and methods for mobile compatibility
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    preflightContinue: false,
+    optionsSuccessStatus: 204
   }
 });
 
@@ -134,13 +142,17 @@ io.on('connection', (socket) => {
 
 console.log(`Attempting to start server on port ${PORT}`);
 
-// Start server
+// Start server with additional mobile-friendly options
 server.listen(parseInt(PORT, 10), '0.0.0.0', async () => {
   console.log(`✅ Server running on port ${PORT}`);
   console.log(`✅ Server is accessible at: http://0.0.0.0:${PORT}`);
   
   // Seed schemes when server starts
   await seedSchemes();
+  
+  // Log server info for debugging mobile issues
+  console.log('Server started with mobile-friendly configuration');
+  console.log('Listening on all interfaces (0.0.0.0) for mobile connectivity');
 });
 
 // Handle server errors

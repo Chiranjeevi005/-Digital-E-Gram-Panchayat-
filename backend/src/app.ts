@@ -20,22 +20,47 @@ dotenv.config();
 const app: Application = express();
 
 // Middleware
+// Enhanced CORS configuration for mobile compatibility
 app.use(cors({
-  origin: [
-    'http://localhost:3000', 
-    'http://localhost:3001', 
-    'http://127.0.0.1:3000', 
-    'http://127.0.0.1:3001',
-    'http://localhost:3001',
-    // Add Vercel frontend domains
-    'https://digital-e-gram-panchayat-frontend.vercel.app',
-    'https://digital-e-gram-panchayat-frontend-pkb9qdcc0.vercel.app',
-    // Add Render frontend domain
-    'https://digital-e-gram-panchayat-rjkb.onrender.com',
-    // Add Vercel frontend domain - will be set via environment variable in production
-    ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : [])
-  ],
-  credentials: true
+  origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+    // Allow requests with no origin (like mobile apps, curl requests)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      'http://localhost:3000', 
+      'http://localhost:3001', 
+      'http://127.0.0.1:3000', 
+      'http://127.0.0.1:3001',
+      'http://localhost:3001',
+      // Add Vercel frontend domains
+      'https://digital-e-gram-panchayat-frontend.vercel.app',
+      'https://digital-e-gram-panchayat-frontend-pkb9qdcc0.vercel.app',
+      // Add Render frontend domain
+      'https://digital-e-gram-panchayat-rjkb.onrender.com',
+      // Add Vercel frontend domain - will be set via environment variable in production
+      ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
+      // Add mobile-specific origins
+      'http://localhost:3003',
+      'http://127.0.0.1:3003'
+    ];
+    
+    // For mobile devices, be more permissive
+    if (allowedOrigins.indexOf(origin) !== -1 || origin?.includes('localhost') || origin?.includes('127.0.0.1')) {
+      callback(null, true);
+    } else {
+      // Log the origin for debugging
+      console.log('CORS blocked origin:', origin);
+      callback(null, true); // Temporarily allow all for mobile debugging
+    }
+  },
+  credentials: true,
+  // Allow all headers and methods for mobile compatibility
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'X-Device-Type', 'X-User-Agent'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'HEAD'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
+  // Mobile-specific CORS options
+  maxAge: 86400 // 24 hours
 }));
 app.use(express.json());
 
@@ -62,7 +87,23 @@ app.get('/health', (req: Request, res: Response) => {
   res.json({ 
     status: 'OK', 
     message: 'Backend is running properly',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    userAgent: req.get('User-Agent') || 'Unknown'
+  });
+});
+
+// Mobile-specific health check endpoint
+app.get('/health/mobile', (req: Request, res: Response) => {
+  const userAgent = req.get('User-Agent') || 'Unknown';
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+  
+  res.json({ 
+    status: 'OK', 
+    message: 'Mobile health check successful',
+    timestamp: new Date().toISOString(),
+    userAgent,
+    isMobile,
+    clientIP: req.ip || req.connection.remoteAddress
   });
 });
 

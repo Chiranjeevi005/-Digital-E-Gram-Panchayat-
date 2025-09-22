@@ -3,18 +3,16 @@
 import React from 'react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
+import Map from '../../components/Map';
 
 const ContactPage = () => {
-  // Contact information
+  // Contact information with Mumbai location
   const contactInfo = {
     email: "support@digital-epanchayat.gov.in",
     phone: "+91 98765 43210",
-    office: "Panchayat Office, Main Road, Village Name",
+    office: "Mumbai Panchayat Office, Bandra-Kurla Complex, Mumbai, Maharashtra 400051",
     hours: "Monday to Friday: 9:00 AM - 5:00 PM"
   };
-
-  // Map location (placeholder)
-  const mapLocation = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d300115.6059875955!2d72.877655!3d19.075983!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3be7c6306644edc1%3A0x5da4ed8f8d648c69!2sMumbai%2C%20Maharashtra!5e0!3m2!1sen!2sin!4v1620000000000!5m2!1sen!2sin";
 
   return (
     <div className="min-h-screen flex flex-col bg-off-white">
@@ -102,10 +100,8 @@ const ContactPage = () => {
               
               <div className="bg-white rounded-lg shadow-md p-6">
                 <h3 className="text-xl font-semibold text-gray-800 mb-4">Office Location</h3>
-                <div className="aspect-w-16 aspect-h-9 bg-gray-200 rounded-lg overflow-hidden">
-                  <div className="bg-gray-200 border-2 border-dashed rounded-xl w-full h-64 flex items-center justify-center text-gray-500">
-                    Map Placeholder
-                  </div>
+                <div className="aspect-w-16 aspect-h-9">
+                  <Map location="Mumbai" height="300px" />
                 </div>
               </div>
             </div>

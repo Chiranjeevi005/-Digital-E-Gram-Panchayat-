@@ -1,5 +1,5 @@
 // Environment configuration
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3002/api';
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://digital-e-gram-panchayat-rjkb.onrender.com/api';
 
 export const APP_CONFIG = {
   API_BASE_URL,

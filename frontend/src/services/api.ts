@@ -205,8 +205,8 @@ export interface CitizenRecord {
 // Define a generic type for API responses
 type ApiResponse<T = unknown> = Promise<T>;
 
-// Helper function to handle fetch errors
-const handleFetchError = async (response: Response) => {
+// Helper function to handle fetch errors with mobile-specific handling
+const handleFetchError = async (response: Response, url: string) => {
   if (!response.ok) {
     let errorMessage = `HTTP error! status: ${response.status}`;
     try {
@@ -216,6 +216,15 @@ const handleFetchError = async (response: Response) => {
       // If we can't parse JSON, use the status text
       errorMessage = response.statusText || errorMessage;
     }
+    
+    // Add mobile-specific context
+    const isMobile = typeof window !== 'undefined' && 
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+    if (isMobile) {
+      errorMessage = `Mobile Connection Error: ${errorMessage}. URL: ${url}`;
+    }
+    
     const error = new Error(errorMessage);
     (error as any).status = response.status;
     throw error;
@@ -224,24 +233,38 @@ const handleFetchError = async (response: Response) => {
 };
 
 export const apiClient = {
-  // Generic GET request
+  // Generic GET request with mobile-specific handling
   get: async <T = unknown>(endpoint: string): Promise<T> => {
     try {
       console.log('Making GET request to:', `${API_BASE_URL}${endpoint}`); // Debug log
       const token = getToken();
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      
+      // Mobile-specific fetch options
+      const isMobile = typeof window !== 'undefined' && 
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      const fetchOptions: RequestInit = {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           ...(token && { 'Authorization': `Bearer ${token}` }),
         },
-        // Add timeout and credentials for better error handling
         credentials: 'include',
-      });
+        // Mobile-specific options
+        ...(isMobile && {
+          cache: 'no-store',
+          keepalive: true
+        })
+      };
+      
+      const fullUrl = `${API_BASE_URL}${endpoint}`;
+      console.log('Making GET request to:', fullUrl); // Debug log
+      
+      const response = await fetch(fullUrl, fetchOptions);
       
       console.log('GET response status:', response.status); // Debug log
       
-      await handleFetchError(response);
+      await handleFetchError(response, fullUrl);
       const data = await response.json();
       console.log('GET response data:', data); // Debug log
       return data;
@@ -249,80 +272,138 @@ export const apiClient = {
       console.error('API GET request failed:', error);
       // Provide more specific error messages
       if (error instanceof TypeError && error.message === 'Failed to fetch') {
-        throw new Error('Network error: Unable to connect to the server. Please check if the server is running.');
+        // Check if this is a mobile device
+        const isMobile = typeof window !== 'undefined' && 
+          /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isMobile) {
+          throw new Error('Network error on mobile device: Unable to connect to the server. Please check your internet connection and try again.');
+        } else {
+          throw new Error('Network error: Unable to connect to the server. Please check if the server is running.');
+        }
       }
       throw error;
     }
   },
 
-  // Generic POST request
+  // Generic POST request with mobile-specific handling
   post: async <T = unknown>(endpoint: string, data: Record<string, unknown>): ApiResponse<T> => {
     try {
       const token = getToken();
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      
+      // Mobile-specific fetch options
+      const isMobile = typeof window !== 'undefined' && 
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      const fetchOptions: RequestInit = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...(token && { 'Authorization': `Bearer ${token}` }),
         },
         body: JSON.stringify(data),
-        // Add timeout and credentials for better error handling
         credentials: 'include',
-      });
+        // Mobile-specific options
+        ...(isMobile && {
+          cache: 'no-store',
+          keepalive: true
+        })
+      };
       
-      await handleFetchError(response);
+      const fullUrl = `${API_BASE_URL}${endpoint}`;
+      const response = await fetch(fullUrl, fetchOptions);
+      
+      await handleFetchError(response, fullUrl);
       return response.json();
     } catch (error) {
       console.error('API POST request failed:', error);
       // Provide more specific error messages
       if (error instanceof TypeError && error.message === 'Failed to fetch') {
-        throw new Error('Network error: Unable to connect to the server. Please check if the server is running.');
+        // Check if this is a mobile device
+        const isMobile = typeof window !== 'undefined' && 
+          /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isMobile) {
+          throw new Error('Network error on mobile device: Unable to connect to the server. Please check your internet connection and try again.');
+        } else {
+          throw new Error('Network error: Unable to connect to the server. Please check if the server is running.');
+        }
       }
       throw error;
     }
   },
 
-  // Generic PUT request
+  // Generic PUT request with mobile-specific handling
   put: async <T = unknown>(endpoint: string, data: Record<string, unknown>): ApiResponse<T> => {
     try {
       const token = getToken();
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      
+      // Mobile-specific fetch options
+      const isMobile = typeof window !== 'undefined' && 
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      const fetchOptions: RequestInit = {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           ...(token && { 'Authorization': `Bearer ${token}` }),
         },
         body: JSON.stringify(data),
-        // Add timeout and credentials for better error handling
         credentials: 'include',
-      });
+        // Mobile-specific options
+        ...(isMobile && {
+          cache: 'no-store',
+          keepalive: true
+        })
+      };
       
-      await handleFetchError(response);
+      const fullUrl = `${API_BASE_URL}${endpoint}`;
+      const response = await fetch(fullUrl, fetchOptions);
+      
+      await handleFetchError(response, fullUrl);
       return response.json();
     } catch (error) {
       console.error('API PUT request failed:', error);
       // Provide more specific error messages
       if (error instanceof TypeError && error.message === 'Failed to fetch') {
-        throw new Error('Network error: Unable to connect to the server. Please check if the server is running.');
+        // Check if this is a mobile device
+        const isMobile = typeof window !== 'undefined' && 
+          /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isMobile) {
+          throw new Error('Network error on mobile device: Unable to connect to the server. Please check your internet connection and try again.');
+        } else {
+          throw new Error('Network error: Unable to connect to the server. Please check if the server is running.');
+        }
       }
       throw error;
     }
   },
 
-  // Generic DELETE request
+  // Generic DELETE request with mobile-specific handling
   delete: async <T>(endpoint: string): Promise<T> => {
     try {
       const token = getToken();
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      
+      // Mobile-specific fetch options
+      const isMobile = typeof window !== 'undefined' && 
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      const fetchOptions: RequestInit = {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
           ...(token && { 'Authorization': `Bearer ${token}` }),
         },
         credentials: 'include',
-      });
+        // Mobile-specific options
+        ...(isMobile && {
+          cache: 'no-store',
+          keepalive: true
+        })
+      };
       
-      await handleFetchError(response);
+      const fullUrl = `${API_BASE_URL}${endpoint}`;
+      const response = await fetch(fullUrl, fetchOptions);
+      
+      await handleFetchError(response, fullUrl);
       return response.json();
     } catch (error) {
       console.error('API delete request failed:', error);
@@ -330,25 +411,44 @@ export const apiClient = {
     }
   },
 
-  // File download request
+  // File download request with mobile-specific handling
   download: async (endpoint: string): Promise<Blob> => {
     try {
       const token = getToken();
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      
+      // Mobile-specific fetch options
+      const isMobile = typeof window !== 'undefined' && 
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      const fetchOptions: RequestInit = {
         headers: {
           ...(token && { 'Authorization': `Bearer ${token}` }),
         },
-        // Add timeout and credentials for better error handling
         credentials: 'include',
-      });
+        // Mobile-specific options
+        ...(isMobile && {
+          cache: 'no-store',
+          keepalive: true
+        })
+      };
       
-      await handleFetchError(response);
+      const fullUrl = `${API_BASE_URL}${endpoint}`;
+      const response = await fetch(fullUrl, fetchOptions);
+      
+      await handleFetchError(response, fullUrl);
       return response.blob();
     } catch (error) {
       console.error('API download request failed:', error);
       // Provide more specific error messages
       if (error instanceof TypeError && error.message === 'Failed to fetch') {
-        throw new Error('Network error: Unable to connect to the server. Please check if the server is running.');
+        // Check if this is a mobile device
+        const isMobile = typeof window !== 'undefined' && 
+          /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isMobile) {
+          throw new Error('Network error on mobile device: Unable to connect to the server. Please check your internet connection and try again.');
+        } else {
+          throw new Error('Network error: Unable to connect to the server. Please check if the server is running.');
+        }
       }
       throw error;
     }

@@ -489,31 +489,7 @@ export const getPropertyTax = async (req: Request, res: Response) => {
       });
     }
     
-    // Validate that propertyId is a string
-    if (typeof propertyId !== 'string') {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Property ID must be a valid text' 
-      });
-    }
-    
-    // Validate that ownerName is a string
-    if (typeof ownerName !== 'string') {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Owner name must be a valid text' 
-      });
-    }
-    
-    // Validate that village is a string
-    if (typeof village !== 'string') {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Village must be a valid text' 
-      });
-    }
-    
-    // Create mock property tax data
+    // Create mock property tax data - allow any input values
     const propertyTaxData = {
       propertyId,
       ownerName,
@@ -652,7 +628,7 @@ export const getMutationStatus = async (req: Request, res: Response) => {
       });
     }
     
-    // Create mutation status data with custom input
+    // Create mutation status data with custom input - allow any values
     const mutationStatusData = {
       applicationId,
       propertyId: req.body.propertyId || 'Unknown Property',

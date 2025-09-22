@@ -43,7 +43,21 @@ function LoginContent() {
       // Redirect to home page instead of dashboard as per specifications
       router.push('/');
     } catch (err) {
-      setError((err as Error).message || 'Login failed');
+      // Enhanced error handling for mobile devices
+      const isMobile = typeof window !== 'undefined' && 
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      const errorMessage = (err as Error).message || 'Login failed';
+      
+      if (isMobile) {
+        if (errorMessage.includes('Network error') || errorMessage.includes('Failed to fetch')) {
+          setError('Mobile Network Connection Error: Unable to connect to the server. Please check your internet connection, try switching between Wi-Fi and mobile data, disable any ad blockers or privacy extensions, and ensure you can access https://digital-e-gram-panchayat-rjkb.onrender.com.');
+        } else {
+          setError('Mobile Login Error: ' + errorMessage + '. Please check your internet connection and try again. If the problem persists, try using a different browser or an incognito/private browsing window.');
+        }
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
